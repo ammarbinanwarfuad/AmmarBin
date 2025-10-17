@@ -1,0 +1,31 @@
+# Test files
+__tests__
+__mocks__
+*.test.ts
+*.test.tsx
+*.spec.ts
+*.spec.tsx
+coverage
+playwright.config.ts
+jest.config.js
+jest.setup.js
+test-db.js
+
+# Development files
+.env.local
+.env.development
+*.md
+!README.md
+
+# Build artifacts
+.next
+.swc
+node_modules
+
+# Scripts (not needed in production)
+scripts/seed.ts
+scripts/test-*.ts
+scripts/verify-*.ts
+
+# Documentation
+TESTING-DOCUMENTATION.md
