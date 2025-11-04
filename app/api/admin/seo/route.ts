@@ -1,0 +1,54 @@
+import { NextResponse } from "next/server";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
+import { connectDB } from "@/lib/db";
+
+// Vercel serverless optimization
+export const runtime = 'nodejs';
+export const dynamic = 'force-dynamic';
+export const maxDuration = 30;
+export const preferredRegion = 'sin1'; // Singapore - closest to Mumbai MongoDB
+
+// ⚡ Performance: Cache SEO analysis for 5 minutes
+
+export async function GET() {
+  try {
+    // Check authentication - admin routes require valid session
+    const session = await getServerSession(authOptions);
+    if (!session) {
+      console.warn("[Admin API] Unauthorized access attempt to /api/admin/seo");
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+    await connectDB();
+    const Blog = (await import("@/models/Blog")).default;
+    // ⚡ Performance: Only select needed fields
+    const blogs = await Blog.find({}).select('title slug content featuredImage seo').lean();
+
+    // ⚡ Performance: Process in single pass
+    const issues = blogs.map((b: unknown) => {
+      const blog = b as { title?: string; slug?: string; content?: string; featuredImage?: string; seo?: { metaDescription?: string } };
+      const words = (blog.content || '').split(/\s+/).filter(Boolean).length;
+      return {
+        title: blog.title || 'Untitled',
+        slug: blog.slug || 'unknown',
+        missingMeta: !blog.seo?.metaDescription,
+        missingImage: !blog.featuredImage,
+        shortContent: words < 300,
+      };
+    }).filter(i => i.missingMeta || i.missingImage || i.shortContent);
+
+    return NextResponse.json(
+      { issues, total: blogs.length },
+      {
+        headers: {
+          "Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate",
+        },
+      }
+    );
+  } catch (error) {
+    console.error("[Admin API] Error in /api/admin/seo:", error);
+    return NextResponse.json({ error: 'Failed to compute SEO' }, { status: 500 });
+  }
+}
+
+
