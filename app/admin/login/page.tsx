@@ -1,0 +1,165 @@
+"use client";
+
+import { useState, useEffect } from "react";
+import { signIn, useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
+import { motion } from "framer-motion";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { loginSchema } from "@/lib/validations";
+import { z } from "zod";
+import toast from "react-hot-toast";
+import { LogIn } from "lucide-react";
+
+type LoginFormData = z.infer<typeof loginSchema>;
+
+export default function AdminLoginPage() {
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const router = useRouter();
+  const { data: session, status, update } = useSession();
+
+  // Redirect if already authenticated
+  useEffect(() => {
+    if (status === "authenticated" && session) {
+      router.push("/admin/dashboard");
+    }
+  }, [status, session, router]);
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<LoginFormData>({
+    resolver: zodResolver(loginSchema),
+  });
+
+  const onSubmit = async (data: LoginFormData) => {
+    setIsSubmitting(true);
+    try {
+      const result = await signIn("credentials", {
+        email: data.email,
+        password: data.password,
+        redirect: false,
+      });
+
+      if (result?.error) {
+        toast.error(result.error || "Invalid credentials");
+        setIsSubmitting(false);
+      } else if (result?.ok) {
+        // Update the session to ensure it's refreshed
+        await update();
+        
+        // Wait a moment for the session cookie to be set
+        await new Promise(resolve => setTimeout(resolve, 300));
+        
+        // Verify session is established by checking the session endpoint
+        try {
+          const sessionCheck = await fetch("/api/auth/session", {
+            cache: "no-store",
+          });
+          const sessionData = await sessionCheck.json();
+          
+          if (sessionData?.user) {
+            toast.success("Login successful!");
+            // Use full page reload to ensure session is properly loaded
+            // This prevents middleware from redirecting back to login
+            // eslint-disable-next-line react-hooks/immutability
+            window.location.href = "/admin/dashboard";
+            return;
+          }
+        } catch (sessionError) {
+          console.error("Session check error:", sessionError);
+        }
+        
+        // Fallback: if session check fails, still try to navigate
+        toast.success("Login successful!");
+        // Use full page reload for reliability
+        // eslint-disable-next-line react-hooks/immutability
+        window.location.href = "/admin/dashboard";
+      } else {
+        toast.error("Login failed. Please try again.");
+        setIsSubmitting(false);
+      }
+    } catch (error) {
+      console.error("Login error:", error);
+      toast.error("An error occurred. Please try again.");
+      setIsSubmitting(false);
+    }
+  };
+
+  return (
+    <div className="min-h-screen flex items-center justify-center px-6 py-24 bg-background">
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+        className="w-full max-w-md"
+      >
+        <Card>
+          <CardHeader className="space-y-1">
+            <CardTitle className="text-2xl font-bold text-center">
+              Admin Login
+            </CardTitle>
+            <CardDescription className="text-center">
+              Enter your credentials to access the admin dashboard
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+              <div>
+                <Label htmlFor="email">Email</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  {...register("email")}
+                  placeholder="admin@example.com"
+                  className="mt-2"
+                />
+                {errors.email && (
+                  <p className="text-sm text-destructive mt-1">
+                    {errors.email.message}
+                  </p>
+                )}
+              </div>
+
+              <div>
+                <Label htmlFor="password">Password</Label>
+                <Input
+                  id="password"
+                  type="password"
+                  {...register("password")}
+                  placeholder="••••••••"
+                  className="mt-2"
+                />
+                {errors.password && (
+                  <p className="text-sm text-destructive mt-1">
+                    {errors.password.message}
+                  </p>
+                )}
+              </div>
+
+              <Button
+                type="submit"
+                disabled={isSubmitting}
+                className="w-full gap-2"
+              >
+                {isSubmitting ? (
+                  "Signing in..."
+                ) : (
+                  <>
+                    <LogIn className="h-4 w-4" /> Sign In
+                  </>
+                )}
+              </Button>
+            </form>
+          </CardContent>
+        </Card>
+      </motion.div>
+    </div>
+  );
+}
+
