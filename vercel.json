@@ -14,19 +14,6 @@
       ]
     },
     {
-      "source": "/(.*\\.(jpg|jpeg|png|gif|webp|avif|svg|ico|woff|woff2|ttf|eot))",
-      "headers": [
-        {
-          "key": "Cache-Control",
-          "value": "public, max-age=86400, stale-while-revalidate=604800"
-        },
-        {
-          "key": "CDN-Cache-Control",
-          "value": "public, max-age=86400"
-        }
-      ]
-    },
-    {
       "source": "/api/((?!admin).*)",
       "headers": [
         {
