@@ -20,7 +20,7 @@ type LoginFormData = z.infer<typeof loginSchema>;
 export default function AdminLoginPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const router = useRouter();
-  const { data: session, status, update } = useSession();
+  const { data: session, status } = useSession();
 
   // Redirect if already authenticated
   useEffect(() => {
@@ -46,32 +46,17 @@ export default function AdminLoginPage() {
     setIsSubmitting(true);
     
     try {
+      // Let NextAuth handle everything securely - server-side redirect
       const result = await signIn("credentials", {
         email: data.email,
         password: data.password,
-        redirect: false,
+        redirect: true,  // ✅ NextAuth handles redirect securely
+        callbackUrl: "/admin/dashboard",
       });
 
+      // This code only runs if redirect fails or is prevented
       if (result?.error) {
         toast.error(result.error || "Invalid credentials");
-        setIsSubmitting(false);
-        return;
-      }
-
-      if (result?.ok) {
-        // Update the session immediately
-        await update();
-        
-        // Small delay to ensure cookie is set
-        await new Promise(resolve => setTimeout(resolve, 100));
-        
-        toast.success("Login successful! Redirecting...");
-        
-        // Use window.location.href for full page reload to ensure session cookie is read
-        // This ensures the middleware sees the session cookie
-        window.location.href = "/admin/dashboard";
-      } else {
-        toast.error("Login failed. Please try again.");
         setIsSubmitting(false);
       }
     } catch (error) {
