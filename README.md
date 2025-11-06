@@ -439,10 +439,10 @@ This application is heavily optimized for performance:
 7. **Caching**: Multiple caching layers (CDN, edge, in-memory, Next.js unstable_cache)
 8. **Cache Invalidation**: Automatic cache invalidation on content updates for instant changes
 9. **ETags**: Conditional requests support for reduced bandwidth
-8. **Bundle Optimization**: Tree shaking, minification, compression
-9. **Font Optimization**: Next.js font optimization with preloading
-10. **Service Worker**: Offline support and caching
-11. **Stale-While-Revalidate**: CDN caching with background updates
+10. **Bundle Optimization**: Tree shaking, minification, compression
+11. **Font Optimization**: Next.js font optimization with preloading
+12. **Service Worker**: Offline support and caching
+13. **Stale-While-Revalidate**: CDN caching with background updates
 
 ### Performance Monitoring
 
