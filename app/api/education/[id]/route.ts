@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { connectDB } from "@/lib/db";
 import Education from "@/models/Education";
 import { logActivity } from "@/lib/activity-logger";
+import { invalidateCacheAfterUpdate } from "@/lib/cache-invalidation";
 
 export async function DELETE(
   request: Request,
@@ -25,6 +26,9 @@ export async function DELETE(
         userAgent: request.headers.get("user-agent") || undefined,
       });
     }
+
+    // Invalidate cache (non-blocking, fire-and-forget)
+    invalidateCacheAfterUpdate('education');
 
     return NextResponse.json({ message: "Education deleted successfully" });
   } catch (error) {
