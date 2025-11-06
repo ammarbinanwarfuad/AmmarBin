@@ -169,9 +169,12 @@ This is a modern, production-ready portfolio website that showcases projects, sk
 │   ├── sw.js                     # Service worker
 │   └── ...                       # Other static files
 ├── scripts/                      # Utility scripts
+│   ├── seed.ts                   # Database seeding script
+│   └── ...                       # Other utility scripts
 ├── types/                        # TypeScript type definitions
-├── middleware.ts                 # Next.js middleware
+├── middleware.ts                 # Next.js middleware (auth, caching, geo)
 ├── next.config.ts                # Next.js configuration
+├── vercel.json                   # Vercel deployment configuration
 ├── tailwind.config.ts            # Tailwind CSS configuration
 └── package.json                  # Dependencies and scripts
 ```
