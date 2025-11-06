@@ -2,13 +2,17 @@ import { NextResponse } from "next/server";
 import { connectDB } from "@/lib/db";
 import Profile from "@/models/Profile";
 import { addTimingHeaders, measureTime } from "@/lib/server-timing";
+import { invalidateCacheAfterUpdate } from "@/lib/cache-invalidation";
+import { unstable_cache } from "next/cache";
 
 export async function GET() {
   const startTime = Date.now();
   let dbTime = 0;
   
   try {
-    // Measure database connection and query time
+    // Use unstable_cache for server-side caching (15 minutes TTL - profile changes rarely)
+    const getCachedProfile = unstable_cache(
+      async () => {
     const { result: dbResult, duration: dbDuration } = await measureTime('DB Connection', async () => {
       await connectDB();
       return await Profile.findOne().lean();
@@ -42,14 +46,25 @@ export async function GET() {
       });
     }
 
+        return { profile, dbTime };
+      },
+      ['profile:main'],
+      {
+        tags: ['profile'],
+        revalidate: 900, // 15 minutes
+      }
+    );
+
+    const { profile, dbTime: cachedDbTime } = await getCachedProfile();
+    dbTime = cachedDbTime || 0;
+
     const totalTime = Date.now() - startTime;
     const response = NextResponse.json(
       { profile },
       {
         headers: {
-          "Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate",
-          "Pragma": "no-cache",
-          "Expires": "0",
+          "Cache-Control": "public, s-maxage=60, stale-while-revalidate=300",
+          "CDN-Cache-Control": "public, s-maxage=60",
         },
       }
     );
@@ -115,6 +130,8 @@ export async function PUT(request: Request) {
       upsert: true,
     });
 
+    // Invalidate cache (non-blocking, fire-and-forget)
+    invalidateCacheAfterUpdate('profile');
 
     return NextResponse.json({ profile });
   } catch (error) {
