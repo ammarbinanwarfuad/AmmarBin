@@ -74,19 +74,16 @@ export function SkillsGrid({ skills, categories }: SkillsGridProps) {
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
               {categorySkills.map((skill) => (
                 <Card key={skill._id} className="p-6">
-                  <div className="flex items-center justify-between mb-3">
+                  <div className="mb-3">
                     <h3 className="font-semibold text-foreground">
                       {skill.name}
                     </h3>
-                    <span className="text-sm font-bold text-muted-foreground">
-                      {skill.proficiency}%
-                    </span>
                   </div>
                   <div className="w-full bg-secondary rounded-full h-2.5">
                     <div
                       className="h-2.5 rounded-full transition-all duration-500"
                       style={{ 
-                        width: `${skill.proficiency}%`,
+                        width: "100%",
                         backgroundColor: getCategoryColor(category)
                       }}
                     />

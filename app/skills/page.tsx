@@ -42,7 +42,7 @@ export default async function SkillsPage() {
               Skills & Technologies
             </h1>
             <p className="text-lg text-muted-foreground">
-              A comprehensive overview of my technical skills and proficiency levels
+              A comprehensive overview of my technical skills and technologies
             </p>
           </div>
 
