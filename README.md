@@ -637,5 +637,5 @@ For issues, questions, or contributions, please open an issue on the repository.
 
 ---
 
-**Built with ❤️ using Next.js 16**
+**Built with ❤️ by Ammar Bin Anwar Fuad using Next.js 16**
 
