@@ -3,10 +3,11 @@ import { connectDB } from "@/lib/db";
 import Certificate from "@/models/Certificate";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
+import { invalidateCacheAfterUpdate } from "@/lib/cache-invalidation";
+import { unstable_cache } from "next/cache";
 
 export async function GET(request: Request) {
   try {
-    await connectDB();
     const session = await getServerSession(authOptions);
 
     const { searchParams } = new URL(request.url);
@@ -39,10 +40,18 @@ export async function GET(request: Request) {
       ];
     }
 
+    // Create cache key based on query parameters
+    const cacheKey = `certifications:${JSON.stringify(query)}:${search || ''}`;
+
+    // Use unstable_cache for server-side caching
+    const getCachedCertifications = unstable_cache(
+      async () => {
+        await connectDB();
+
     const certificates = await Certificate.find(query)
       .sort({ issueDate: -1 })
       .lean()
-      .maxTimeMS(500); // Timeout for faster TTFB
+          .maxTimeMS(500);
 
     // Calculate stats - only count published certificates for public users
     const statsQuery: Record<string, unknown> = session ? {} : { published: true };
@@ -81,13 +90,23 @@ export async function GET(request: Request) {
       categories: categoriesData,
     };
 
+        return { certificates, stats };
+      },
+      [cacheKey],
+      {
+        tags: ['certifications'],
+        revalidate: 600, // 10 minutes
+      }
+    );
+
+    const { certificates, stats } = await getCachedCertifications();
+
     return NextResponse.json(
       { certificates, stats },
       {
         headers: {
-          "Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate",
-          "Pragma": "no-cache",
-          "Expires": "0",
+          "Cache-Control": "public, s-maxage=60, stale-while-revalidate=300",
+          "CDN-Cache-Control": "public, s-maxage=60",
         },
       }
     );
@@ -108,6 +127,8 @@ export async function POST(request: Request) {
 
     const certificate = await Certificate.create(data);
 
+    // Invalidate cache (non-blocking, fire-and-forget)
+    invalidateCacheAfterUpdate('certifications');
 
     return NextResponse.json(
       { message: "Certificate created successfully", certificate },
@@ -141,6 +162,8 @@ export async function PUT(request: Request) {
       );
     }
 
+    // Invalidate cache (non-blocking, fire-and-forget)
+    invalidateCacheAfterUpdate('certifications');
 
     return NextResponse.json({
       message: "Certificate updated successfully",

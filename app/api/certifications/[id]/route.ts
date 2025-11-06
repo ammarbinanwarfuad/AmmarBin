@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { connectDB } from "@/lib/db";
 import Certificate from "@/models/Certificate";
+import { invalidateCacheAfterUpdate } from "@/lib/cache-invalidation";
 
 export async function DELETE(
   request: Request,
@@ -19,6 +20,8 @@ export async function DELETE(
       );
     }
 
+    // Invalidate cache (non-blocking, fire-and-forget)
+    invalidateCacheAfterUpdate('certifications');
 
     return NextResponse.json({
       message: "Certificate deleted successfully",

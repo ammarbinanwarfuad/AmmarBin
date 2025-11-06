@@ -3,6 +3,7 @@ import { connectDB } from "@/lib/db";
 import Certificate from "@/models/Certificate";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
+import { invalidateCacheAfterUpdate } from "@/lib/cache-invalidation";
 
 export async function PATCH(
   request: Request,
@@ -29,7 +30,8 @@ export async function PATCH(
       return NextResponse.json({ error: "Certificate not found" }, { status: 404 });
     }
 
-    // Revalidate paths (fire and forget - don't block response)
+    // Invalidate cache (non-blocking, fire-and-forget)
+    invalidateCacheAfterUpdate('certifications');
     
     return NextResponse.json({ certificate });
   } catch (error) {
