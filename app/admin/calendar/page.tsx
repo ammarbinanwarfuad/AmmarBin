@@ -7,8 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Calendar as CalendarIcon, ChevronLeft, ChevronRight, FileText, Edit } from "lucide-react";
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isSameDay, addMonths, subMonths } from "date-fns";
-import useSWR from 'swr';
-import { fetcher } from '@/lib/fetcher';
+import { useBlogs } from '@/lib/hooks/useAdminData';
 import Link from "next/link";
 
 interface BlogPost {
@@ -31,8 +30,8 @@ export default function AdminCalendarPage() {
     }
   }, [status, router]);
 
-  const { data, isLoading } = useSWR("/api/blog?includeUnpublished=true", fetcher);
-  const blogs: BlogPost[] = data?.blogs || [];
+  const { blogs: blogsData, isLoading } = useBlogs();
+  const blogs: BlogPost[] = blogsData || [];
 
   const monthStart = startOfMonth(currentMonth);
   const monthEnd = endOfMonth(currentMonth);

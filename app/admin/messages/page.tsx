@@ -3,13 +3,14 @@
 import { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import { motion } from "framer-motion";
+import { DynamicMotion } from "@/components/DynamicMotion";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { MessageSquare, Mail, Trash2, Eye, CheckSquare, Square } from "lucide-react";
 import toast from "react-hot-toast";
 import { format } from "date-fns";
 import { useMessages } from "@/lib/hooks/useAdminData";
+import { mutate } from 'swr';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -59,7 +60,7 @@ export default function AdminMessagesPage() {
           next.delete(id);
           return next;
         });
-        refresh();
+        mutate('/api/contact');
       } else {
         toast.error("Failed to delete message");
       }
@@ -106,7 +107,7 @@ export default function AdminMessagesPage() {
         if (wasSelectedMessageDeleted) {
           setSelectedMessage(null);
         }
-        refresh();
+        mutate('/api/contact');
       } else {
         toast.error("Failed to delete messages");
       }
@@ -125,7 +126,7 @@ export default function AdminMessagesPage() {
       });
 
       if (response.ok) {
-        refresh();
+        mutate('/api/contact');
       }
     } catch (error) {
       console.error("Error marking as read:", error);
@@ -213,7 +214,7 @@ export default function AdminMessagesPage() {
           {/* Messages List */}
           <div className="lg:col-span-1 space-y-3">
             {messages.map((message: Message) => (
-              <motion.div
+              <DynamicMotion
                 key={message._id}
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
@@ -276,7 +277,7 @@ export default function AdminMessagesPage() {
                     </div>
                   </CardHeader>
                 </Card>
-              </motion.div>
+              </DynamicMotion>
             ))}
 
             {messages.length === 0 && (
@@ -304,7 +305,7 @@ export default function AdminMessagesPage() {
           {/* Message Detail */}
           <div className="lg:col-span-2">
             {selectedMessage ? (
-              <motion.div
+              <DynamicMotion
                 initial={{ opacity: 0, x: 20 }}
                 animate={{ opacity: 1, x: 0 }}
               >
@@ -369,7 +370,7 @@ export default function AdminMessagesPage() {
                     </div>
                   </CardContent>
                 </Card>
-              </motion.div>
+              </DynamicMotion>
             ) : (
               <Card>
                 <CardContent className="text-center py-32">
