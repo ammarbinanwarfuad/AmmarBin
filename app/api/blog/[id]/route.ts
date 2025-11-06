@@ -3,6 +3,7 @@ import { connectDB } from "@/lib/db";
 import Blog from "@/models/Blog";
 import ExternalBlog from "@/models/ExternalBlog";
 import { logActivity } from "@/lib/activity-logger";
+import { invalidateCacheAfterUpdate } from "@/lib/cache-invalidation";
 
 export async function DELETE(
   request: Request,
@@ -50,6 +51,9 @@ export async function DELETE(
       userAgent: request.headers.get("user-agent") || undefined,
     });
 
+    // Invalidate cache (non-blocking, fire-and-forget)
+    invalidateCacheAfterUpdate('blog');
+
     return NextResponse.json({ message: "Blog post deleted successfully" });
   } catch (error) {
     console.error("Error deleting blog:", error);
@@ -81,6 +85,9 @@ export async function PATCH(
         { status: 404 }
       );
     }
+
+    // Invalidate cache (non-blocking, fire-and-forget)
+    invalidateCacheAfterUpdate('blog');
 
     return NextResponse.json({ blog, message: "Blog post updated successfully" });
   } catch (error) {

@@ -2,10 +2,11 @@ import { NextResponse } from "next/server";
 import { connectDB } from "@/lib/db";
 import Blog from "@/models/Blog";
 import ExternalBlog from "@/models/ExternalBlog";
+import { invalidateCacheAfterUpdate } from "@/lib/cache-invalidation";
+import { unstable_cache } from "next/cache";
 
 export async function GET(request: Request) {
   try {
-    await connectDB();
     const { searchParams } = new URL(request.url);
     const source = searchParams.get("source");
     const slug = searchParams.get("slug");
@@ -13,26 +14,47 @@ export async function GET(request: Request) {
 
     // If slug is provided, fetch single blog post
     if (slug) {
-      const blog = await Blog.findOne({ slug })
+      const getCachedBlog = unstable_cache(
+        async () => {
+          await connectDB();
+          return await Blog.findOne({ slug })
         .lean()
-        .maxTimeMS(500); // Timeout for faster TTFB
+            .maxTimeMS(500);
+        },
+        [`blog:${slug}`],
+        {
+          tags: ['blog'],
+          revalidate: 300, // 5 minutes
+        }
+      );
+
+      const blog = await getCachedBlog();
+      
       if (!blog) {
         return NextResponse.json(
           { error: "Blog post not found" },
           { status: 404 }
         );
       }
+      
       return NextResponse.json(
         { blog },
         {
           headers: {
-            "Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate",
-            "Pragma": "no-cache",
-            "Expires": "0",
+            "Cache-Control": "public, s-maxage=60, stale-while-revalidate=300",
+            "CDN-Cache-Control": "public, s-maxage=60",
           },
         }
       );
     }
+
+    // Create cache key based on query parameters
+    const cacheKey = `blogs:${source || 'all'}:${includeUnpublished}`;
+
+    // Use unstable_cache for server-side caching
+    const getCachedBlogs = unstable_cache(
+      async () => {
+        await connectDB();
 
     // Fetch internal blogs
     let internalBlogs: Record<string, unknown>[] = [];
@@ -41,7 +63,7 @@ export async function GET(request: Request) {
       internalBlogs = await Blog.find(query)
         .sort({ publishedDate: -1, createdAt: -1 })
         .lean()
-        .maxTimeMS(500); // Timeout for faster TTFB
+            .maxTimeMS(500);
     }
 
     // Fetch external blogs
@@ -51,30 +73,38 @@ export async function GET(request: Request) {
       externalBlogs = await ExternalBlog.find(query)
         .sort({ publishedDate: -1 })
         .lean()
-        .maxTimeMS(500); // Timeout for faster TTFB
+            .maxTimeMS(500);
     }
 
     // Combine and add source field
-    const allBlogs = [
+        return [
       ...internalBlogs.map((blog) => ({ ...blog, source: "internal" as const })),
       ...externalBlogs.map((blog) => ({ 
         ...blog, 
         source: (blog.source as string) || "external",
-        published: true // External blogs are always published
+            published: true
       })),
     ].sort((a: Record<string, unknown>, b: Record<string, unknown>) => {
       const dateA = new Date((a.publishedDate as string) || (a.createdAt as string));
       const dateB = new Date((b.publishedDate as string) || (b.createdAt as string));
       return dateB.getTime() - dateA.getTime();
     });
+      },
+      [cacheKey],
+      {
+        tags: ['blog'],
+        revalidate: 300, // 5 minutes
+      }
+    );
+
+    const allBlogs = await getCachedBlogs();
 
     return NextResponse.json(
       { blogs: allBlogs },
       {
         headers: {
-          "Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate",
-          "Pragma": "no-cache",
-          "Expires": "0",
+          "Cache-Control": "public, s-maxage=60, stale-while-revalidate=300",
+          "CDN-Cache-Control": "public, s-maxage=60",
         },
       }
     );
@@ -107,6 +137,10 @@ export async function POST(request: Request) {
     }
     
     const blog = await Blog.create(data);
+    
+    // Invalidate cache (non-blocking, fire-and-forget)
+    invalidateCacheAfterUpdate('blog');
+    
     return NextResponse.json({ blog }, { status: 201 });
   } catch (error) {
     console.error("Error creating blog:", error);
