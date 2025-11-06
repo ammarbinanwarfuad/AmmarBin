@@ -2,6 +2,8 @@
 
 A high-performance, feature-rich portfolio website built with Next.js 16, featuring a comprehensive admin dashboard, blog system, project showcase, and advanced performance optimizations.
 
+**Author:** Ammar Bin Anwar Fuad
+
 ## 📋 Table of Contents
 
 - [Overview](#overview)
