@@ -639,5 +639,5 @@ For issues, questions, or contributions, please open an issue on the repository.
 
 **Built with ❤️ by Ammar Bin Anwar Fuad using Next.js 16**
 
-© 2024 Ammar Bin Anwar Fuad. All rights reserved.
+© 2025 Ammar Bin Anwar Fuad. All rights reserved.
 
