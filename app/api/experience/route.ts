@@ -1,22 +1,35 @@
 import { NextResponse } from "next/server";
 import { connectDB } from "@/lib/db";
 import Experience from "@/models/Experience";
+import { invalidateCacheAfterUpdate } from "@/lib/cache-invalidation";
+import { unstable_cache } from "next/cache";
 
 export async function GET() {
   try {
+    // Use unstable_cache for server-side caching (10 minutes TTL)
+    const getCachedExperiences = unstable_cache(
+      async () => {
     await connectDB();
-    const experiences = await Experience.find()
+        return await Experience.find()
       .sort({ order: 1, startDate: -1 })
       .lean()
-      .maxTimeMS(500); // Timeout for faster TTFB
+          .maxTimeMS(500);
+      },
+      ['experience:all'],
+      {
+        tags: ['experience'],
+        revalidate: 600, // 10 minutes
+      }
+    );
+
+    const experiences = await getCachedExperiences();
       
     return NextResponse.json(
       { experiences },
       {
         headers: {
-          "Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate",
-          "Pragma": "no-cache",
-          "Expires": "0",
+          "Cache-Control": "public, s-maxage=60, stale-while-revalidate=300",
+          "CDN-Cache-Control": "public, s-maxage=60",
         },
       }
     );
@@ -43,6 +56,8 @@ export async function POST(request: Request) {
     const data = await request.json();
     const experience = await Experience.create(data);
     
+    // Invalidate cache (non-blocking, fire-and-forget)
+    invalidateCacheAfterUpdate('experience');
     
     return NextResponse.json({ experience }, { status: 201 });
   } catch (error) {
@@ -88,6 +103,8 @@ export async function PUT(request: Request) {
       );
     }
 
+    // Invalidate cache (non-blocking, fire-and-forget)
+    invalidateCacheAfterUpdate('experience');
 
     return NextResponse.json({ experience });
   } catch (error) {

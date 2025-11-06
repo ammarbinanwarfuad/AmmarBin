@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { connectDB } from "@/lib/db";
 import Experience from "@/models/Experience";
+import { invalidateCacheAfterUpdate } from "@/lib/cache-invalidation";
 
 export async function DELETE(
   request: Request,
@@ -19,7 +20,8 @@ export async function DELETE(
     await connectDB();
     await Experience.findByIdAndDelete(id);
 
-    // Revalidate pages that show experience
+    // Invalidate cache (non-blocking, fire-and-forget)
+    invalidateCacheAfterUpdate('experience');
 
     return NextResponse.json({ message: "Experience deleted successfully" });
   } catch (error) {
