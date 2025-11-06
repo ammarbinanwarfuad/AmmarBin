@@ -166,7 +166,9 @@ This is a modern, production-ready portfolio website that showcases projects, sk
 │   ├── Blog.ts                   # Blog model
 │   └── ...                       # Other models
 ├── public/                       # Static assets
-│   ├── sw.js                     # Service worker
+│   ├── sw.js                     # Service worker for PWA
+│   ├── sitemap.xml               # SEO sitemap
+│   ├── robots.txt                # SEO robots file
 │   └── ...                       # Other static files
 ├── scripts/                      # Utility scripts
 │   ├── seed.ts                   # Database seeding script
