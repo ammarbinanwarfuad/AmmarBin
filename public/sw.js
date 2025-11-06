@@ -89,6 +89,12 @@ function isCacheableAPI(url) {
   return CACHEABLE_API_ROUTES.some(route => url.pathname.startsWith(route));
 }
 
+// Helper: Check if URL is an authentication route (should never be cached)
+function isAuthRequest(url) {
+  return url.pathname.startsWith('/api/auth/') || 
+         url.pathname.startsWith('/admin/');
+}
+
 // Fetch event - implement caching strategies
 self.addEventListener('fetch', (event) => {
   const { request } = event;
@@ -96,6 +102,12 @@ self.addEventListener('fetch', (event) => {
 
   // Skip non-GET requests
   if (request.method !== 'GET') {
+    return;
+  }
+
+  // ⚠️ CRITICAL: Skip ALL authentication and admin-related requests - never cache them
+  if (isAuthRequest(url)) {
+    // Always fetch from network, never cache auth requests
     return;
   }
 
@@ -175,52 +187,39 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // Strategy 3: Stale-While-Revalidate for static pages
+  // Strategy 3: Network-First for static pages (always try network first)
   if (url.origin === self.location.origin && !isAPIRequest(url)) {
     event.respondWith(
       caches.open(STATIC_CACHE).then((cache) => {
-        return cache.match(request).then((cachedResponse) => {
-          // Start fetching from network in background
-          const fetchPromise = fetch(request)
-            .then((response) => {
-              if (response && response.status === 200) {
-                // Update cache with fresh content
-                cache.put(request, response.clone());
+        return fetch(request)
+          .then((response) => {
+            // Cache successful responses
+            if (response && response.status === 200) {
+              cache.put(request, response.clone());
+            }
+            return response;
+          })
+          .catch(() => {
+            // Network failed, try cache
+            return cache.match(request).then((cachedResponse) => {
+              if (cachedResponse) {
+                return cachedResponse;
               }
-              return response;
-            })
-            .catch(() => {
-              // Network failed, ignore
-              return null;
-            });
-
-          // Return cached version immediately if available, otherwise wait for network
-          if (cachedResponse) {
-            // Return cached version immediately, update in background
-            fetchPromise.catch(() => {}); // Ignore errors
-            return cachedResponse;
-          }
-
-          // No cache, wait for network
-          return fetchPromise.then((response) => {
-            if (response) {
-              return response;
-            }
-            // Network failed and no cache, return offline page for navigation
-            if (request.mode === 'navigate') {
-              return cache.match(OFFLINE_PAGE).then((offlinePage) => {
-                return offlinePage || new Response('Offline', {
-                  status: 503,
-                  headers: { 'Content-Type': 'text/html' },
+              // Network failed and no cache, return offline page for navigation
+              if (request.mode === 'navigate') {
+                return cache.match(OFFLINE_PAGE).then((offlinePage) => {
+                  return offlinePage || new Response('Offline', {
+                    status: 503,
+                    headers: { 'Content-Type': 'text/html' },
+                  });
                 });
+              }
+              return new Response('Offline', {
+                status: 503,
+                headers: { 'Content-Type': 'text/plain' },
               });
-            }
-            return new Response('Offline', {
-              status: 503,
-              headers: { 'Content-Type': 'text/plain' },
             });
           });
-        });
       })
     );
     return;

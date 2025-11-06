@@ -222,6 +222,34 @@ const nextConfig: NextConfig = {
         ].filter((h): h is { key: string; value: string } => h.value !== undefined),
       },
       {
+        // Auth routes - never cache
+        source: "/api/auth/:path*",
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0",
+          },
+          {
+            key: "Pragma",
+            value: "no-cache",
+          },
+          {
+            key: "Expires",
+            value: "0",
+          },
+        ],
+      },
+      {
+        // Admin login page - never cache
+        source: "/admin/login",
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0",
+          },
+        ],
+      },
+      {
         // Service Worker - must be served with no-cache but allow service worker scope
         source: "/sw.js",
         headers: [

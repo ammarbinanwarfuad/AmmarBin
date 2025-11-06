@@ -20,12 +20,12 @@ type LoginFormData = z.infer<typeof loginSchema>;
 export default function AdminLoginPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const router = useRouter();
-  const { data: session, status, update } = useSession();
+  const { data: session, status } = useSession();
 
   // Redirect if already authenticated
   useEffect(() => {
     if (status === "authenticated" && session) {
-      router.push("/admin/dashboard");
+      router.replace("/admin/dashboard");
     }
   }, [status, session, router]);
 
@@ -38,7 +38,13 @@ export default function AdminLoginPage() {
   });
 
   const onSubmit = async (data: LoginFormData) => {
+    // Prevent multiple submissions
+    if (isSubmitting) {
+      return;
+    }
+
     setIsSubmitting(true);
+    
     try {
       const result = await signIn("credentials", {
         email: data.email,
@@ -49,37 +55,17 @@ export default function AdminLoginPage() {
       if (result?.error) {
         toast.error(result.error || "Invalid credentials");
         setIsSubmitting(false);
-      } else if (result?.ok) {
-        // Update the session to ensure it's refreshed
-        await update();
+        return;
+      }
+
+      if (result?.ok) {
+        // Force a hard reload to ensure session cookie is properly set
+        // This bypasses service worker cache and ensures fresh session
+        toast.success("Login successful! Redirecting...");
         
-        // Wait a moment for the session cookie to be set
-        await new Promise(resolve => setTimeout(resolve, 300));
-        
-        // Verify session is established by checking the session endpoint
-        try {
-          const sessionCheck = await fetch("/api/auth/session", {
-            cache: "no-store",
-          });
-          const sessionData = await sessionCheck.json();
-          
-          if (sessionData?.user) {
-            toast.success("Login successful!");
-            // Use full page reload to ensure session is properly loaded
-            // This prevents middleware from redirecting back to login
-            // eslint-disable-next-line react-hooks/immutability
-            window.location.href = "/admin/dashboard";
-            return;
-          }
-        } catch (sessionError) {
-          console.error("Session check error:", sessionError);
-        }
-        
-        // Fallback: if session check fails, still try to navigate
-        toast.success("Login successful!");
-        // Use full page reload for reliability
-        // eslint-disable-next-line react-hooks/immutability
-        window.location.href = "/admin/dashboard";
+        // Use window.location.replace to avoid adding to history
+        // Add cache-busting query param to bypass service worker
+        window.location.replace(`/admin/dashboard?t=${Date.now()}`);
       } else {
         toast.error("Login failed. Please try again.");
         setIsSubmitting(false);
