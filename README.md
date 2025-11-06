@@ -137,8 +137,17 @@ This is a modern, production-ready portfolio website that showcases projects, sk
 │   ├── api/                      # API routes
 │   │   ├── admin/               # Admin API endpoints
 │   │   ├── auth/                 # Authentication endpoints
+│   │   ├── analytics/            # Analytics endpoints
 │   │   ├── blog/                 # Blog API endpoints
 │   │   ├── projects/            # Projects API endpoints
+│   │   ├── skills/               # Skills API endpoints
+│   │   ├── experience/           # Experience API endpoints
+│   │   ├── education/            # Education API endpoints
+│   │   ├── certifications/      # Certifications API endpoints
+│   │   ├── participation/        # Participation API endpoints
+│   │   ├── profile/               # Profile API endpoints
+│   │   ├── contact/              # Contact form API endpoints
+│   │   ├── resume/               # Resume API endpoints
 │   │   └── ...                   # Other API endpoints
 │   ├── blog/                     # Blog pages
 │   ├── projects/                 # Projects page
