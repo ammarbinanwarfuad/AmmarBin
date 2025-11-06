@@ -1,8 +1,7 @@
-import { Suspense } from "react";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { getExperiences, getParticipations } from "@/lib/server/data";
-import { ExperienceTabs } from "@/components/ExperienceTabs";
+import { ExperienceTabsClient } from "@/components/ExperienceTabsClient";
 
 export const dynamic = 'force-dynamic'; // No caching
 
@@ -26,12 +25,10 @@ export default async function ExperiencePage() {
             </p>
           </div>
 
-          <Suspense fallback={<div className="h-96" />}>
-            <ExperienceTabs 
-              experiences={experiences} 
-              participations={participations}
-            />
-          </Suspense>
+          <ExperienceTabsClient 
+            experiences={experiences} 
+            participations={participations}
+          />
         </div>
       </main>
       <Footer />

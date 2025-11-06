@@ -1,6 +1,4 @@
-"use client";
-
-import { motion } from "framer-motion";
+import { LazyMotionDiv } from "@/components/LazyMotion";
 import { Card } from "@/components/ui/card";
 import { Calendar, MapPin, GraduationCap, Award } from "lucide-react";
 import { formatDate } from "@/lib/utils";
@@ -14,8 +12,8 @@ interface Education {
   startDate: Date;
   endDate?: Date;
   current?: boolean;
-  grade?: string;
   location?: string;
+  grade?: string;
   description?: string;
   achievements?: string[];
 }
@@ -24,11 +22,22 @@ interface EducationListProps {
   education: Education[];
 }
 
+// SSR EducationList component (for public pages)
 export function EducationList({ education }: EducationListProps) {
+  if (education.length === 0) {
+    return (
+      <Card className="p-12 text-center">
+        <p className="text-muted-foreground">
+          No education information available.
+        </p>
+      </Card>
+    );
+  }
+
   return (
     <div className="space-y-8">
       {education.map((edu, index) => (
-        <motion.div
+        <LazyMotionDiv
           key={edu._id}
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
@@ -89,9 +98,8 @@ export function EducationList({ education }: EducationListProps) {
               </div>
             </div>
           </Card>
-        </motion.div>
+        </LazyMotionDiv>
       ))}
     </div>
   );
 }
-
