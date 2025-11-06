@@ -419,6 +419,7 @@ This application is heavily optimized for performance:
 8. **Bundle Optimization**: Tree shaking, minification, compression
 9. **Font Optimization**: Next.js font optimization with preloading
 10. **Service Worker**: Offline support and caching
+11. **Stale-While-Revalidate**: CDN caching with background updates
 
 ### Performance Monitoring
 
