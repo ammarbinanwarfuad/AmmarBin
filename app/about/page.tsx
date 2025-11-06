@@ -4,8 +4,8 @@ import { Footer } from "@/components/Footer";
 import { getProfile } from "@/lib/server/data";
 import { AboutContent } from "@/components/AboutContent";
 
-// ISR: Revalidate every hour for automatic updates
-export const revalidate = 3600;
+// ISR: Revalidate every 2 hours (profile changes less frequently)
+export const revalidate = 7200; // 2 hours
 
 export default async function AboutPage() {
   const profile = await getProfile();

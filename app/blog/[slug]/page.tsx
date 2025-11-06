@@ -18,8 +18,8 @@ interface BlogDetailPageProps {
   params: Promise<{ slug: string }>;
 }
 
-// ISR: Revalidate every hour for automatic updates
-export const revalidate = 3600;
+// ISR: Revalidate every 30 minutes for faster updates (blog content changes more frequently)
+export const revalidate = 1800; // 30 minutes
 
 // Generate static params for popular blog posts at build time
 export async function generateStaticParams() {

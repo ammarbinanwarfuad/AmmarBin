@@ -4,8 +4,8 @@ import { Card } from "@/components/ui/card";
 import { getSkills } from "@/lib/server/data";
 import { SkillsGrid } from "@/components/SkillsGrid";
 
-// ISR: Revalidate every hour for automatic updates
-export const revalidate = 3600;
+// ISR: Revalidate every 2 hours (skills change less frequently)
+export const revalidate = 7200; // 2 hours
 
 export default async function SkillsPage() {
   // Always fetch fresh data from MongoDB (cache bypassed in getSkills)
