@@ -1,8 +1,9 @@
 import { NextResponse } from "next/server";
 import { connectDB } from "@/lib/db";
+import { cachedFetch } from "@/lib/cache";
 
 // ⚡ Performance: Add timeout and parallel checking
-const CHECK_TIMEOUT = 2000; // 2 seconds max per URL (reduced from 3s)
+const CHECK_TIMEOUT = 1500; // 1.5 seconds max per URL (reduced from 2s)
 
 async function check(url?: string | null): Promise<{ url: string | null; ok: boolean; status: number }> {
   if (!url) return { url: null, ok: false, status: 0 };
@@ -32,31 +33,40 @@ async function check(url?: string | null): Promise<{ url: string | null; ok: boo
 
 export async function GET() {
   try {
-    await connectDB();
-    const Project = (await import("@/models/Project")).default;
-    const projects = await Project.find({}).select('title liveUrl githubUrl').lean();
+    // Cache link check results for 10 minutes (links don't change frequently)
+    const data = await cachedFetch(
+      'admin:link-check',
+      async () => {
+        await connectDB();
+        const Project = (await import("@/models/Project")).default;
+        const projects = await Project.find({}).select('title liveUrl githubUrl').lean();
 
-    // ⚡ Performance: Check all URLs in parallel (not sequential)
-    const results = await Promise.all(
-      projects.map(async (p: unknown) => {
-        const project = p as { title?: string; liveUrl?: string | null; githubUrl?: string | null };
-        // Check both URLs in parallel for each project
-        const [live, github] = await Promise.all([
-          check(project.liveUrl),
-          check(project.githubUrl),
-        ]);
-        return {
-          title: project.title || 'Untitled',
-          live,
-          github,
-        };
-      })
+        // ⚡ Performance: Check all URLs in parallel (not sequential)
+        const results = await Promise.all(
+          projects.map(async (p: unknown) => {
+            const project = p as { title?: string; liveUrl?: string | null; githubUrl?: string | null };
+            // Check both URLs in parallel for each project
+            const [live, github] = await Promise.all([
+              check(project.liveUrl),
+              check(project.githubUrl),
+            ]);
+            return {
+              title: project.title || 'Untitled',
+              live,
+              github,
+            };
+          })
+        );
+
+        const broken = results.filter(r => !(r.live.ok && r.github.ok));
+        
+        return { results, broken };
+      },
+      10 * 60 * 1000 // 10 minutes TTL (links don't change often)
     );
-
-    const broken = results.filter(r => !(r.live.ok && r.github.ok));
     
     return NextResponse.json(
-      { results, broken },
+      data,
       {
         headers: {
           'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',

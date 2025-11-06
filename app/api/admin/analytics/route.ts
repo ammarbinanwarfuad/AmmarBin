@@ -1,9 +1,14 @@
 import { NextResponse } from "next/server";
 import { connectDB } from "@/lib/db";
+import { cachedFetch } from "@/lib/cache";
 
 export async function GET() {
   try {
-    await connectDB();
+    // Cache analytics for 5 minutes (admin data changes frequently)
+    const data = await cachedFetch(
+      'admin:analytics',
+      async () => {
+        await connectDB();
     const Project = (await import("@/models/Project")).default;
     const Blog = (await import("@/models/Blog")).default;
     const Message = (await import("@/models/Message")).default;
@@ -36,13 +41,18 @@ export async function GET() {
       Skill.countDocuments({ createdAt: { $gte: d30 } }).maxTimeMS(500),
     ]);
 
-    return NextResponse.json(
-      {
-        totals: { projects, blogs, messages, skills },
-        last7d: { projects: p7, blogs: b7, messages: m7, skills: s7 },
-        last30d: { projects: p30, blogs: b30, messages: m30, skills: s30 },
-        generatedAt: now.toISOString(),
+        return {
+          totals: { projects, blogs, messages, skills },
+          last7d: { projects: p7, blogs: b7, messages: m7, skills: s7 },
+          last30d: { projects: p30, blogs: b30, messages: m30, skills: s30 },
+          generatedAt: now.toISOString(),
+        };
       },
+      5 * 60 * 1000 // 5 minutes TTL
+    );
+
+    return NextResponse.json(
+      data,
       {
         headers: {
           'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',

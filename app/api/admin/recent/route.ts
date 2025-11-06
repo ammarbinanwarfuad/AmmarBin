@@ -1,10 +1,15 @@
 import { NextResponse } from "next/server";
 import { connectDB } from "@/lib/db";
 import { fetchGitHubRepos } from "@/lib/github";
+import { cachedFetch } from "@/lib/cache";
 
 export async function GET() {
   try {
-    await connectDB();
+    // Cache recent data for 2 minutes (changes frequently)
+    const data = await cachedFetch(
+      'admin:recent',
+      async () => {
+        await connectDB();
     const Blog = (await import("@/models/Blog")).default;
     const Message = (await import("@/models/Message")).default;
 
@@ -25,8 +30,13 @@ export async function GET() {
       Message.find({}).select('name email subject createdAt').sort({ createdAt: -1 }).limit(5).lean().maxTimeMS(500),
     ]);
 
+        return { blogs, messages, repos };
+      },
+      2 * 60 * 1000 // 2 minutes TTL
+    );
+
     return NextResponse.json(
-      { blogs, messages, repos },
+      data,
       {
         headers: {
           'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
