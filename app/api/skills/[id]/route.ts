@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { connectDB } from "@/lib/db";
 import Skill from "@/models/Skill";
 import { logActivity } from "@/lib/activity-logger";
+import { invalidateCacheAfterUpdate } from "@/lib/cache-invalidation";
 
 export async function PUT(
   request: Request,
@@ -30,8 +31,6 @@ export async function PUT(
       return NextResponse.json({ error: "Skill not found" }, { status: 404 });
     }
 
-    // Revalidate pages that show skills - use 'layout' type to force immediate revalidation
-
     // Log activity
     await logActivity({
       action: "update",
@@ -42,6 +41,9 @@ export async function PUT(
       ipAddress: request.headers.get("x-forwarded-for") || undefined,
       userAgent: request.headers.get("user-agent") || undefined,
     });
+
+    // Invalidate cache (non-blocking, fire-and-forget)
+    invalidateCacheAfterUpdate('skills');
 
     return NextResponse.json({ skill });
   } catch (error) {
@@ -90,6 +92,9 @@ export async function DELETE(
       // Log but don't fail the request if activity logging fails
       console.warn("Activity logging failed:", error);
     }
+
+    // Invalidate cache (non-blocking, fire-and-forget)
+    invalidateCacheAfterUpdate('skills');
 
     return NextResponse.json({ message: "Skill deleted successfully" });
   } catch (error) {

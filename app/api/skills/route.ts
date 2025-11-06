@@ -2,22 +2,35 @@ import { NextResponse } from "next/server";
 import { connectDB } from "@/lib/db";
 import Skill from "@/models/Skill";
 import { logActivity } from "@/lib/activity-logger";
+import { invalidateCacheAfterUpdate } from "@/lib/cache-invalidation";
+import { unstable_cache } from "next/cache";
 
 export async function GET() {
   try {
+    // Use unstable_cache for server-side caching (10 minutes TTL - skills change less frequently)
+    const getCachedSkills = unstable_cache(
+      async () => {
     await connectDB();
-    const skills = await Skill.find()
+        return await Skill.find()
       .sort({ category: 1, name: 1 })
       .lean()
-      .maxTimeMS(500); // Timeout for faster TTFB
+          .maxTimeMS(500);
+      },
+      ['skills:all'],
+      {
+        tags: ['skills'],
+        revalidate: 600, // 10 minutes
+      }
+    );
+
+    const skills = await getCachedSkills();
       
     return NextResponse.json(
       { skills },
       {
         headers: {
-          "Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate",
-          "Pragma": "no-cache",
-          "Expires": "0",
+          "Cache-Control": "public, s-maxage=60, stale-while-revalidate=300",
+          "CDN-Cache-Control": "public, s-maxage=60",
         },
       }
     );
@@ -55,6 +68,9 @@ export async function POST(request: Request) {
       ipAddress: request.headers.get("x-forwarded-for") || undefined,
       userAgent: request.headers.get("user-agent") || undefined,
     });
+
+    // Invalidate cache (non-blocking, fire-and-forget)
+    invalidateCacheAfterUpdate('skills');
 
     return NextResponse.json({ skill }, { status: 201 });
   } catch (error) {
@@ -111,6 +127,9 @@ export async function PUT(request: Request) {
       ipAddress: request.headers.get("x-forwarded-for") || undefined,
       userAgent: request.headers.get("user-agent") || undefined,
     });
+
+    // Invalidate cache (non-blocking, fire-and-forget)
+    invalidateCacheAfterUpdate('skills');
 
     return NextResponse.json({ skill });
   } catch (error) {
