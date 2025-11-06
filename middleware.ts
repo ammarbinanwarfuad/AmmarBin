@@ -59,12 +59,11 @@ export default withAuth(
       }
     }
     
-    // Pages - edge caching with revalidation
-    if (!url.pathname.startsWith('/admin/') && !url.pathname.startsWith('/api/') && isProduction) {
-      // Cache public pages at edge for faster global loads
-      response.headers.set('Cache-Control', 'public, s-maxage=3600, stale-while-revalidate=86400');
-      response.headers.set('CDN-Cache-Control', 'public, s-maxage=3600');
-    }
+    // Pages - let pages control their own caching via revalidate/dynamic
+    // We don't set aggressive cache headers here to respect page-level settings
+    // Pages with `dynamic = 'force-dynamic'` will fetch fresh data
+    // Pages with `revalidate` will use ISR with their specified intervals
+    // This works with our cache invalidation system for instant updates
     
     const duration = Date.now() - start;
     response.headers.set('X-Middleware-Duration', duration.toString());
