@@ -59,13 +59,44 @@ export default function AdminLoginPage() {
       }
 
       if (result?.ok) {
-        // Force a hard reload to ensure session cookie is properly set
-        // This bypasses service worker cache and ensures fresh session
         toast.success("Login successful! Redirecting...");
         
-        // Use window.location.replace to avoid adding to history
-        // Add cache-busting query param to bypass service worker
-        window.location.replace(`/admin/dashboard?t=${Date.now()}`);
+        // Wait for session to be established by checking session endpoint
+        // Retry up to 5 times with increasing delays
+        let sessionEstablished = false;
+        for (let i = 0; i < 5; i++) {
+          await new Promise(resolve => setTimeout(resolve, 200 * (i + 1)));
+          
+          try {
+            const sessionResponse = await fetch("/api/auth/session", {
+              method: "GET",
+              credentials: "include",
+              cache: "no-store",
+              headers: {
+                "Cache-Control": "no-cache",
+              },
+            });
+            
+            const sessionData = await sessionResponse.json();
+            
+            if (sessionData?.user) {
+              sessionEstablished = true;
+              break;
+            }
+          } catch (err) {
+            console.error("Session check attempt", i + 1, "failed:", err);
+          }
+        }
+
+        if (sessionEstablished) {
+          // Use window.location.href for full page reload to ensure session cookie is read
+          // This ensures the middleware sees the session cookie
+          window.location.href = "/admin/dashboard";
+        } else {
+          // Fallback: still redirect but log warning
+          console.warn("Session verification failed, redirecting anyway");
+          window.location.href = "/admin/dashboard";
+        }
       } else {
         toast.error("Login failed. Please try again.");
         setIsSubmitting(false);
