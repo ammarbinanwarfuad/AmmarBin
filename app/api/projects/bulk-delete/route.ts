@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { connectDB } from "@/lib/db";
 import Project from "@/models/Project";
 import { logActivity } from "@/lib/activity-logger";
+import { invalidateCacheAfterUpdate } from "@/lib/cache-invalidation";
 
 export async function POST(request: Request) {
   try {
@@ -49,6 +50,9 @@ export async function POST(request: Request) {
       ipAddress: request.headers.get("x-forwarded-for") || undefined,
       userAgent: request.headers.get("user-agent") || undefined,
     });
+
+    // Invalidate cache (non-blocking, fire-and-forget)
+    invalidateCacheAfterUpdate('projects');
 
     return NextResponse.json({
       message: `${result.deletedCount} project(s) deleted successfully`,

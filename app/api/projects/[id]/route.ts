@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { connectDB } from "@/lib/db";
 import Project from "@/models/Project";
+import { invalidateCacheAfterUpdate } from "@/lib/cache-invalidation";
 
 export async function GET(
   request: Request,
@@ -66,6 +67,9 @@ export async function PUT(
       return NextResponse.json({ error: "Project not found" }, { status: 404 });
     }
 
+    // Invalidate cache (non-blocking, fire-and-forget)
+    invalidateCacheAfterUpdate('projects');
+
     return NextResponse.json({ project });
   } catch (error) {
     console.error("Error updating project:", error);
@@ -88,6 +92,9 @@ export async function DELETE(
     if (!project) {
       return NextResponse.json({ error: "Project not found" }, { status: 404 });
     }
+
+    // Invalidate cache (non-blocking, fire-and-forget)
+    invalidateCacheAfterUpdate('projects');
 
     return NextResponse.json({ message: "Project deleted successfully" });
   } catch (error) {
