@@ -133,6 +133,8 @@ This is a modern, production-ready portfolio website that showcases projects, sk
 │   │   ├── backup/              # Backup & restore
 │   │   ├── export/              # Export & import
 │   │   ├── settings/            # Settings
+│   │   ├── calendar/            # Calendar view
+│   │   ├── change-password/     # Change password
 │   │   └── login/               # Admin login
 │   ├── api/                      # API routes
 │   │   ├── admin/               # Admin API endpoints
