@@ -174,9 +174,13 @@ This is a modern, production-ready portfolio website that showcases projects, sk
 │   ├── auth.ts                   # Authentication configuration
 │   ├── db.ts                     # Database connection
 │   ├── cache.ts                  # Caching utilities
+│   ├── cache-invalidation.ts    # Cache invalidation system
+│   ├── etag.ts                   # ETag support for conditional requests
 │   ├── cloudinary.ts             # Cloudinary configuration
 │   ├── github.ts                 # GitHub API integration
+│   ├── blog-fetchers.ts          # External blog fetching (Hashnode, GUCC)
 │   ├── hooks/                    # Custom React hooks
+│   ├── server/                   # Server-side utilities
 │   └── ...                       # Other utilities
 ├── models/                       # Mongoose models
 │   ├── User.ts                   # User model
