@@ -73,16 +73,20 @@ export async function connectDB() {
     const opts = {
       bufferCommands: false,
       maxPoolSize: 10, // Maintain up to 10 socket connections
-      minPoolSize: 1, // Start with 1 connection for faster initial connection, let it grow as needed
-      serverSelectionTimeoutMS: 3000, // Faster timeout for better TTFB
-      socketTimeoutMS: 5000, // Reduced timeout for faster response
-      connectTimeoutMS: 3000, // Faster connection timeout
+      minPoolSize: 2, // Start with 2 connections for faster response (increased from 1)
+      serverSelectionTimeoutMS: 2000, // Reduced from 3000ms for faster TTFB
+      socketTimeoutMS: 4000, // Reduced from 5000ms for faster response
+      connectTimeoutMS: 2000, // Reduced from 3000ms for faster connection
       heartbeatFrequencyMS: 10000, // Check connection health every 10 seconds
-      // Enable connection retry with backoff
+      // Enable connection retry with exponential backoff
       retryWrites: true,
       retryReads: true,
       // Optimize for performance
       compressors: ['zlib'] as ('zlib' | 'none' | 'snappy' | 'zstd')[], // Enable compression for faster data transfer
+      // Connection pool monitoring
+      maxIdleTimeMS: 30000, // Close idle connections after 30s
+      // Optimize for serverless/edge
+      directConnection: false, // Use connection pool (not direct)
     };
 
     cached.promise = mongoose.connect(MONGODB_URI, opts).then((mongoose) => {
