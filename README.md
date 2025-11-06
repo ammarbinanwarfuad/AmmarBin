@@ -611,6 +611,17 @@ This project is private and proprietary. All rights reserved.
 - Vercel for hosting and analytics
 - All open-source contributors whose packages made this possible
 
+## 🔄 Cache Invalidation
+
+The application includes an advanced cache invalidation system that ensures content updates appear instantly on the live site:
+
+- **Automatic Invalidation**: All admin actions (create, update, delete) automatically invalidate relevant caches
+- **Non-Blocking**: Cache invalidation runs asynchronously without impacting API response times
+- **Multi-Layer**: Invalidates Next.js cache, CDN cache, and service worker cache
+- **Optional Vercel Integration**: Enhanced cache purging with VERCEL_TOKEN and VERCEL_PROJECT_ID
+
+See [Environment Variables](#environment-variables) section for Vercel cache setup instructions.
+
 ## 📞 Support
 
 For issues, questions, or contributions, please open an issue on the repository.
