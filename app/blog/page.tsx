@@ -1,7 +1,7 @@
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { getBlogs } from "@/lib/server/data";
-import { BlogGrid } from "@/components/BlogGrid";
+import { BlogGridWithFilter } from "@/components/BlogGridWithFilter";
 
 export const dynamic = 'force-dynamic'; // No caching
 
@@ -22,7 +22,7 @@ export default async function BlogPage() {
             </p>
           </div>
 
-          <BlogGrid blogs={blogs} />
+          <BlogGridWithFilter blogs={blogs} />
         </div>
       </main>
       <Footer />

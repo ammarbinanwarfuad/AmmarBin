@@ -1,6 +1,3 @@
-"use client";
-
-import { useState, useMemo, memo, useCallback } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { LazyMotionDiv } from "@/components/LazyMotion";
@@ -26,17 +23,18 @@ interface BlogGridProps {
   blogs: Blog[];
 }
 
-// Memoized blog card component
-const BlogCard = memo(({ blog, index }: { blog: Blog; index: number }) => {
-  const getSourceLabel = useCallback((source: string) => {
-    const labels: Record<string, string> = {
-      internal: "Personal Blog",
-      gucc: "GUCC Blog",
-      hashnode: "Hashnode",
-    };
-    return labels[source] || source;
-  }, []);
+// Helper function to get source label
+function getSourceLabel(source: string): string {
+  const labels: Record<string, string> = {
+    internal: "Personal Blog",
+    gucc: "GUCC Blog",
+    hashnode: "Hashnode",
+  };
+  return labels[source] || source;
+}
 
+// SSR Blog Card component
+function BlogCard({ blog, index }: { blog: Blog; index: number }) {
   return (
     <LazyMotionDiv
       initial={{ opacity: 0, y: 20 }}
@@ -102,71 +100,25 @@ const BlogCard = memo(({ blog, index }: { blog: Blog; index: number }) => {
       </Card>
     </LazyMotionDiv>
   );
-});
+}
 
-BlogCard.displayName = 'BlogCard';
-
-export const BlogGrid = memo(function BlogGrid({ blogs }: BlogGridProps) {
-  const [filter, setFilter] = useState<string>("all");
-
-  // Memoize filtered blogs
-  const filteredBlogs = useMemo(() => 
-    filter === "all"
-      ? blogs
-      : blogs.filter((blog) => blog.source === filter),
-    [blogs, filter]
-  );
-
-  // Memoize filter handler
-  const handleFilterChange = useCallback((newFilter: string) => {
-    setFilter(newFilter);
-  }, []);
+// SSR BlogGrid component (for public pages)
+export function BlogGrid({ blogs }: BlogGridProps) {
+  if (blogs.length === 0) {
+    return (
+      <Card className="p-12 text-center">
+        <p className="text-muted-foreground">
+          No blog posts found. Check back soon for new content!
+        </p>
+      </Card>
+    );
+  }
 
   return (
-    <>
-      {/* Filter Buttons */}
-      <div className="flex flex-wrap gap-2 mb-12">
-        <Button
-          variant={filter === "all" ? "default" : "outline"}
-          onClick={() => handleFilterChange("all")}
-        >
-          All Posts
-        </Button>
-        <Button
-          variant={filter === "internal" ? "default" : "outline"}
-          onClick={() => handleFilterChange("internal")}
-        >
-          Personal
-        </Button>
-        <Button
-          variant={filter === "gucc" ? "default" : "outline"}
-          onClick={() => handleFilterChange("gucc")}
-        >
-          GUCC
-        </Button>
-        <Button
-          variant={filter === "hashnode" ? "default" : "outline"}
-          onClick={() => handleFilterChange("hashnode")}
-        >
-          Hashnode
-        </Button>
-      </div>
-
-      {/* Blog Grid */}
-      {filteredBlogs.length > 0 ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredBlogs.map((blog, index) => (
-            <BlogCard key={blog._id} blog={blog} index={index} />
-          ))}
-        </div>
-      ) : (
-        <Card className="p-12 text-center">
-          <p className="text-muted-foreground">
-            No blog posts found. Check back soon for new content!
-          </p>
-        </Card>
-      )}
-    </>
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      {blogs.map((blog, index) => (
+        <BlogCard key={blog._id} blog={blog} index={index} />
+      ))}
+    </div>
   );
-});
-
+}
