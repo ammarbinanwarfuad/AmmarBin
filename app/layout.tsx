@@ -6,6 +6,8 @@ import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { GoogleTagManager, GoogleTagManagerNoscript } from "@/components/GoogleTagManager";
 import { ClientPerformanceMonitor } from "@/components/ClientPerformanceMonitor";
+import { ServiceWorkerRegistration } from "@/components/ServiceWorkerRegistration";
+import { PerformanceBudgetMonitor } from "@/components/PerformanceBudgetMonitor";
 import "./globals.css";
 
 const gtmId = process.env.NEXT_PUBLIC_GTM_ID;
@@ -107,6 +109,10 @@ export default function RootLayout({
         <DeferredAnalytics />
         {/* Performance monitoring */}
         <ClientPerformanceMonitor />
+        {/* Performance budget monitoring */}
+        <PerformanceBudgetMonitor />
+        {/* Service Worker for offline support */}
+        <ServiceWorkerRegistration />
         {/* Vercel Analytics - Auto-detects on Vercel, works without ID */}
         <Analytics />
         {/* Vercel Speed Insights - Auto-detects on Vercel, works without ID */}
