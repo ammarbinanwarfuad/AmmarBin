@@ -250,8 +250,13 @@ SMTP_FROM=noreply@yourdomain.com
 
 ```env
 # GitHub (for project sync)
-GITHUB_TOKEN=your-github-token
+GITHUB_PAT=your-github-personal-access-token
 GITHUB_USERNAME=your-github-username
+
+# Vercel (for enhanced cache purging)
+# Get these from: Vercel Dashboard → Project → Settings → General
+VERCEL_TOKEN=your-vercel-api-token
+VERCEL_PROJECT_ID=your-vercel-project-id
 
 # Analytics
 NEXT_PUBLIC_GTM_ID=GTM-XXXXXXX
@@ -263,6 +268,27 @@ NEXT_PUBLIC_ENABLE_SW=true
 # Feature Flags
 NEXT_PUBLIC_ENABLE_ANALYTICS=true
 ```
+
+### Vercel Cache Invalidation (Optional)
+
+For enhanced cache purging when content is updated, add these environment variables:
+
+1. **Get VERCEL_TOKEN**:
+   - Go to [Vercel Dashboard](https://vercel.com/account/tokens)
+   - Create a new token with read/write permissions
+   - Copy the token
+
+2. **Get VERCEL_PROJECT_ID**:
+   - Go to your project in Vercel Dashboard
+   - Navigate to Settings → General
+   - Copy the Project ID
+
+3. **Add to Vercel Environment Variables**:
+   - Go to Project → Settings → Environment Variables
+   - Add `VERCEL_TOKEN` and `VERCEL_PROJECT_ID`
+   - Redeploy your project
+
+**Note**: Cache invalidation works without these variables (using Next.js revalidation), but adding them enables additional Vercel CDN cache purging for faster updates.
 
 ### Generating NextAuth Secret
 
@@ -383,11 +409,13 @@ This application is heavily optimized for performance:
 
 1. **Server-Side Rendering (SSR)**: Most pages use SSR for better SEO
 2. **Static Site Generation (SSG)**: Blog posts and static pages
-3. **Incremental Static Regeneration (ISR)**: Blog posts revalidate hourly
+3. **Incremental Static Regeneration (ISR)**: Blog posts revalidate every 30 minutes, skills and about page revalidate every 2 hours
 4. **Image Optimization**: Next.js Image with Cloudinary
 5. **Code Splitting**: Automatic code splitting with dynamic imports
 6. **Lazy Loading**: Components and libraries loaded on demand
-7. **Caching**: Multiple caching layers (CDN, edge, in-memory)
+7. **Caching**: Multiple caching layers (CDN, edge, in-memory, Next.js unstable_cache)
+8. **Cache Invalidation**: Automatic cache invalidation on content updates for instant changes
+9. **ETags**: Conditional requests support for reduced bandwidth
 8. **Bundle Optimization**: Tree shaking, minification, compression
 9. **Font Optimization**: Next.js font optimization with preloading
 10. **Service Worker**: Offline support and caching
