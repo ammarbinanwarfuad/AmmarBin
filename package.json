@@ -8,7 +8,6 @@
     "analyze": "set ANALYZE=true && next build --webpack",
     "start": "next start",
     "lint": "eslint",
-    "seed": "tsx scripts/seed.ts",
     "postbuild": "next-sitemap"
   },
   "dependencies": {

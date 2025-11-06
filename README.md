@@ -169,7 +169,6 @@ This is a modern, production-ready portfolio website that showcases projects, sk
 │   ├── sw.js                     # Service worker
 │   └── ...                       # Other static files
 ├── scripts/                      # Utility scripts
-│   └── seed.ts                   # Database seeding script
 ├── types/                        # TypeScript type definitions
 ├── middleware.ts                 # Next.js middleware
 ├── next.config.ts                # Next.js configuration
@@ -210,13 +209,7 @@ Create a `.env.local` file in the root directory (see [Environment Variables](#e
 
 Ensure MongoDB is running and update the connection string in `.env.local`
 
-5. **Seed the database (optional)**
-
-```bash
-npm run seed
-```
-
-6. **Run the development server**
+5. **Run the development server**
 
 ```bash
 npm run dev
@@ -335,9 +328,6 @@ npm run lint
 
 # Analyze bundle size
 npm run analyze
-
-# Seed database
-npm run seed
 ```
 
 ### Development Server
