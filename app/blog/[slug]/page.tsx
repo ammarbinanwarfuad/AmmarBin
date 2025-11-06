@@ -1,121 +1,47 @@
-"use client";
-
+import { notFound } from "next/navigation";
 import dynamic from "next/dynamic";
-import { useParams, useRouter } from "next/navigation";
 import Image from "next/image";
 import { LazyMotionDiv } from "@/components/LazyMotion";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { Calendar, Clock, ArrowLeft, User } from "lucide-react";
+import { Calendar, Clock, User } from "lucide-react";
 import { formatDate } from "@/lib/utils";
-import { Skeleton } from "@/components/ui/skeleton";
-import { useBlog } from "@/lib/hooks/usePublicData";
+import { getBlogBySlug } from "@/lib/server/data";
+import { BlogBackButton } from "@/components/BlogBackButton";
 
-// Dynamic import React Markdown to reduce initial bundle size (~25KB)
+// Dynamic import React Markdown with SSR enabled for better SEO
 const ReactMarkdown = dynamic(() => import("react-markdown"), {
-  ssr: false,
-  loading: () => (
-    <div className="animate-pulse space-y-4">
-      <div className="h-4 bg-muted rounded w-3/4"></div>
-      <div className="h-4 bg-muted rounded"></div>
-      <div className="h-4 bg-muted rounded w-5/6"></div>
-    </div>
-  ),
+  ssr: true, // Enable SSR for better SEO
 });
 
-export default function BlogDetailPage() {
-  const params = useParams();
-  const router = useRouter();
-  const slug = params.slug as string;
-  
-  // Use SWR for data fetching - automatic caching, revalidation, and error handling
-  const { blog, isLoading: loading, error: fetchError } = useBlog(slug);
-  const error = fetchError || !blog;
+interface BlogDetailPageProps {
+  params: Promise<{ slug: string }>;
+}
 
-  if (loading) {
-    return (
-      <div className="min-h-screen flex flex-col">
-        <Header />
-        <main className="flex-1">
-          {/* Cover Image Skeleton */}
-          <div className="px-6 py-8 sm:py-12">
-            <div className="mx-auto max-w-7xl">
-              <Skeleton className="w-full h-64 md:h-96 rounded-lg" />
-            </div>
-          </div>
+// ISR: Revalidate every hour for automatic updates
+export const revalidate = 3600;
 
-          {/* Content Skeleton */}
-          <div className="px-6 pb-12 sm:pb-16">
-            <div className="mx-auto max-w-4xl">
-              {/* Back Button Skeleton */}
-              <Skeleton className="h-10 w-32 mb-6" />
-
-              {/* Title Skeleton */}
-              <Skeleton className="h-12 w-full mb-4" />
-              <Skeleton className="h-12 w-3/4 mb-6" />
-
-              {/* Meta Information Skeleton */}
-              <div className="flex flex-wrap items-center gap-4 mb-6 pb-6 border-b border-border">
-                <Skeleton className="h-4 w-24" />
-                <Skeleton className="h-4 w-32" />
-                <Skeleton className="h-4 w-20" />
-              </div>
-
-              {/* Tags Skeleton */}
-              <div className="flex flex-wrap gap-2 mb-8">
-                <Skeleton className="h-6 w-16 rounded-full" />
-                <Skeleton className="h-6 w-20 rounded-full" />
-                <Skeleton className="h-6 w-18 rounded-full" />
-              </div>
-
-              {/* Content Skeleton */}
-              <div className="space-y-4">
-                <Skeleton className="h-4 w-full" />
-                <Skeleton className="h-4 w-full" />
-                <Skeleton className="h-4 w-5/6" />
-                <Skeleton className="h-4 w-full mt-6" />
-                <Skeleton className="h-4 w-full" />
-                <Skeleton className="h-4 w-4/6" />
-                <Skeleton className="h-4 w-full mt-6" />
-                <Skeleton className="h-4 w-full" />
-                <Skeleton className="h-4 w-5/6" />
-              </div>
-
-              {/* Bottom Button Skeleton */}
-              <div className="mt-12 pt-8 border-t border-border">
-                <Skeleton className="h-10 w-48" />
-              </div>
-            </div>
-          </div>
-        </main>
-        <Footer />
-      </div>
-    );
+// Generate static params for popular blog posts at build time
+export async function generateStaticParams() {
+  try {
+    const { getBlogs } = await import("@/lib/server/data");
+    const blogs = await getBlogs();
+    // Pre-render first 20 blog posts (most popular/recent)
+    return blogs.slice(0, 20).map((blog: Record<string, unknown>) => ({
+      slug: blog.slug as string,
+    }));
+  } catch (error) {
+    console.error("Error generating static params for blog posts:", error);
+    return [];
   }
+}
 
-  if (error || !blog) {
-    return (
-      <div className="min-h-screen flex flex-col">
-        <Header />
-        <main className="flex-1 flex items-center justify-center px-6">
-          <Card className="max-w-md w-full">
-            <CardContent className="text-center py-12">
-              <h1 className="text-2xl font-bold mb-4">Blog Post Not Found</h1>
-              <p className="text-muted-foreground mb-6">
-                The blog post you&apos;re looking for doesn&apos;t exist or has been removed.
-              </p>
-              <Button onClick={() => router.push("/blog")}>
-                <ArrowLeft className="h-4 w-4 mr-2" />
-                Back to Blog
-              </Button>
-            </CardContent>
-          </Card>
-        </main>
-        <Footer />
-      </div>
-    );
+export default async function BlogDetailPage({ params }: BlogDetailPageProps) {
+  const { slug } = await params;
+  const blog = await getBlogBySlug(slug);
+
+  if (!blog) {
+    notFound();
   }
 
   return (
@@ -153,14 +79,9 @@ export default function BlogDetailPage() {
               transition={{ duration: 0.5 }}
             >
               {/* Back Button */}
-              <Button
-                variant="ghost"
-                onClick={() => router.push("/blog")}
-                className="mb-6"
-              >
-                <ArrowLeft className="h-4 w-4 mr-2" />
-                Back to Blog
-              </Button>
+              <div className="mb-6">
+                <BlogBackButton />
+              </div>
 
               {/* Title */}
               <h1 className="text-4xl sm:text-5xl font-bold text-foreground mb-4">
@@ -186,9 +107,9 @@ export default function BlogDetailPage() {
               </div>
 
               {/* Tags */}
-                  {blog.tags && blog.tags.length > 0 && (
-                    <div className="flex flex-wrap gap-2 mb-8">
-                      {blog.tags.map((tag: string, index: number) => (
+              {blog.tags && blog.tags.length > 0 && (
+                <div className="flex flex-wrap gap-2 mb-8">
+                  {blog.tags.map((tag: string, index: number) => (
                     <span
                       key={index}
                       className="px-3 py-1 bg-primary/10 text-primary rounded-full text-sm"
@@ -206,14 +127,7 @@ export default function BlogDetailPage() {
 
               {/* Back Button (Bottom) */}
               <div className="mt-12 pt-8 border-t border-border">
-                <Button
-                  variant="outline"
-                  onClick={() => router.push("/blog")}
-                  className="w-full sm:w-auto"
-                >
-                  <ArrowLeft className="h-4 w-4 mr-2" />
-                  Back to All Posts
-                </Button>
+                <BlogBackButton variant="outline" fullWidth />
               </div>
             </LazyMotionDiv>
           </div>
@@ -223,4 +137,3 @@ export default function BlogDetailPage() {
     </div>
   );
 }
-

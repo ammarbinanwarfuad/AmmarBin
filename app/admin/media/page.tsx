@@ -9,8 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Image as ImageIcon, Search, Trash2, Download, Loader2, CheckSquare, Square, Copy, Video, File } from "lucide-react";
 import toast from "react-hot-toast";
-import useSWR from 'swr';
-import { fetcher } from '@/lib/fetcher';
+import { useMedia } from '@/lib/hooks/useAdminData';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -51,25 +50,16 @@ export default function AdminMediaPage() {
     }
   }, [status, router]);
 
-  const queryParams = new URLSearchParams();
-  // Only send resourceType if it's not "all"
-  if (resourceType !== "all") {
-    queryParams.set("resourceType", resourceType);
-  }
-  if (searchTerm) queryParams.set("search", searchTerm);
-
-  const { data, isLoading, error, mutate } = useSWR(
-    `/api/admin/media?${queryParams.toString()}`,
-    fetcher
+  const { resources, total, isLoading, error, refresh } = useMedia(
+    resourceType !== "all" ? resourceType : undefined,
+    searchTerm || undefined
   );
-
-  const resources: MediaResource[] = data?.resources || [];
 
   const handleDelete = async (publicId: string) => {
     setDeletingId(publicId);
     try {
       // Get the actual resource type from the resource object
-      const resource = resources.find(r => r.public_id === publicId);
+      const resource = (resources as MediaResource[]).find(r => r.public_id === publicId);
       const actualResourceType = resource?.resource_type || resourceType || "image";
       const response = await fetch(`/api/admin/media?publicId=${publicId}&resourceType=${actualResourceType}`, {
         method: "DELETE",
@@ -77,7 +67,7 @@ export default function AdminMediaPage() {
 
       if (response.ok) {
         toast.success("Media deleted successfully!");
-        mutate();
+        refresh();
       } else {
         toast.error("Failed to delete media");
       }
@@ -121,7 +111,7 @@ export default function AdminMediaPage() {
     if (selectedItems.size === resources.length) {
       setSelectedItems(new Set());
     } else {
-      setSelectedItems(new Set(resources.map((r) => r.public_id)));
+      setSelectedItems(new Set(resources.map((r: MediaResource) => r.public_id)));
     }
   };
 
@@ -137,7 +127,7 @@ export default function AdminMediaPage() {
       const deletePromises = Array.from(selectedItems).map(async (publicId) => {
         try {
           // Get the actual resource type from the resource object
-          const resource = resources.find(r => r.public_id === publicId);
+          const resource = resources.find((r: MediaResource) => r.public_id === publicId);
           const actualResourceType = resource?.resource_type || resourceType || "image";
           const response = await fetch(`/api/admin/media?publicId=${publicId}&resourceType=${actualResourceType}`, {
             method: "DELETE",
@@ -155,7 +145,7 @@ export default function AdminMediaPage() {
       if (successCount > 0) {
         toast.success(`Deleted ${successCount} item(s) successfully${failCount > 0 ? `, ${failCount} failed` : ""}`);
         setSelectedItems(new Set());
-        mutate();
+        refresh();
       } else {
         toast.error("Failed to delete items");
       }
@@ -310,7 +300,7 @@ export default function AdminMediaPage() {
           )}
           {!error && (
             <div className="mb-4 text-sm text-muted-foreground">
-              {data?.total || 0} {resourceType === "all" ? "items" : resourceType + "s"} found
+              {total} {resourceType === "all" ? "items" : resourceType + "s"} found
             </div>
           )}
           {!error && (
@@ -327,7 +317,7 @@ export default function AdminMediaPage() {
                 </Card>
               ) : (
                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                  {resources.map((resource) => {
+                  {(resources as MediaResource[]).map((resource) => {
                     const isSelected = selectedItems.has(resource.public_id);
                     return (
                       <Card 

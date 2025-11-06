@@ -1,120 +1,46 @@
 import { NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
-import { connectDB } from "@/lib/db";
-import { WebVital } from "@/models/WebVital";
 
-// ⚡ Performance: Cache performance alerts for 1 minute
-
-
-interface AlertThreshold {
-  metric: string;
-  threshold: number;
-  severity: "warning" | "critical";
-}
-
-const THRESHOLDS: AlertThreshold[] = [
-  { metric: "LCP", threshold: 4000, severity: "critical" }, // 4s
-  { metric: "LCP", threshold: 2500, severity: "warning" }, // 2.5s
-  { metric: "INP", threshold: 500, severity: "critical" }, // 500ms
-  { metric: "INP", threshold: 200, severity: "warning" }, // 200ms
-  { metric: "CLS", threshold: 0.25, severity: "critical" }, // 0.25
-  { metric: "CLS", threshold: 0.1, severity: "warning" }, // 0.1
-  { metric: "FCP", threshold: 3000, severity: "critical" }, // 3s
-  { metric: "FCP", threshold: 1800, severity: "warning" }, // 1.8s
-  { metric: "TTFB", threshold: 1800, severity: "critical" }, // 1.8s
-  { metric: "TTFB", threshold: 800, severity: "warning" }, // 800ms
-];
-
-export async function GET(request: Request) {
+/**
+ * API endpoint to receive performance budget alerts
+ * In production, this could be integrated with monitoring services like Sentry, Datadog, etc.
+ */
+export async function POST(request: Request) {
   try {
-    const session = await getServerSession(authOptions);
-    if (!session) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+    // In production, you might want to require authentication
+    // const session = await getServerSession(authOptions);
+    // if (!session) {
+    //   return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    // }
 
-    await connectDB();
+    const body = await request.json();
+    const { metric, value, threshold, severity, url, timestamp } = body;
 
-    const { searchParams } = new URL(request.url);
-    const hours = parseInt(searchParams.get("hours") || "24");
-
-    const startDate = new Date();
-    startDate.setHours(startDate.getHours() - hours);
-
-    // Get recent metrics with optimized query
-    const metrics = await WebVital.find({
-      timestamp: { $gte: startDate },
-    })
-      .select('name value rating timestamp')
-      .sort({ timestamp: -1 })
-      .limit(5000) // Limit to prevent excessive processing
-      .lean()
-      .maxTimeMS(500);
-
-    // Calculate alerts
-    const alerts: Array<{
-      metric: string;
-      severity: "warning" | "critical";
-      count: number;
-      percentage: number;
-      avgValue: number;
-      threshold: number;
-    }> = [];
-
-    for (const threshold of THRESHOLDS) {
-      const metricData = metrics.filter((m) => m.name === threshold.metric);
-      if (metricData.length === 0) continue;
-
-      const violations = metricData.filter((m) => {
-        const value = m.value;
-        if (threshold.metric === "CLS") {
-          return value >= threshold.threshold;
-        }
-        return value >= threshold.threshold;
-      });
-
-      if (violations.length > 0) {
-        const avgValue =
-          violations.reduce((sum, m) => sum + m.value, 0) / violations.length;
-        const percentage = (violations.length / metricData.length) * 100;
-
-        alerts.push({
-          metric: threshold.metric,
-          severity: threshold.severity,
-          count: violations.length,
-          percentage: Math.round(percentage * 10) / 10,
-          avgValue: Math.round(avgValue),
-          threshold: threshold.threshold,
-        });
-      }
-    }
-
-    // Sort by severity (critical first) then by count
-    alerts.sort((a, b) => {
-      if (a.severity !== b.severity) {
-        return a.severity === "critical" ? -1 : 1;
-      }
-      return b.count - a.count;
+    // Log the performance alert
+    console.warn(`[Performance Alert] ${metric}: ${value} (threshold: ${threshold}) - ${severity}`, {
+      url,
+      timestamp,
     });
 
-    return NextResponse.json(
-      {
-        alerts,
-        totalMetrics: metrics.length,
-        period: `${hours} hours`,
-      },
-      {
-        headers: {
-          "Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate",
-        },
-      }
-    );
+    // In production, you could:
+    // 1. Send to error tracking service (Sentry, LogRocket, etc.)
+    // 2. Store in database for analytics
+    // 3. Send to monitoring service (Datadog, New Relic, etc.)
+    // 4. Trigger alerts (email, Slack, PagerDuty, etc.)
+
+    // Example: Send to Sentry (if configured)
+    // if (typeof process !== 'undefined' && (process as any).Sentry) {
+    //   (process as any).Sentry.captureMessage(
+    //     `Performance budget exceeded: ${metric}`,
+    //     severity === 'error' ? 'error' : 'warning'
+    //   );
+    // }
+
+    return NextResponse.json({ success: true });
   } catch (error) {
-    console.error("Error fetching performance alerts:", error);
+    console.error("Error processing performance alert:", error);
     return NextResponse.json(
-      { error: "Failed to fetch performance alerts" },
+      { error: "Failed to process alert" },
       { status: 500 }
     );
   }
 }
-
