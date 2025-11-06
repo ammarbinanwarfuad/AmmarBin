@@ -105,9 +105,12 @@ export function useParticipations() {
   };
 }
 
-// Messages Hook
+// Messages Hook with polling for real-time updates
 export function useMessages() {
-  const { data, error, isLoading, mutate } = useSWR('/api/contact', fetcher, adminConfig);
+  const { data, error, isLoading, mutate } = useSWR('/api/contact', fetcher, {
+    ...adminConfig,
+    refreshInterval: 5000, // Poll every 5 seconds for new messages
+  });
   
   return {
     messages: data?.messages || [],
@@ -123,6 +126,57 @@ export function useProfile() {
   
   return {
     profile: data?.profile || null,
+    isLoading,
+    error,
+    refresh: () => mutate(undefined, { revalidate: true }),
+  };
+}
+
+// Activity Hook with polling for real-time updates
+export function useActivity(entityType?: string, action?: string) {
+  const queryParams = new URLSearchParams();
+  if (entityType) queryParams.set("entityType", entityType);
+  if (action) queryParams.set("action", action);
+  const url = `/api/admin/activity${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
+  
+  const { data, error, isLoading, mutate } = useSWR(url, fetcher, {
+    ...adminConfig,
+    refreshInterval: 10000, // Poll every 10 seconds for new activity
+  });
+  
+  return {
+    activities: data?.activities || [],
+    total: data?.total || 0,
+    isLoading,
+    error,
+    refresh: () => mutate(undefined, { revalidate: true }),
+  };
+}
+
+// Media Hook
+export function useMedia(resourceType?: string, search?: string) {
+  const queryParams = new URLSearchParams();
+  if (resourceType && resourceType !== "all") queryParams.set("resourceType", resourceType);
+  if (search) queryParams.set("search", search);
+  const url = `/api/admin/media${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
+  
+  const { data, error, isLoading, mutate } = useSWR(url, fetcher, adminConfig);
+  
+  return {
+    resources: data?.resources || [],
+    total: data?.total || 0,
+    isLoading,
+    error,
+    refresh: () => mutate(undefined, { revalidate: true }),
+  };
+}
+
+// Scheduled Tasks Hook
+export function useScheduledTasks() {
+  const { data, error, isLoading, mutate } = useSWR('/api/admin/scheduled-tasks', fetcher, adminConfig);
+  
+  return {
+    tasks: data?.tasks || [],
     isLoading,
     error,
     refresh: () => mutate(undefined, { revalidate: true }),
