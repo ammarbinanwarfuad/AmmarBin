@@ -150,9 +150,16 @@ This is a modern, production-ready portfolio website that showcases projects, sk
 │   │   ├── resume/               # Resume API endpoints
 │   │   └── ...                   # Other API endpoints
 │   ├── blog/                     # Blog pages
+│   │   └── [slug]/              # Individual blog post pages
 │   ├── projects/                 # Projects page
+│   ├── skills/                   # Skills page
+│   ├── experience/               # Experience page
+│   ├── education/                # Education page
+│   ├── certifications/           # Certifications page
+│   ├── participation/            # Participation page
 │   ├── contact/                  # Contact page
 │   ├── resume/                   # Resume page
+│   ├── offline/                  # Offline page (PWA)
 │   └── ...                       # Other public pages
 ├── components/                    # React components
 │   ├── ui/                       # UI components (shadcn/ui)
