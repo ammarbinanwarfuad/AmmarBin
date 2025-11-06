@@ -4,7 +4,8 @@ import { Footer } from "@/components/Footer";
 import { getProfile } from "@/lib/server/data";
 import { AboutContent } from "@/components/AboutContent";
 
-export const dynamic = 'force-dynamic'; // No caching
+// ISR: Revalidate every hour for automatic updates
+export const revalidate = 3600;
 
 export default async function AboutPage() {
   const profile = await getProfile();

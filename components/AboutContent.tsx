@@ -1,7 +1,5 @@
-"use client";
-
 import Link from "next/link";
-import { motion } from "framer-motion";
+import { LazyMotionDiv } from "@/components/LazyMotion";
 import { Button } from "@/components/ui/button";
 import { Download, MapPin, Languages, Heart } from "lucide-react";
 
@@ -22,9 +20,10 @@ interface AboutContentProps {
   profile: ProfileData;
 }
 
+// SSR AboutContent component (for public pages)
 export function AboutContent({ profile }: AboutContentProps) {
   return (
-    <motion.div
+    <LazyMotionDiv
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
@@ -103,7 +102,6 @@ export function AboutContent({ profile }: AboutContentProps) {
           </Link>
         )}
       </div>
-    </motion.div>
+    </LazyMotionDiv>
   );
 }
-
