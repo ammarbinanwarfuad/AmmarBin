@@ -9,8 +9,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { History, Filter, X } from "lucide-react";
 import { format } from "date-fns";
-import useSWR from 'swr';
-import { fetcher } from '@/lib/fetcher';
+import { useActivity } from '@/lib/hooks/useAdminData';
 
 interface Activity {
   _id: string;
@@ -34,18 +33,13 @@ export default function AdminActivityPage() {
     }
   }, [status, router]);
 
-  const queryParams = new URLSearchParams();
-  if (entityFilter) queryParams.set("entityType", entityFilter);
-  if (actionFilter) queryParams.set("action", actionFilter);
-
-  const { data, isLoading, error } = useSWR(
-    `/api/admin/activity?${queryParams.toString()}`,
-    fetcher
+  const { activities, total, isLoading, error } = useActivity(
+    entityFilter || undefined,
+    actionFilter || undefined
   );
 
-  const activities: Activity[] = data?.activities || [];
-  const entityTypes = Array.from(new Set(activities.map((a) => a.entityType)));
-  const actions = Array.from(new Set(activities.map((a) => a.action)));
+  const entityTypes = Array.from(new Set(activities.map((a: Activity) => a.entityType))) as string[];
+  const actions = Array.from(new Set(activities.map((a: Activity) => a.action))) as string[];
 
   const getActionColor = (action: string) => {
     switch (action) {
@@ -147,20 +141,20 @@ export default function AdminActivityPage() {
           <CardHeader>
             <CardTitle>Recent Activities</CardTitle>
             <CardDescription>
-              {data?.total || 0} total activities
+              {total} total activities
             </CardDescription>
           </CardHeader>
           <CardContent>
             {error ? (
               <p className="text-destructive">Failed to load activities</p>
-            ) : activities.length === 0 ? (
+            ) : (activities as Activity[]).length === 0 ? (
               <div className="text-center py-12">
                 <History className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
                 <p className="text-muted-foreground">No activities found</p>
               </div>
             ) : (
               <div className="space-y-4">
-                {activities.map((activity) => (
+                {(activities as Activity[]).map((activity) => (
                   <div
                     key={activity._id}
                     className="flex items-start gap-4 p-4 border rounded-lg hover:bg-accent/50 transition-colors"
