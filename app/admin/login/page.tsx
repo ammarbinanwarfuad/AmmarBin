@@ -46,17 +46,26 @@ export default function AdminLoginPage() {
     setIsSubmitting(true);
     
     try {
-      // Let NextAuth handle everything securely - server-side redirect
       const result = await signIn("credentials", {
         email: data.email,
         password: data.password,
-        redirect: true,  // ✅ NextAuth handles redirect securely
-        callbackUrl: "/admin/dashboard",
+        redirect: false,  // Handle redirect manually for better control
       });
 
-      // This code only runs if redirect fails or is prevented
       if (result?.error) {
         toast.error(result.error || "Invalid credentials");
+        setIsSubmitting(false);
+        return;
+      }
+
+      if (result?.ok) {
+        // Wait a moment for cookie to be set, then redirect
+        await new Promise(resolve => setTimeout(resolve, 500));
+        
+        // Use window.location.href for full page reload to ensure middleware sees session
+        window.location.href = "/admin/dashboard";
+      } else {
+        toast.error("Login failed. Please try again.");
         setIsSubmitting(false);
       }
     } catch (error) {

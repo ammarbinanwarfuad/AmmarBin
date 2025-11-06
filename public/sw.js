@@ -95,6 +95,13 @@ function isAuthRequest(url) {
          url.pathname.startsWith('/admin/');
 }
 
+// Helper: Check if URL is a Next.js static asset (should never be cached by SW)
+function isNextStaticAsset(url) {
+  return url.pathname.startsWith('/_next/static/') ||
+         url.pathname.startsWith('/_next/image') ||
+         url.pathname.startsWith('/_next/webpack');
+}
+
 // Fetch event - implement caching strategies
 self.addEventListener('fetch', (event) => {
   const { request } = event;
@@ -105,9 +112,9 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // ⚠️ CRITICAL: Skip ALL authentication and admin-related requests - never cache them
-  if (isAuthRequest(url)) {
-    // Always fetch from network, never cache auth requests
+  // ⚠️ CRITICAL: Skip ALL authentication, admin routes, and Next.js static assets
+  if (isAuthRequest(url) || isNextStaticAsset(url)) {
+    // Don't intercept - let browser handle these directly
     return;
   }
 
