@@ -1,7 +1,7 @@
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { getCertifications } from "@/lib/server/data";
-import { CertificationsGrid } from "@/components/CertificationsGrid";
+import { CertificationsGridWithFilter } from "@/components/CertificationsGridWithFilter";
 
 export const dynamic = 'force-dynamic'; // No caching
 
@@ -28,7 +28,7 @@ export default async function CertificationsPage() {
             </p>
           </div>
 
-          <CertificationsGrid
+          <CertificationsGridWithFilter
             certificates={certificates as Array<{
               _id: string;
               title: string;

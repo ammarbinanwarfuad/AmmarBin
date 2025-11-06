@@ -1,19 +1,9 @@
-"use client";
-
-import { useState } from "react";
 import { LazyMotionDiv } from "@/components/LazyMotion";
 import Image from "next/image";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import {
   Award,
   Calendar,
-  ExternalLink,
-  Download,
-  Search,
-  Filter,
-  TrendingUp,
   CheckCircle2,
   XCircle,
 } from "lucide-react";
@@ -44,7 +34,6 @@ interface Stats {
 interface CertificationsGridProps {
   certificates: Certificate[];
   stats: Stats;
-  categories: string[];
 }
 
 const categoryColors: string[] = [
@@ -60,30 +49,17 @@ const categoryColors: string[] = [
   "bg-indigo-500/10 text-indigo-600 dark:text-indigo-400",
 ];
 
-const getCategoryColor = (category: string, index: number) => {
+const getCategoryColor = (category: string, index: number): string => {
   return categoryColors[index % categoryColors.length];
 };
 
-export function CertificationsGrid({ certificates: initialCertificates, stats, categories }: CertificationsGridProps) {
-  const [searchTerm, setSearchTerm] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState("all");
+const isExpired = (expiryDate?: string): boolean => {
+  if (!expiryDate) return false;
+  return new Date(expiryDate) < new Date();
+};
 
-  // Client-side filtering
-  const filteredCertificates = initialCertificates.filter((cert) => {
-    const matchesCategory = selectedCategory === "all" || cert.category === selectedCategory;
-    const matchesSearch = !searchTerm || 
-      cert.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      cert.issuer.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      cert.description?.toLowerCase().includes(searchTerm.toLowerCase());
-    
-    return matchesCategory && matchesSearch;
-  });
-
-  const isExpired = (expiryDate?: string) => {
-    if (!expiryDate) return false;
-    return new Date(expiryDate) < new Date();
-  };
-
+// SSR CertificationsGrid component (for public pages)
+export function CertificationsGrid({ certificates, stats }: CertificationsGridProps) {
   return (
     <>
       {/* Stats Section */}
@@ -132,7 +108,7 @@ export function CertificationsGrid({ certificates: initialCertificates, stats, c
             <CardContent className="p-6">
               <div className="flex items-center gap-4">
                 <div className="p-3 bg-orange-500/10 rounded-lg">
-                  <TrendingUp className="h-6 w-6 text-orange-600" />
+                  <Award className="h-6 w-6 text-orange-600" />
                 </div>
                 <div>
                   <p className="text-sm text-muted-foreground">
@@ -148,63 +124,13 @@ export function CertificationsGrid({ certificates: initialCertificates, stats, c
         </LazyMotionDiv>
       )}
 
-      {/* Search and Filter Section */}
-      <LazyMotionDiv
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: 0.2 }}
-        className="mb-8 space-y-4"
-      >
-        {/* Search Bar */}
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input
-            type="text"
-            placeholder="Search certifications..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="pl-10"
-          />
-        </div>
-
-        {/* Category Filters */}
-        <div className="flex items-center gap-2 overflow-x-auto pb-2">
-          <Filter className="h-4 w-4 text-muted-foreground flex-shrink-0" />
-          <Button
-            variant={selectedCategory === "all" ? "default" : "outline"}
-            size="sm"
-            onClick={() => setSelectedCategory("all")}
-            className="whitespace-nowrap"
-          >
-            All
-            <span className="ml-2 text-xs opacity-70">
-              ({stats.total})
-            </span>
-          </Button>
-          {categories.map((category) => (
-            <Button
-              key={category}
-              variant={selectedCategory === category ? "default" : "outline"}
-              size="sm"
-              onClick={() => setSelectedCategory(category)}
-              className="whitespace-nowrap"
-            >
-              {category}
-              <span className="ml-2 text-xs opacity-70">
-                ({stats.categories.find((c) => c._id === category)?.count || 0})
-              </span>
-            </Button>
-          ))}
-        </div>
-      </LazyMotionDiv>
-
       {/* Certificates Grid */}
-      {filteredCertificates.length === 0 ? (
+      {certificates.length === 0 ? (
         <Card>
           <CardContent className="text-center py-12">
             <Award className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
             <p className="text-muted-foreground">
-              No certifications found matching your criteria
+              No certifications found.
             </p>
           </CardContent>
         </Card>
@@ -215,7 +141,7 @@ export function CertificationsGrid({ certificates: initialCertificates, stats, c
           transition={{ duration: 0.5, delay: 0.3 }}
           className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
         >
-          {filteredCertificates.map((cert, index) => (
+          {certificates.map((cert, index) => (
             <LazyMotionDiv
               key={cert._id}
               initial={{ opacity: 0, y: 20 }}
@@ -324,32 +250,6 @@ export function CertificationsGrid({ certificates: initialCertificates, stats, c
                       <span className="font-medium">ID:</span> {cert.credentialId}
                     </div>
                   )}
-
-                  {/* Action Buttons */}
-                  <div className="flex gap-2 pt-2">
-                    {cert.verificationUrl && (
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="flex-1"
-                        onClick={() => window.open(cert.verificationUrl, "_blank")}
-                      >
-                        <ExternalLink className="h-3 w-3 mr-1" />
-                        Verify
-                      </Button>
-                    )}
-                    {cert.certificateImage && (
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="flex-1"
-                        onClick={() => window.open(cert.certificateImage, "_blank")}
-                      >
-                        <Download className="h-3 w-3 mr-1" />
-                        Download
-                      </Button>
-                    )}
-                  </div>
                 </CardContent>
               </Card>
             </LazyMotionDiv>
@@ -359,4 +259,3 @@ export function CertificationsGrid({ certificates: initialCertificates, stats, c
     </>
   );
 }
-
