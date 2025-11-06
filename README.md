@@ -615,6 +615,7 @@ This project is private and proprietary. All rights reserved.
 
 ## 🙏 Acknowledgments
 
+- **Ammar Bin Anwar Fuad** - Project creator and developer
 - Next.js team for the amazing framework
 - Vercel for hosting and analytics
 - All open-source contributors whose packages made this possible
