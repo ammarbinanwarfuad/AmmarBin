@@ -580,8 +580,10 @@ The application can be deployed to any platform supporting Next.js:
 The application uses:
 - Next.js 16 with App Router
 - Webpack for bundling
-- Automatic sitemap generation
+- Automatic sitemap generation (next-sitemap)
 - Optimized production builds
+- Standalone output mode for reduced bundle size
+- Image optimization with AVIF and WebP formats
 
 ### Environment Variables
 
