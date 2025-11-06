@@ -2,7 +2,7 @@ import { Suspense } from "react";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { getProjects } from "@/lib/server/data";
-import { ProjectsGrid } from "@/components/ProjectsGrid";
+import { ProjectsGridWithFilter } from "@/components/ProjectsGridWithFilter";
 import { ProjectsSkeleton } from "@/components/ProjectsSkeleton";
 
 export const dynamic = 'force-dynamic'; // No caching
@@ -10,7 +10,7 @@ export const dynamic = 'force-dynamic'; // No caching
 // Async component for projects with streaming
 async function ProjectsSection() {
   const projects = await getProjects();
-  return <ProjectsGrid projects={projects} />;
+  return <ProjectsGridWithFilter projects={projects} />;
 }
 
 export default function ProjectsPage() {
