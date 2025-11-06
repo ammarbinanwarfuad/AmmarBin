@@ -20,7 +20,7 @@ type LoginFormData = z.infer<typeof loginSchema>;
 export default function AdminLoginPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const router = useRouter();
-  const { data: session, status } = useSession();
+  const { data: session, status, update } = useSession();
 
   // Redirect if already authenticated
   useEffect(() => {
@@ -59,44 +59,17 @@ export default function AdminLoginPage() {
       }
 
       if (result?.ok) {
+        // Update the session immediately
+        await update();
+        
+        // Small delay to ensure cookie is set
+        await new Promise(resolve => setTimeout(resolve, 100));
+        
         toast.success("Login successful! Redirecting...");
         
-        // Wait for session to be established by checking session endpoint
-        // Retry up to 5 times with increasing delays
-        let sessionEstablished = false;
-        for (let i = 0; i < 5; i++) {
-          await new Promise(resolve => setTimeout(resolve, 200 * (i + 1)));
-          
-          try {
-            const sessionResponse = await fetch("/api/auth/session", {
-              method: "GET",
-              credentials: "include",
-              cache: "no-store",
-              headers: {
-                "Cache-Control": "no-cache",
-              },
-            });
-            
-            const sessionData = await sessionResponse.json();
-            
-            if (sessionData?.user) {
-              sessionEstablished = true;
-              break;
-            }
-          } catch (err) {
-            console.error("Session check attempt", i + 1, "failed:", err);
-          }
-        }
-
-        if (sessionEstablished) {
-          // Use window.location.href for full page reload to ensure session cookie is read
-          // This ensures the middleware sees the session cookie
-          window.location.href = "/admin/dashboard";
-        } else {
-          // Fallback: still redirect but log warning
-          console.warn("Session verification failed, redirecting anyway");
-          window.location.href = "/admin/dashboard";
-        }
+        // Use window.location.href for full page reload to ensure session cookie is read
+        // This ensures the middleware sees the session cookie
+        window.location.href = "/admin/dashboard";
       } else {
         toast.error("Login failed. Please try again.");
         setIsSubmitting(false);
