@@ -10,8 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Clock, Play, Pause, Trash2, Plus, X, Loader2, CheckCircle, XCircle } from "lucide-react";
 import toast from "react-hot-toast";
 import { format } from "date-fns";
-import useSWR from 'swr';
-import { fetcher } from '@/lib/fetcher';
+import { useScheduledTasks } from '@/lib/hooks/useAdminData';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -58,8 +57,7 @@ export default function AdminScheduledTasksPage() {
     }
   }, [status, router]);
 
-  const { data, isLoading, mutate } = useSWR("/api/admin/scheduled-tasks", fetcher);
-  const tasks: ScheduledTask[] = data?.tasks || [];
+  const { tasks, isLoading, refresh } = useScheduledTasks();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -74,7 +72,7 @@ export default function AdminScheduledTasksPage() {
         toast.success("Task created successfully!");
         setShowForm(false);
         setFormData({ name: "", type: "github-sync", schedule: "daily" });
-        mutate();
+        refresh();
       } else {
         toast.error("Failed to create task");
       }
@@ -97,7 +95,7 @@ export default function AdminScheduledTasksPage() {
 
       if (response.ok) {
         toast.success(`Task ${!task.enabled ? "enabled" : "disabled"}`);
-        mutate();
+        refresh();
       } else {
         toast.error("Failed to update task");
       }
@@ -116,7 +114,7 @@ export default function AdminScheduledTasksPage() {
 
       if (response.ok) {
         toast.success("Task executed successfully!");
-        mutate();
+        refresh();
       } else {
         toast.error("Failed to execute task");
       }
@@ -136,7 +134,7 @@ export default function AdminScheduledTasksPage() {
 
       if (response.ok) {
         toast.success("Task deleted successfully!");
-        mutate();
+        refresh();
       } else {
         toast.error("Failed to delete task");
       }
@@ -233,7 +231,7 @@ export default function AdminScheduledTasksPage() {
 
         {/* Tasks List */}
         <div className="space-y-4">
-          {tasks.length === 0 ? (
+            {(tasks as ScheduledTask[]).length === 0 ? (
             <Card>
               <CardContent className="text-center py-12">
                 <Clock className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
@@ -241,7 +239,7 @@ export default function AdminScheduledTasksPage() {
               </CardContent>
             </Card>
           ) : (
-            tasks.map((task) => (
+            tasks.map((task: ScheduledTask) => (
               <Card key={task._id}>
                 <CardHeader>
                   <div className="flex justify-between items-start">
