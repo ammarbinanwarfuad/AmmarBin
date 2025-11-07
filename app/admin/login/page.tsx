@@ -46,18 +46,21 @@ export default function AdminLoginPage() {
     setIsSubmitting(true);
     
     try {
-      // Use NextAuth's built-in redirect functionality, similar to logout
+      // Change redirect to false to handle errors properly
       const result = await signIn("credentials", {
         email: data.email,
         password: data.password,
-        redirect: true,
+        redirect: false, // Changed from true to false for better error handling
         callbackUrl: "/admin/dashboard",
       });
 
-      // If redirect is true, this code won't execute, but handle errors if redirect fails
       if (result?.error) {
         toast.error(result.error || "Invalid credentials");
         setIsSubmitting(false);
+      } else if (result?.ok) {
+        // Manually redirect on success
+        router.push("/admin/dashboard");
+        router.refresh(); // Refresh to update session
       }
     } catch (error) {
       console.error("Login error:", error);
