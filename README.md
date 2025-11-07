@@ -555,18 +555,99 @@ All admin APIs require authentication and are prefixed with `/api/admin/`:
 
 ## 🚢 Deployment
 
+### Pre-Deployment Checklist
+
+Before deploying to production, ensure you have completed the following:
+
+#### ✅ Environment Variables
+- [ ] `MONGODB_URI` - MongoDB connection string (Atlas recommended for production)
+- [ ] `NEXTAUTH_URL` - Your production URL (e.g., `https://ammarbin.vercel.app`)
+- [ ] `NEXTAUTH_SECRET` - Secure random secret (generate with `openssl rand -base64 32`)
+- [ ] `CLOUDINARY_CLOUD_NAME` - Cloudinary cloud name
+- [ ] `CLOUDINARY_API_KEY` - Cloudinary API key
+- [ ] `CLOUDINARY_API_SECRET` - Cloudinary API secret
+- [ ] `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASSWORD`, `SMTP_FROM` (optional - for contact form emails)
+- [ ] `GITHUB_PAT`, `GITHUB_USERNAME` (optional - for GitHub project sync)
+- [ ] `VERCEL_TOKEN`, `VERCEL_PROJECT_ID` (optional - for enhanced cache invalidation)
+
+#### ✅ Database Setup
+- [ ] MongoDB Atlas cluster created and configured
+- [ ] Database connection string tested
+- [ ] Network access configured (IP whitelist or 0.0.0.0/0 for Vercel)
+- [ ] Database indexes created (automatic on first run)
+- [ ] Initial admin user created (use seed script or create manually)
+
+#### ✅ Security
+- [ ] All environment variables are set in production
+- [ ] `NEXTAUTH_SECRET` is unique and secure
+- [ ] `NEXTAUTH_URL` matches your production domain exactly
+- [ ] MongoDB connection string uses strong credentials
+- [ ] Cloudinary credentials are secure
+- [ ] Admin account has strong password
+
+#### ✅ Testing
+- [ ] Test login functionality on production
+- [ ] Test contact form submission
+- [ ] Test admin dashboard access
+- [ ] Test API endpoints
+- [ ] Test health check endpoint (`/api/health`)
+- [ ] Verify all pages load correctly
+- [ ] Test on mobile devices
+
+#### ✅ Performance
+- [ ] Build completes without errors (`npm run build`)
+- [ ] No console errors in production
+- [ ] Images are optimized
+- [ ] Database queries are performing well
+- [ ] Check Vercel Function Logs for any errors
+
 ### Vercel (Recommended)
 
-1. Push your code to GitHub
-2. Import the repository in Vercel
-3. Add environment variables in Vercel dashboard
-4. Deploy!
+1. **Push your code to GitHub**
+   ```bash
+   git add .
+   git commit -m "Ready for production deployment"
+   git push origin main
+   ```
+
+2. **Import the repository in Vercel**
+   - Go to [Vercel Dashboard](https://vercel.com/dashboard)
+   - Click "Add New Project"
+   - Import your GitHub repository
+
+3. **Configure Project Settings**
+   - Framework Preset: Next.js (auto-detected)
+   - Root Directory: `./` (default)
+   - Build Command: `npm run build` (default)
+   - Output Directory: `.next` (default)
+   - Install Command: `npm install` (default)
+
+4. **Add Environment Variables**
+   - Go to Project → Settings → Environment Variables
+   - Add all required variables (see checklist above)
+   - Ensure variables are set for "Production" environment
+   - **Important**: After adding variables, redeploy the project
+
+5. **Deploy!**
+   - Click "Deploy"
+   - Wait for build to complete
+   - Test your production site
+
+6. **Post-Deployment Verification**
+   - [ ] Visit your production URL
+   - [ ] Test admin login at `/admin/login`
+   - [ ] Check health endpoint: `https://your-domain.vercel.app/api/health`
+   - [ ] Verify all pages load correctly
+   - [ ] Test contact form
+   - [ ] Check Vercel Function Logs for any errors
 
 Vercel automatically:
 - Detects Next.js
 - Optimizes builds
 - Provides CDN
 - Enables analytics
+- Handles SSL certificates
+- Provides edge network
 
 ### Other Platforms
 
