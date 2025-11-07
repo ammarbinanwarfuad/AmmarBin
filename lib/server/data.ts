@@ -125,7 +125,8 @@ export const getBlogs = async (source?: string) => {
       externalBlogs = await ExternalBlog.find(query)
         .select('title slug excerpt featuredImage publishedDate readTime tags source url')
         .sort({ publishedDate: -1 })
-        .lean();
+        .lean()
+        .maxTimeMS(500); // Timeout for faster TTFB
     }
 
     // Combine and add source field
@@ -155,7 +156,9 @@ export const getBlogBySlug = async (slug: string) => {
   try {
     await connectDB();
     const Blog = (await import("@/models/Blog")).default;
-    const blog = await Blog.findOne({ slug }).lean();
+    const blog = await Blog.findOne({ slug })
+      .lean()
+      .maxTimeMS(500); // Timeout for faster TTFB
     
     if (!blog) {
       return null;
@@ -178,7 +181,7 @@ export const getExperiences = async () => {
       .select('company companyLogo role startDate endDate current location description responsibilities skills')
       .sort({ startDate: -1 })
       .lean()
-      .maxTimeMS(500);
+      .maxTimeMS(5000); // 5 second timeout
     const result = JSON.parse(JSON.stringify(experiences));
     return result;
   } catch (error) {
@@ -195,7 +198,8 @@ export const getParticipations = async () => {
     const participations = await Participation.find({})
       .select('title organization role startDate endDate current location description impact images')
       .sort({ startDate: -1 })
-      .lean();
+      .lean()
+      .maxTimeMS(5000); // 5 second timeout
     return JSON.parse(JSON.stringify(participations));
   } catch (error) {
     console.error("Error fetching participations:", error);
@@ -212,7 +216,7 @@ export const getEducation = async () => {
       .select('institution institutionLogo degree field startDate endDate current grade location description achievements')
       .sort({ startDate: -1 })
       .lean()
-      .maxTimeMS(500);
+      .maxTimeMS(5000); // 5 second timeout
     const result = JSON.parse(JSON.stringify(education));
     return result;
   } catch (error) {
@@ -230,7 +234,7 @@ export const getSkills = async () => {
       .select('name category proficiency icon')
       .sort({ category: 1, proficiency: -1 })
       .lean()
-      .maxTimeMS(500);
+      .maxTimeMS(5000); // 5 second timeout
     
     const result = JSON.parse(JSON.stringify(skills));
     return result;
@@ -269,13 +273,14 @@ export const getCertifications = async (filters?: { category?: string; search?: 
       .select('title issuer category issueDate expiryDate credentialId verificationUrl certificateImage skills description featured')
       .sort({ issueDate: -1 })
       .lean()
-      .maxTimeMS(500);
+      .maxTimeMS(5000); // 5 second timeout
     
     // Calculate stats - only count published certificates
     const publishedQuery: Record<string, unknown> = { published: true };
     const allCertificates = await Certificate.find(publishedQuery)
       .select('category expiryDate published')
-      .lean();
+      .lean()
+      .maxTimeMS(5000); // 5 second timeout
     const now = new Date();
     // Active: published certificates with no expiry date OR expiry date in the future
     const active = allCertificates.filter(c => !c.expiryDate || new Date(c.expiryDate as Date) > now).length;
