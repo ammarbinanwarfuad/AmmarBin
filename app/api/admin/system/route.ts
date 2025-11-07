@@ -1,11 +1,21 @@
 import { NextResponse } from "next/server";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
 import { connectDB } from "@/lib/db";
 
 // ⚡ Performance: Cache system status for 30 seconds
-
+// NOTE: System status is protected to prevent information disclosure
+// It reveals environment variable presence and database connectivity
 
 export async function GET() {
   try {
+    // Check authentication - system status should be protected
+    // to prevent information disclosure about environment setup
+    const session = await getServerSession(authOptions);
+    if (!session) {
+      console.warn("[Admin API] Unauthorized access attempt to /api/admin/system");
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
     const started = Date.now();
     await connectDB();
     const pingMs = Date.now() - started;
@@ -25,7 +35,8 @@ export async function GET() {
         },
       }
     );
-  } catch {
+  } catch (error) {
+    console.error("[Admin API] Error in /api/admin/system:", error);
     return NextResponse.json({ error: 'System status failed' }, { status: 500 });
   }
 }
