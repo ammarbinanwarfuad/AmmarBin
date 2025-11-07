@@ -1,4 +1,6 @@
 import { NextResponse } from "next/server";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
 import { connectDB } from "@/lib/db";
 import { cachedFetch } from "@/lib/cache";
 
@@ -33,6 +35,13 @@ async function check(url?: string | null): Promise<{ url: string | null; ok: boo
 
 export async function GET() {
   try {
+    // Check authentication - admin routes require valid session
+    const session = await getServerSession(authOptions);
+    if (!session) {
+      console.warn("[Admin API] Unauthorized access attempt to /api/admin/link-check");
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
     // Cache link check results for 10 minutes (links don't change frequently)
     const data = await cachedFetch(
       'admin:link-check',
@@ -75,7 +84,8 @@ export async function GET() {
         },
       }
     );
-  } catch {
+  } catch (error) {
+    console.error("[Admin API] Error in /api/admin/link-check:", error);
     return NextResponse.json({ error: 'Failed to check links' }, { status: 500 });
   }
 }
