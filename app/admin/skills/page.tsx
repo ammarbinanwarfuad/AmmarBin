@@ -111,7 +111,7 @@ function normalizeColorToHex(color: string): string | null {
           }).join('')}`;
         }
       }
-    } catch (e) {
+    } catch {
       // Fall through to return null
     }
   }
@@ -176,23 +176,16 @@ export default function AdminSkillsPage() {
     category: "",
   });
   
-  // Get unique categories from existing skills
-  const existingCategories = useMemo(() => {
-    if (!skills || skills.length === 0) return [];
-    return Array.from(
-      new Set(skills.map((skill: Skill) => skill.category).filter(Boolean))
-    ).sort() as string[];
-  }, [skills]);
 
   // Define the desired order of categories (same as public panel)
-  const categoryOrder = [
+  const categoryOrder = useMemo(() => [
     "Programming Languages",
     "Frontend Development",
     "Backend Development",
     "CMS",
     "Tools & Technologies",
     "Other Skills"
-  ];
+  ], []);
 
   // Sort categories according to the specified order (for dropdown)
   const sortedCategoriesForDropdown = useMemo(() => {
@@ -216,7 +209,7 @@ export default function AdminSkillsPage() {
     }
 
     return sorted;
-  }, [skills, formData.category]);
+  }, [skills, formData.category, categoryOrder]);
 
   // Sort categories according to the specified order (for display)
   const sortedCategories = useMemo(() => {
@@ -233,7 +226,7 @@ export default function AdminSkillsPage() {
         !categoryOrder.some(ordered => ordered.toLowerCase() === cat.toLowerCase())
       )
     );
-  }, [skills]);
+  }, [skills, categoryOrder]);
 
   // Helper function to get skills by category
   const getSkillsByCategory = (category: string): Skill[] => {
