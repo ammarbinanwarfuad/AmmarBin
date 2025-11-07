@@ -51,7 +51,6 @@ export async function fetchAdminData(url: string): Promise<unknown> {
     // For server-side fetches, use relative URLs to ensure cookies are properly handled
     // When using absolute URLs, Next.js makes external HTTP requests which may not
     // properly forward cookies. Using relative URLs ensures the request stays internal.
-    const fetchUrl = url.startsWith('http') ? url : url;
     
     // Create AbortController for timeout handling
     const controller = new AbortController();

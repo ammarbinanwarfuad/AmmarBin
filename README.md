@@ -783,55 +783,28 @@ const data = await fetch('/api/admin/analytics');
 Before deploying, run these verification scripts:
 
 ```bash
-# Verify all code tasks are complete
-npm run complete:tasks
-
 # Verify environment variables are set correctly
 npm run verify:env
 
 # Verify all admin routes are protected
 npm run verify:routes
 
-# Test authentication endpoints
-npm run test:auth
-
-# Run comprehensive test suite
-npm run test:comprehensive
-
-# Run all pre-deployment checks
+# Run all pre-deployment checks (includes env, routes, and build verification)
 npm run predeploy
 ```
 
-### Testing Guide
+### Testing
 
-See [TESTING_GUIDE.md](./TESTING_GUIDE.md) for comprehensive testing instructions, including:
-- First login testing
-- Logout functionality
-- Subsequent login testing (critical)
-- Error handling scenarios
-- Session persistence
+Before deploying, run the pre-deployment checks:
 
-### Deployment Checklist
+```bash
+npm run predeploy
+```
 
-See [DEPLOYMENT_CHECKLIST.md](./DEPLOYMENT_CHECKLIST.md) for a complete deployment checklist.
-
-### Manual Tasks Guide
-
-See [MANUAL_TASKS_GUIDE.md](./MANUAL_TASKS_GUIDE.md) for step-by-step instructions to complete the remaining manual tasks.
-
-### Task Completion Status
-
-**Current Status:** 47/88 tasks complete (53%)
-- ✅ **Automated Tasks:** 47/47 (100%)
-- ⏳ **Manual Tasks:** 0/41 (0%)
-
-**Quick Complete:** See [QUICK_COMPLETE_GUIDE.md](./QUICK_COMPLETE_GUIDE.md) to finish remaining tasks in ~35 minutes.
-
-**Documentation:**
-- [ALL_TASKS_COMPLETE.md](./ALL_TASKS_COMPLETE.md) - Complete task status
-- [TASK_COMPLETION_CHECKLIST.md](./TASK_COMPLETION_CHECKLIST.md) - Progress tracking
-- [QUICK_COMPLETE_GUIDE.md](./QUICK_COMPLETE_GUIDE.md) - Fast track completion (35 min)
-- [COMPLETE_ALL_TASKS.md](./COMPLETE_ALL_TASKS.md) - Complete task breakdown
+This will verify:
+- Required files exist
+- Environment variables are set correctly
+- Route protection is properly configured
 
 ## 📞 Support
 
