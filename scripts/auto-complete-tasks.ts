@@ -416,7 +416,7 @@ tasks.push(
 );
 
 // Manual tasks that can't be automated
-const manualTasks = [
+const manualTasks: Task[] = [
   // Browser testing tasks (4.1-4.4)
   ...Array.from({ length: 6 }, (_, i) => ({
     id: `4.1.${i + 1}`,
@@ -455,7 +455,7 @@ const manualTasks = [
     id: '6.1.2',
     category: 'Deployment',
     name: 'All environment variables set in Vercel',
-    status: 'manual',
+    status: 'manual' as const,
     verification: () => 'Manual check required - see Vercel Dashboard',
     note: 'Check Vercel Dashboard → Settings → Environment Variables',
   },
@@ -463,7 +463,7 @@ const manualTasks = [
     id: '6.1.3',
     category: 'Deployment',
     name: 'No console errors in browser',
-    status: 'manual',
+    status: 'manual' as const,
     verification: () => 'Manual testing required',
     note: 'Check browser console after deployment',
   },
@@ -471,7 +471,7 @@ const manualTasks = [
     id: '6.1.4',
     category: 'Deployment',
     name: 'No 401 errors in Network tab',
-    status: 'manual',
+    status: 'manual' as const,
     verification: () => 'Manual testing required',
     note: 'Check browser Network tab after deployment',
   },
@@ -479,7 +479,7 @@ const manualTasks = [
     id: '6.1.5',
     category: 'Deployment',
     name: 'Login/logout flow works consistently',
-    status: 'manual',
+    status: 'manual' as const,
     verification: () => 'Manual testing required',
     note: 'Test multiple login/logout cycles',
   },
