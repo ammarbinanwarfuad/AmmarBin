@@ -15,7 +15,7 @@ export default function AdminLoginPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isRedirecting, setIsRedirecting] = useState(false);
   const router = useRouter();
-  const { data: session, status } = useSession();
+  const { data: session, status, update } = useSession();
 
   // Redirect if already authenticated (but not if we're in the process of logging in)
   // CRITICAL: Use window.location for hard redirect to bypass service worker cache
@@ -62,9 +62,11 @@ export default function AdminLoginPage() {
         // We need to ensure the session is fully established before redirecting
         
         // Update the session in the client to ensure it's in sync
+        // Note: update is from useSession hook, may not be available immediately after login
         try {
-          const { update } = await import("next-auth/react");
-          await update();
+          if (update) {
+            await update();
+          }
         } catch (error) {
           console.warn("[Login] Session update error (continuing anyway):", error);
         }
