@@ -1,10 +1,18 @@
 import { NextResponse } from "next/server";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
 import { connectDB } from "@/lib/db";
 import { fetchGitHubRepos } from "@/lib/github";
 import { cachedFetch } from "@/lib/cache";
 
 export async function GET() {
   try {
+    // Check authentication - admin routes require valid session
+    const session = await getServerSession(authOptions);
+    if (!session) {
+      console.warn("[Admin API] Unauthorized access attempt to /api/admin/recent");
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
     // Cache recent data for 2 minutes (changes frequently)
     const data = await cachedFetch(
       'admin:recent',
@@ -45,7 +53,19 @@ export async function GET() {
         },
       }
     );
-  } catch {
+
+    return NextResponse.json(
+      data,
+      {
+        headers: {
+          'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
+          'Pragma': 'no-cache',
+          'Expires': '0',
+        },
+      }
+    );
+  } catch (error) {
+    console.error("[Admin API] Error in /api/admin/recent:", error);
     return NextResponse.json({ error: "Failed to load recent" }, { status: 500 });
   }
 }
