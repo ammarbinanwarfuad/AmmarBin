@@ -5,6 +5,20 @@
  */
 
 import { preWarmConnection } from './db';
+import { validateEnv } from './env-validation';
+
+// Validate environment variables on module load
+if (typeof window === 'undefined') {
+  try {
+    validateEnv();
+  } catch (error) {
+    console.error('[ENV] Environment validation failed:', error);
+    // In production, this should fail fast
+    if (process.env.NODE_ENV === 'production') {
+      throw error;
+    }
+  }
+}
 
 /**
  * Initialize database connection early
