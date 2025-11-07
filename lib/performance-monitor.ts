@@ -100,3 +100,26 @@ export function initPerformanceMonitoring() {
   });
 }
 
+/**
+ * Wrap async functions with performance monitoring
+ * Tracks execution time and logs slow operations
+ */
+export async function withPerformanceMonitoring<T>(
+  name: string,
+  fn: () => Promise<T>
+): Promise<T> {
+  const start = Date.now();
+  try {
+    const result = await fn();
+    const duration = Date.now() - start;
+    if (duration > 1000) {
+      console.warn(`[PERF] ${name} took ${duration}ms`);
+    }
+    return result;
+  } catch (error) {
+    const duration = Date.now() - start;
+    console.error(`[PERF] ${name} failed after ${duration}ms:`, error);
+    throw error;
+  }
+}
+
