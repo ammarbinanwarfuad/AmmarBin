@@ -23,33 +23,65 @@ export async function fetchAdminData(url: string): Promise<unknown> {
     const headersList = await headers();
     const cookieHeader = headersList.get('cookie') || '';
     
-    // Log cookie status in development for debugging
+    // Log cookie status for debugging (in both dev and production for troubleshooting)
+    const hasCookies = cookieHeader.length > 0;
+    const cookieCount = cookieHeader.split(';').filter(c => c.trim()).length;
+    // Check for session cookie - NextAuth uses different names in dev vs production
+    // In production with secure:true, it might use __Secure- prefix or __Host- prefix
+    const hasSessionCookie = cookieHeader.includes('next-auth.session-token') 
+      || cookieHeader.includes('__Secure-next-auth.session-token')
+      || cookieHeader.includes('__Host-next-auth.session-token')
+      || cookieHeader.match(/next-auth\.session-token[^;]*/); // Match any variant
+    
     if (isDevelopment) {
-      const hasCookies = cookieHeader.length > 0;
       if (hasCookies) {
-        console.log(`[Admin Fetch] ✅ Cookies found for ${url} (${cookieHeader.split(';').length} cookie(s))`);
+        console.log(`[Admin Fetch] ✅ Cookies found for ${url} (${cookieCount} cookie(s), session: ${hasSessionCookie ? 'YES' : 'NO'})`);
       } else {
         console.warn(`[Admin Fetch] ⚠️  No cookies found for ${url} - authentication may fail`);
       }
+    } else {
+      // In production, log warnings if cookies are missing (for debugging issues)
+      if (!hasCookies) {
+        console.warn(`[Admin Fetch] ⚠️  No cookies found for ${url}`);
+      } else if (!hasSessionCookie) {
+        console.warn(`[Admin Fetch] ⚠️  Cookies found but no session cookie for ${url}`);
+      }
     }
     
-    // Determine base URL for API calls
-    // Priority: NEXTAUTH_URL > VERCEL_URL > localhost (dev)
-    const baseUrl = process.env.NEXTAUTH_URL 
-      || (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : null)
-      || 'http://localhost:3000';
+    // For server-side fetches, use relative URLs to ensure cookies are properly handled
+    // When using absolute URLs, Next.js makes external HTTP requests which may not
+    // properly forward cookies. Using relative URLs ensures the request stays internal.
+    const fetchUrl = url.startsWith('http') ? url : url;
     
     // Create AbortController for timeout handling
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
     
     try {
-      const response = await fetch(`${baseUrl}${url}`, {
+      // For server-side internal API calls, we need to construct the full URL
+      // but use the same protocol/host as the incoming request
+      let fullUrl: string;
+      
+      if (url.startsWith('http')) {
+        // Already a full URL
+        fullUrl = url;
+      } else {
+        // For internal API calls, try to use the same origin
+        // In production, use NEXTAUTH_URL; in dev, use localhost
+        const baseUrl = process.env.NEXTAUTH_URL 
+          || (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : null)
+          || 'http://localhost:3000';
+        fullUrl = `${baseUrl}${url}`;
+      }
+      
+      const response = await fetch(fullUrl, {
         cache: 'no-store', // Always fetch fresh data
         signal: controller.signal,
         headers: {
           'Cache-Control': 'no-cache',
           'Cookie': cookieHeader, // ✅ Critical: Pass cookies for authentication
+          // Also forward other important headers
+          'User-Agent': headersList.get('user-agent') || 'Next.js Server',
         },
       });
       
@@ -68,9 +100,16 @@ export async function fetchAdminData(url: string): Promise<unknown> {
         };
         
         if (response.status === 401) {
-          console.warn(`[Admin Fetch] 🔒 Unauthorized (401) for ${url}`, errorContext);
-          if (isDevelopment && !cookieHeader) {
+          console.warn(`[Admin Fetch] 🔒 Unauthorized (401) for ${url}`, {
+            ...errorContext,
+            cookieCount,
+            hasSessionCookie,
+            cookiePreview: cookieHeader.substring(0, 100), // First 100 chars for debugging
+          });
+          if (!cookieHeader) {
             console.warn(`[Admin Fetch] 💡 Hint: No cookies were passed. Check if session is valid.`);
+          } else if (!hasSessionCookie) {
+            console.warn(`[Admin Fetch] 💡 Hint: Cookies present but no session cookie. Session may have expired.`);
           }
         } else {
           console.warn(`[Admin Fetch] ❌ Failed to fetch ${url}: ${response.status} ${response.statusText} (${duration}ms)`);

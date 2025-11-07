@@ -45,14 +45,28 @@ export default function AdminLoginPage() {
 
       if (result?.error) {
         toast.error(result.error || "Invalid credentials");
+        setIsSubmitting(false);
       } else if (result?.ok) {
-        router.push("/admin/dashboard");
-        router.refresh();
+        // Show success message
+        toast.success("Login successful! Redirecting...");
+        
+        // CRITICAL FIX: Wait for session cookie to be set by NextAuth
+        // NextAuth sets cookies via Set-Cookie header in the response
+        // We need to wait for the browser to process the Set-Cookie header
+        // before navigating to ensure the session is established
+        await new Promise(resolve => setTimeout(resolve, 800));
+        
+        // Use window.location.href for a hard refresh
+        // This ensures:
+        // 1. Session cookie is fully set before navigation
+        // 2. Full page reload with all cookies properly established
+        // 3. Server Components receive the session cookie in request headers
+        // 4. Internal API calls can properly authenticate
+        window.location.href = "/admin/dashboard";
       }
     } catch (error) {
       console.error("Login error:", error);
       toast.error("An error occurred. Please try again.");
-    } finally {
       setIsSubmitting(false);
     }
   };

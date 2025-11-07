@@ -460,6 +460,22 @@ This application is heavily optimized for performance:
 
 ## 🎛 Admin Dashboard
 
+### Authentication & Security
+
+The admin dashboard is protected by NextAuth.js authentication. All admin routes (`/admin/*`) and API endpoints (`/api/admin/*`) require a valid session.
+
+**Key Features:**
+- Session-based authentication with JWT strategy
+- Automatic session expiration (2 hours default)
+- Rate limiting on login attempts (5 attempts per 15 minutes)
+- Secure password hashing with bcrypt
+- Cookie-based session management
+
+**Server-Side Fetch Pattern:**
+When Server Components need to fetch data from authenticated API routes, they must manually pass cookies because Next.js App Router doesn't automatically forward them. The `fetchAdminData` utility in `lib/admin/fetch-with-auth.ts` handles this automatically.
+
+**See [Troubleshooting](#-troubleshooting) section for common authentication issues.**
+
 ### Access
 
 Navigate to `/admin/login` and log in with your admin credentials.
@@ -505,14 +521,16 @@ Navigate to `/admin/login` and log in with your admin credentials.
 - **Activity Log**: Track all admin actions
 - **Settings**: System and profile settings
 
-### Security
+### Security Details
 
 - Password hashing with bcrypt
-- Rate limiting on login attempts
+- Session-based authentication (JWT)
+- Rate limiting on login attempts (5 attempts per 15 minutes)
+- All admin API routes protected with authentication checks
+- Cookie-based session management with secure flags
 - Session management with NextAuth
-- Protected API routes
 - CSRF protection
-- Secure headers
+- Secure headers (HSTS, X-Frame-Options, X-Content-Type-Options, etc.)
 
 ## 📡 API Documentation
 
@@ -587,9 +605,11 @@ Before deploying to production, ensure you have completed the following:
 
 #### ✅ Testing
 - [ ] Test login functionality on production
+- [ ] Test logout functionality
+- [ ] Test subsequent login after logout (critical - verify cookie passing works)
 - [ ] Test contact form submission
 - [ ] Test admin dashboard access
-- [ ] Test API endpoints
+- [ ] Test API endpoints (verify no 401 errors)
 - [ ] Test health check endpoint (`/api/health`)
 - [ ] Verify all pages load correctly
 - [ ] Test on mobile devices
@@ -711,6 +731,113 @@ The application includes an advanced cache invalidation system that ensures cont
 - **Optional Vercel Integration**: Enhanced cache purging with VERCEL_TOKEN and VERCEL_PROJECT_ID
 
 See [Environment Variables](#environment-variables) section for Vercel cache setup instructions.
+
+## 🔧 Troubleshooting
+
+### Admin Login Issues
+
+#### Problem: Login works initially but fails after logout and re-login
+
+**Solution:** This was a known issue with Next.js App Router Server Components not automatically forwarding cookies to internal API routes. This has been fixed by:
+
+1. **Cookie Passing Utility**: Created `lib/admin/fetch-with-auth.ts` that manually passes cookies from request headers to internal API calls
+2. **Protected Routes**: All admin API routes now properly check authentication
+3. **Error Handling**: Enhanced error handling with user-friendly messages
+
+**How it works:**
+- Server Components use `headers()` from `next/headers` to get incoming request cookies
+- Cookies are manually passed to fetch requests via the `Cookie` header
+- API routes verify authentication using `getServerSession(authOptions)`
+
+**Verification:**
+- Check browser Network tab - no 401 errors on `/api/admin/*` routes
+- Verify cookies are being passed (check in development console logs)
+- Test multiple login/logout cycles to ensure consistency
+
+#### Problem: 401 Unauthorized errors on admin dashboard
+
+**Possible causes:**
+1. **Missing Environment Variables**: Ensure `NEXTAUTH_URL` and `NEXTAUTH_SECRET` are set
+2. **Cookie Issues**: Check if cookies are enabled in browser
+3. **Session Expired**: Session may have expired (default: 2 hours)
+
+**Solution:**
+- Verify environment variables in Vercel dashboard
+- Clear browser cookies and try logging in again
+- Check Vercel logs for authentication errors
+- Ensure `NEXTAUTH_URL` matches your production domain exactly
+
+### Server-Side Fetch Authentication
+
+**Important Note:** When making fetch calls from Server Components to internal API routes in Next.js App Router, cookies are NOT automatically forwarded. Always use the `fetchAdminData` utility from `lib/admin/fetch-with-auth.ts` for authenticated requests.
+
+**Example:**
+```typescript
+import { fetchAdminData } from "@/lib/admin/fetch-with-auth";
+
+// ✅ Correct - uses utility that passes cookies
+const data = await fetchAdminData('/api/admin/analytics');
+
+// ❌ Incorrect - cookies won't be passed
+const data = await fetch('/api/admin/analytics');
+```
+
+## 🧪 Testing & Verification
+
+### Pre-Deployment Checks
+
+Before deploying, run these verification scripts:
+
+```bash
+# Verify all code tasks are complete
+npm run complete:tasks
+
+# Verify environment variables are set correctly
+npm run verify:env
+
+# Verify all admin routes are protected
+npm run verify:routes
+
+# Test authentication endpoints
+npm run test:auth
+
+# Run comprehensive test suite
+npm run test:comprehensive
+
+# Run all pre-deployment checks
+npm run predeploy
+```
+
+### Testing Guide
+
+See [TESTING_GUIDE.md](./TESTING_GUIDE.md) for comprehensive testing instructions, including:
+- First login testing
+- Logout functionality
+- Subsequent login testing (critical)
+- Error handling scenarios
+- Session persistence
+
+### Deployment Checklist
+
+See [DEPLOYMENT_CHECKLIST.md](./DEPLOYMENT_CHECKLIST.md) for a complete deployment checklist.
+
+### Manual Tasks Guide
+
+See [MANUAL_TASKS_GUIDE.md](./MANUAL_TASKS_GUIDE.md) for step-by-step instructions to complete the remaining manual tasks.
+
+### Task Completion Status
+
+**Current Status:** 47/88 tasks complete (53%)
+- ✅ **Automated Tasks:** 47/47 (100%)
+- ⏳ **Manual Tasks:** 0/41 (0%)
+
+**Quick Complete:** See [QUICK_COMPLETE_GUIDE.md](./QUICK_COMPLETE_GUIDE.md) to finish remaining tasks in ~35 minutes.
+
+**Documentation:**
+- [ALL_TASKS_COMPLETE.md](./ALL_TASKS_COMPLETE.md) - Complete task status
+- [TASK_COMPLETION_CHECKLIST.md](./TASK_COMPLETION_CHECKLIST.md) - Progress tracking
+- [QUICK_COMPLETE_GUIDE.md](./QUICK_COMPLETE_GUIDE.md) - Fast track completion (35 min)
+- [COMPLETE_ALL_TASKS.md](./COMPLETE_ALL_TASKS.md) - Complete task breakdown
 
 ## 📞 Support
 

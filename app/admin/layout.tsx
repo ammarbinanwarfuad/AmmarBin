@@ -53,16 +53,22 @@ export default function AdminLayout({
     
     setIsLoggingOut(true);
     try {
-      // Use NextAuth's built-in redirect functionality
+      // Sign out and wait for it to complete
       await signOut({ 
         callbackUrl: "/admin/login",
-        redirect: true
+        redirect: false
       });
+      
+      // Wait a bit for the session cookie to be cleared
+      await new Promise(resolve => setTimeout(resolve, 100));
+      
+      // Use window.location.href for a hard refresh to ensure cookies are cleared
+      // This ensures the session is fully cleared before navigating
+      window.location.href = "/admin/login";
     } catch (error) {
       console.error("Logout error:", error);
-      // Fallback: if redirect fails, manually navigate
-      router.push("/admin/login");
-      setIsLoggingOut(false);
+      // Fallback: if signOut fails, manually navigate and clear
+      window.location.href = "/admin/login";
     }
   };
 
