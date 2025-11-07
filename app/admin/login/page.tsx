@@ -46,25 +46,43 @@ export default function AdminLoginPage() {
     setIsSubmitting(true);
     
     try {
-      // Change redirect to false to handle errors properly
-      const result = await signIn("credentials", {
-        email: data.email,
-        password: data.password,
-        redirect: false, // Changed from true to false for better error handling
-        callbackUrl: "/admin/dashboard",
+      // Add timeout to prevent hanging (30 seconds)
+      const LOGIN_TIMEOUT = 30000;
+      const timeoutPromise = new Promise<never>((_, reject) => {
+        setTimeout(() => {
+          reject(new Error("Login request timed out. Please check your connection and try again."));
+        }, LOGIN_TIMEOUT);
       });
+
+      // Race between signIn and timeout
+      const result = await Promise.race([
+        signIn("credentials", {
+          email: data.email,
+          password: data.password,
+          redirect: false,
+          callbackUrl: "/admin/dashboard",
+        }),
+        timeoutPromise,
+      ]);
 
       if (result?.error) {
         toast.error(result.error || "Invalid credentials");
-        setIsSubmitting(false);
       } else if (result?.ok) {
         // Manually redirect on success
         router.push("/admin/dashboard");
         router.refresh(); // Refresh to update session
+      } else {
+        // Handle case where result is undefined or unexpected
+        toast.error("Login failed. Please try again.");
       }
     } catch (error) {
       console.error("Login error:", error);
-      toast.error("An error occurred. Please try again.");
+      const errorMessage = error instanceof Error 
+        ? error.message 
+        : "An error occurred. Please try again.";
+      toast.error(errorMessage);
+    } finally {
+      // Always reset submitting state, even if request hangs or times out
       setIsSubmitting(false);
     }
   };
