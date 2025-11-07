@@ -4,6 +4,7 @@
 /node_modules
 /.pnp
 .pnp.js
+.yarn/install-state.gz
 
 # testing
 /coverage
@@ -42,18 +43,3 @@ next-env.d.ts
 *.swo
 *~
 
-# OS
-.DS_Store
-Thumbs.db
-
-# Logs
-logs
-*.log
-
-# Cache
-.cache
-.parcel-cache
-
-# Temporary files
-*.tmp
-*.temp
