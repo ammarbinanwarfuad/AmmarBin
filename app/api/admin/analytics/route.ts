@@ -1,9 +1,17 @@
 import { NextResponse } from "next/server";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
 import { connectDB } from "@/lib/db";
 import { cachedFetch } from "@/lib/cache";
 
 export async function GET() {
   try {
+    // Check authentication - admin routes require valid session
+    const session = await getServerSession(authOptions);
+    if (!session) {
+      console.warn("[Admin API] Unauthorized access attempt to /api/admin/analytics");
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
     // Cache analytics for 5 minutes (admin data changes frequently)
     const data = await cachedFetch(
       'admin:analytics',
@@ -61,7 +69,8 @@ export async function GET() {
         },
       }
     );
-  } catch {
+  } catch (error) {
+    console.error("[Admin API] Error in /api/admin/analytics:", error);
     return NextResponse.json({ error: "Failed to load analytics" }, { status: 500 });
   }
 }
