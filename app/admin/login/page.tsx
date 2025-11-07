@@ -8,14 +8,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { loginSchema } from "@/lib/validations";
-import { z } from "zod";
 import toast from "react-hot-toast";
 import { LogIn } from "lucide-react";
-
-type LoginFormData = z.infer<typeof loginSchema>;
 
 export default function AdminLoginPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -29,60 +23,36 @@ export default function AdminLoginPage() {
     }
   }, [status, session, router]);
 
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-  } = useForm<LoginFormData>({
-    resolver: zodResolver(loginSchema),
-  });
-
-  const onSubmit = async (data: LoginFormData) => {
-    // Prevent multiple submissions
-    if (isSubmitting) {
-      return;
-    }
-
+  const handleSignIn = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (isSubmitting) return;
+    
     setIsSubmitting(true);
     
     try {
-      // Add timeout to prevent hanging (30 seconds)
-      const LOGIN_TIMEOUT = 30000;
-      const timeoutPromise = new Promise<never>((_, reject) => {
-        setTimeout(() => {
-          reject(new Error("Login request timed out. Please check your connection and try again."));
-        }, LOGIN_TIMEOUT);
-      });
+      const form = e.currentTarget as HTMLFormElement;
+      const formData = new FormData(form);
+      const email = formData.get("email") as string;
+      const password = formData.get("password") as string;
 
-      // Race between signIn and timeout
-      const result = await Promise.race([
-        signIn("credentials", {
-          email: data.email,
-          password: data.password,
-          redirect: false,
-          callbackUrl: "/admin/dashboard",
-        }),
-        timeoutPromise,
-      ]);
+      const result = await signIn("credentials", {
+        email,
+        password,
+        redirect: false,
+        callbackUrl: "/admin/dashboard",
+      });
 
       if (result?.error) {
         toast.error(result.error || "Invalid credentials");
       } else if (result?.ok) {
-        // Manually redirect on success
         router.push("/admin/dashboard");
-        router.refresh(); // Refresh to update session
-      } else {
-        // Handle case where result is undefined or unexpected
-        toast.error("Login failed. Please try again.");
+        router.refresh();
       }
     } catch (error) {
       console.error("Login error:", error);
-      const errorMessage = error instanceof Error 
-        ? error.message 
-        : "An error occurred. Please try again.";
-      toast.error(errorMessage);
+      toast.error("An error occurred. Please try again.");
     } finally {
-      // Always reset submitting state, even if request hangs or times out
       setIsSubmitting(false);
     }
   };
@@ -105,37 +75,29 @@ export default function AdminLoginPage() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+            <form onSubmit={handleSignIn} className="space-y-4">
               <div>
                 <Label htmlFor="email">Email</Label>
                 <Input
                   id="email"
+                  name="email"
                   type="email"
-                  {...register("email")}
+                  required
                   placeholder="admin@example.com"
                   className="mt-2"
                 />
-                {errors.email && (
-                  <p className="text-sm text-destructive mt-1">
-                    {errors.email.message}
-                  </p>
-                )}
               </div>
 
               <div>
                 <Label htmlFor="password">Password</Label>
                 <Input
                   id="password"
+                  name="password"
                   type="password"
-                  {...register("password")}
+                  required
                   placeholder="••••••••"
                   className="mt-2"
                 />
-                {errors.password && (
-                  <p className="text-sm text-destructive mt-1">
-                    {errors.password.message}
-                  </p>
-                )}
               </div>
 
               <Button
@@ -143,13 +105,8 @@ export default function AdminLoginPage() {
                 disabled={isSubmitting}
                 className="w-full gap-2"
               >
-                {isSubmitting ? (
-                  "Signing in..."
-                ) : (
-                  <>
-                    <LogIn className="h-4 w-4" /> Sign In
-                  </>
-                )}
+                <LogIn className="h-4 w-4" />
+                {isSubmitting ? "Signing in..." : "Sign In"}
               </Button>
             </form>
           </CardContent>
