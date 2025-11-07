@@ -74,9 +74,9 @@ export async function connectDB() {
       bufferCommands: false,
       maxPoolSize: 10, // Maintain up to 10 socket connections
       minPoolSize: 2, // Start with 2 connections for faster response (increased from 1)
-      serverSelectionTimeoutMS: 2000, // Reduced from 3000ms for faster TTFB
-      socketTimeoutMS: 4000, // Reduced from 5000ms for faster response
-      connectTimeoutMS: 2000, // Reduced from 3000ms for faster connection
+      serverSelectionTimeoutMS: 10000, // Increased from 2000ms to 10000ms for production cold starts
+      socketTimeoutMS: 45000, // Increased from 4000ms to 45000ms for production
+      connectTimeoutMS: 10000, // Increased from 2000ms to 10000ms for production cold starts
       heartbeatFrequencyMS: 10000, // Check connection health every 10 seconds
       // Enable connection retry with exponential backoff
       retryWrites: true,
