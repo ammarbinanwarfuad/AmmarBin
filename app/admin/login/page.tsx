@@ -13,15 +13,21 @@ import { LogIn } from "lucide-react";
 
 export default function AdminLoginPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isRedirecting, setIsRedirecting] = useState(false);
   const router = useRouter();
   const { data: session, status } = useSession();
 
-  // Redirect if already authenticated
+  // Redirect if already authenticated (but not if we're in the process of logging in)
+  // CRITICAL: Use window.location for hard redirect to bypass service worker cache
   useEffect(() => {
-    if (status === "authenticated" && session) {
-      router.replace("/admin/dashboard");
+    // Only redirect if not currently submitting login and not already redirecting
+    if (status === "authenticated" && session && !isSubmitting && !isRedirecting) {
+      setIsRedirecting(true);
+      // Use window.location.replace to force a hard redirect
+      // This bypasses any service worker caching and prevents back button issues
+      window.location.replace("/admin/dashboard");
     }
-  }, [status, session, router]);
+  }, [status, session, isSubmitting, isRedirecting]);
 
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -49,20 +55,34 @@ export default function AdminLoginPage() {
       } else if (result?.ok) {
         // Show success message
         toast.success("Login successful! Redirecting...");
+        setIsRedirecting(true);
         
-        // CRITICAL FIX: Wait for session cookie to be set by NextAuth
+        // CRITICAL FIX: Force session update and wait for cookie to be set
         // NextAuth sets cookies via Set-Cookie header in the response
-        // We need to wait for the browser to process the Set-Cookie header
-        // before navigating to ensure the session is established
-        await new Promise(resolve => setTimeout(resolve, 800));
+        // We need to ensure the session is fully established before redirecting
         
-        // Use window.location.href for a hard refresh
+        // Update the session in the client to ensure it's in sync
+        try {
+          const { update } = await import("next-auth/react");
+          await update();
+        } catch (error) {
+          console.warn("[Login] Session update error (continuing anyway):", error);
+        }
+        
+        // Wait for session cookie to be processed by browser
+        // Increased wait time to ensure cookie is fully set
+        await new Promise(resolve => setTimeout(resolve, 1200));
+        
+        // CRITICAL: Use window.location.replace for a hard redirect
         // This ensures:
         // 1. Session cookie is fully set before navigation
         // 2. Full page reload with all cookies properly established
-        // 3. Server Components receive the session cookie in request headers
-        // 4. Internal API calls can properly authenticate
-        window.location.href = "/admin/dashboard";
+        // 3. Bypasses service worker cache completely
+        // 4. Server Components receive the session cookie in request headers
+        // 5. Internal API calls can properly authenticate
+        // 6. Using replace prevents back button from going back to login
+        // 7. Prevents redirect loop
+        window.location.replace("/admin/dashboard");
       }
     } catch (error) {
       console.error("Login error:", error);

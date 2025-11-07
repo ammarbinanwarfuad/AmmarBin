@@ -16,9 +16,16 @@ export default withAuth(
     const isProduction = process.env.NODE_ENV === 'production';
     
     // If user is authenticated and trying to access login page, redirect to dashboard
+    // CRITICAL: Add cache-control headers to prevent caching of redirect
     if (url.pathname === "/admin/login" && req.nextauth.token) {
-      const response = NextResponse.redirect(new URL("/admin/dashboard", req.url));
+      const dashboardUrl = new URL("/admin/dashboard", req.url);
+      const response = NextResponse.redirect(dashboardUrl);
       const duration = Date.now() - start;
+      
+      // Prevent caching of redirects and login page
+      response.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0');
+      response.headers.set('Pragma', 'no-cache');
+      response.headers.set('Expires', '0');
       response.headers.set('X-Middleware-Duration', duration.toString());
       response.headers.set('X-Country', country);
       if (city) response.headers.set('X-City', city);

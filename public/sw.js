@@ -113,8 +113,16 @@ self.addEventListener('fetch', (event) => {
   }
 
   // ⚠️ CRITICAL: Skip ALL authentication, admin routes, and Next.js static assets
+  // Also skip admin login and dashboard to prevent service worker from interfering
   if (isAuthRequest(url) || isNextStaticAsset(url)) {
     // Don't intercept - let browser handle these directly
+    return;
+  }
+  
+  // CRITICAL: Skip ALL admin routes to prevent service worker interference
+  // This ensures login/logout and admin navigation work correctly
+  if (url.pathname.startsWith('/admin/')) {
+    // Don't intercept admin routes - let browser handle directly
     return;
   }
 
@@ -195,13 +203,14 @@ self.addEventListener('fetch', (event) => {
   }
 
   // Strategy 3: Network-First for static pages (always try network first)
-  if (url.origin === self.location.origin && !isAPIRequest(url)) {
+  // CRITICAL: Skip admin routes completely - they should never be cached or intercepted
+  if (url.origin === self.location.origin && !isAPIRequest(url) && !url.pathname.startsWith('/admin/')) {
     event.respondWith(
       caches.open(STATIC_CACHE).then((cache) => {
         return fetch(request)
           .then((response) => {
-            // Cache successful responses
-            if (response && response.status === 200) {
+            // Cache successful responses (but NOT admin routes)
+            if (response && response.status === 200 && !url.pathname.startsWith('/admin/')) {
               cache.put(request, response.clone());
             }
             return response;

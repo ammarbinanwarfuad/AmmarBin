@@ -59,16 +59,20 @@ export default function AdminLayout({
         redirect: false
       });
       
-      // Wait a bit for the session cookie to be cleared
-      await new Promise(resolve => setTimeout(resolve, 100));
+      // Wait for the session cookie to be cleared
+      await new Promise(resolve => setTimeout(resolve, 200));
       
-      // Use window.location.href for a hard refresh to ensure cookies are cleared
-      // This ensures the session is fully cleared before navigating
-      window.location.href = "/admin/login";
+      // CRITICAL: Use window.location.replace for a hard redirect
+      // This ensures:
+      // 1. Session cookie is fully cleared
+      // 2. Bypasses service worker cache
+      // 3. Forces a clean state for next login
+      // Using replace prevents back button from going to dashboard
+      window.location.replace("/admin/login");
     } catch (error) {
       console.error("Logout error:", error);
       // Fallback: if signOut fails, manually navigate and clear
-      window.location.href = "/admin/login";
+      window.location.replace("/admin/login");
     }
   };
 
