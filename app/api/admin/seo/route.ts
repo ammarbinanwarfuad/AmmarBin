@@ -1,11 +1,18 @@
 import { NextResponse } from "next/server";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
 import { connectDB } from "@/lib/db";
 
 // ⚡ Performance: Cache SEO analysis for 5 minutes
 
-
 export async function GET() {
   try {
+    // Check authentication - admin routes require valid session
+    const session = await getServerSession(authOptions);
+    if (!session) {
+      console.warn("[Admin API] Unauthorized access attempt to /api/admin/seo");
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
     await connectDB();
     const Blog = (await import("@/models/Blog")).default;
     // ⚡ Performance: Only select needed fields
@@ -32,7 +39,8 @@ export async function GET() {
         },
       }
     );
-  } catch {
+  } catch (error) {
+    console.error("[Admin API] Error in /api/admin/seo:", error);
     return NextResponse.json({ error: 'Failed to compute SEO' }, { status: 500 });
   }
 }
