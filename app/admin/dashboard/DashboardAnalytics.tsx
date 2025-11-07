@@ -1,38 +1,29 @@
 import { Suspense } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-
-// Internal API fetcher for server-side
-async function fetchAdminData(url: string) {
-  try {
-    const baseUrl = process.env.NEXTAUTH_URL 
-      || (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : null)
-      || 'http://localhost:3000';
-    
-    const response = await fetch(`${baseUrl}${url}`, {
-      cache: 'no-store',
-      headers: {
-        'Cache-Control': 'no-cache',
-      },
-    });
-    
-    if (!response.ok) {
-      return null;
-    }
-    
-    return response.json();
-  } catch (error) {
-    console.error(`Error fetching ${url}:`, error);
-    return null;
-  }
-}
+import { fetchAdminData } from "@/lib/admin/fetch-with-auth";
 
 async function AnalyticsSection() {
   const analytics = await fetchAdminData('/api/admin/analytics');
   
+  // Show error state if analytics failed to load
+  if (!analytics) {
+    return (
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+        <Card className="md:col-span-4">
+          <CardContent className="pt-6">
+            <p className="text-sm text-muted-foreground text-center">
+              ⚠️ Unable to load analytics data. Please refresh the page or check your connection.
+            </p>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+  
   return (
     <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-      {analytics && [
+      {[
         { label: 'Projects', value: (analytics as { totals?: { projects?: number } })?.totals?.projects },
         { label: 'Blogs', value: (analytics as { totals?: { blogs?: number } })?.totals?.blogs },
         { label: 'Messages', value: (analytics as { totals?: { messages?: number } })?.totals?.messages },
@@ -44,10 +35,10 @@ async function AnalyticsSection() {
             <CardDescription>Total</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold">{m.value}</div>
+            <div className="text-3xl font-bold">{m.value ?? 0}</div>
             <div className="text-xs text-muted-foreground mt-1">
-              7d: {(analytics as { last7d?: Record<string, number> })?.last7d?.[m.label.toLowerCase()]}, 
-              30d: {(analytics as { last30d?: Record<string, number> })?.last30d?.[m.label.toLowerCase()]}
+              7d: {(analytics as { last7d?: Record<string, number> })?.last7d?.[m.label.toLowerCase()] ?? 0}, 
+              30d: {(analytics as { last30d?: Record<string, number> })?.last30d?.[m.label.toLowerCase()] ?? 0}
             </div>
           </CardContent>
         </Card>
