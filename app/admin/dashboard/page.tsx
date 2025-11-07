@@ -4,32 +4,7 @@ import { redirect } from "next/navigation";
 import { DashboardClient } from "./DashboardClient";
 import { DashboardAnalytics } from "./DashboardAnalytics";
 import { DashboardRecent } from "./DashboardRecent";
-
-// Internal API fetcher for server-side
-async function fetchAdminData(url: string) {
-  try {
-    const baseUrl = process.env.NEXTAUTH_URL 
-      || (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : null)
-      || 'http://localhost:3000';
-    
-    const response = await fetch(`${baseUrl}${url}`, {
-      cache: 'no-store',
-      headers: {
-        'Cache-Control': 'no-cache',
-      },
-    });
-    
-    if (!response.ok) {
-      console.warn(`Failed to fetch ${url}: ${response.status}`);
-      return null;
-    }
-    
-    return response.json();
-  } catch (error) {
-    console.error(`Error fetching ${url}:`, error);
-    return null;
-  }
-}
+import { fetchAdminData } from "@/lib/admin/fetch-with-auth";
 
 export default async function AdminDashboard() {
   const session = await getServerSession(authOptions);
