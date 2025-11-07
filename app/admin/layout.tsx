@@ -65,8 +65,7 @@ export default function AdminLayout({
       // CRITICAL: Use window.location.replace for a hard redirect
       // This ensures:
       // 1. Session cookie is fully cleared
-      // 2. Bypasses service worker cache
-      // 3. Forces a clean state for next login
+      // 2. Forces a clean state for next login
       // Using replace prevents back button from going to dashboard
       window.location.replace("/admin/login");
     } catch (error) {

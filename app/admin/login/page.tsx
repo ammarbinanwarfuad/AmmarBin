@@ -18,13 +18,12 @@ export default function AdminLoginPage() {
   const { data: session, status, update } = useSession();
 
   // Redirect if already authenticated (but not if we're in the process of logging in)
-  // CRITICAL: Use window.location for hard redirect to bypass service worker cache
   useEffect(() => {
     // Only redirect if not currently submitting login and not already redirecting
     if (status === "authenticated" && session && !isSubmitting && !isRedirecting) {
       setIsRedirecting(true);
       // Use window.location.replace to force a hard redirect
-      // This bypasses any service worker caching and prevents back button issues
+      // This prevents back button issues and ensures clean navigation
       window.location.replace("/admin/dashboard");
     }
   }, [status, session, isSubmitting, isRedirecting]);
@@ -79,11 +78,10 @@ export default function AdminLoginPage() {
         // This ensures:
         // 1. Session cookie is fully set before navigation
         // 2. Full page reload with all cookies properly established
-        // 3. Bypasses service worker cache completely
-        // 4. Server Components receive the session cookie in request headers
-        // 5. Internal API calls can properly authenticate
-        // 6. Using replace prevents back button from going back to login
-        // 7. Prevents redirect loop
+        // 3. Server Components receive the session cookie in request headers
+        // 4. Internal API calls can properly authenticate
+        // 5. Using replace prevents back button from going back to login
+        // 6. Prevents redirect loop
         window.location.replace("/admin/dashboard");
       }
     } catch (error) {

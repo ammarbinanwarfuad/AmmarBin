@@ -27,12 +27,7 @@
       ]
     }
   ],
-  "rewrites": [
-    {
-      "source": "/sw.js",
-      "destination": "/sw.js"
-    }
-  ],
+  "rewrites": [],
   "functions": {
     "app/api/**/*.ts": {
       "maxDuration": 30

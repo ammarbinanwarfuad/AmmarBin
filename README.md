@@ -33,7 +33,6 @@ This is a modern, production-ready portfolio website that showcases projects, sk
 - 📊 **Analytics**: Built-in analytics and performance monitoring
 - 📝 **Blog System**: Full-featured blog with external source integration
 - 🤖 **Automation**: Scheduled tasks for GitHub sync and content updates
-- 📱 **PWA Ready**: Service worker for offline support
 - 🌐 **SEO Optimized**: Comprehensive SEO features and sitemap generation
 
 ## ✨ Features
@@ -104,7 +103,6 @@ This is a modern, production-ready portfolio website that showcases projects, sk
 - **Vercel Speed Insights** - Performance monitoring
 - **Web Vitals** - Core Web Vitals tracking
 - **Google Tag Manager** - Analytics integration
-- **Service Worker** - Offline support and caching
 
 ### Development Tools
 
@@ -190,7 +188,6 @@ This is a modern, production-ready portfolio website that showcases projects, sk
 │   ├── Blog.ts                   # Blog model
 │   └── ...                       # Other models
 ├── public/                       # Static assets
-│   ├── sw.js                     # Service worker for PWA
 │   ├── sitemap.xml               # SEO sitemap
 │   ├── robots.txt                # SEO robots file
 │   └── ...                       # Other static files
@@ -291,8 +288,6 @@ VERCEL_PROJECT_ID=your-vercel-project-id
 NEXT_PUBLIC_GTM_ID=GTM-XXXXXXX
 NEXT_PUBLIC_GA_ID=G-XXXXXXXXXX
 
-# Service Worker
-NEXT_PUBLIC_ENABLE_SW=true
 
 # Feature Flags
 NEXT_PUBLIC_ENABLE_ANALYTICS=true
@@ -447,7 +442,6 @@ This application is heavily optimized for performance:
 9. **ETags**: Conditional requests support for reduced bandwidth
 10. **Bundle Optimization**: Tree shaking, minification, compression
 11. **Font Optimization**: Next.js font optimization with preloading
-12. **Service Worker**: Offline support and caching
 13. **Stale-While-Revalidate**: CDN caching with background updates
 
 ### Performance Monitoring
@@ -727,7 +721,7 @@ The application includes an advanced cache invalidation system that ensures cont
 
 - **Automatic Invalidation**: All admin actions (create, update, delete) automatically invalidate relevant caches
 - **Non-Blocking**: Cache invalidation runs asynchronously without impacting API response times
-- **Multi-Layer**: Invalidates Next.js cache, CDN cache, and service worker cache
+- **Multi-Layer**: Invalidates Next.js cache and CDN cache
 - **Optional Vercel Integration**: Enhanced cache purging with VERCEL_TOKEN and VERCEL_PROJECT_ID
 
 See [Environment Variables](#environment-variables) section for Vercel cache setup instructions.
