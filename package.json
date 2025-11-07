@@ -9,7 +9,20 @@
     "start": "next start",
     "lint": "eslint",
     "seed": "tsx scripts/seed.ts",
-    "postbuild": "next-sitemap"
+    "postbuild": "next-sitemap",
+    "verify:env": "tsx scripts/verify-env.ts",
+    "verify:routes": "tsx scripts/verify-routes.ts",
+    "test:auth": "tsx scripts/test-auth-flow.ts",
+    "test:comprehensive": "tsx scripts/comprehensive-test.ts",
+    "test:all": "npm run verify:routes && npm run test:comprehensive",
+    "test:report": "tsx scripts/generate-test-report.ts",
+    "check:local": "tsx scripts/check-local-dev.ts",
+    "complete:tasks": "tsx scripts/auto-complete-tasks.ts",
+    "complete:verifiable": "tsx scripts/complete-all-verifiable.ts",
+    "verify:all": "tsx scripts/verify-all-tasks.ts",
+    "complete:remaining": "tsx scripts/complete-remaining-tasks.ts",
+    "test:server": "tsx scripts/test-with-server.ts",
+    "predeploy": "npm run verify:env && npm run verify:routes && npm run test:report"
   },
   "dependencies": {
     "@emotion/is-prop-valid": "^1.4.0",
