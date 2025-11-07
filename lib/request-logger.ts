@@ -22,26 +22,21 @@ export function logRequest(
     userAgent?: string;
   }
 ) {
-  const log: RequestLog = {
-    method,
-    path,
-    status,
-    duration,
-    ...(options?.ip && { ip: options.ip }),
-    ...(options?.userAgent && { userAgent: options.userAgent }),
-  };
-
+  // Build log message with optional details
+  const ipInfo = options?.ip ? ` [IP: ${options.ip}]` : '';
+  const logMessage = `[REQ] ${method} ${path} - ${status} (${duration}ms)${ipInfo}`;
+  
   // Always log in production, optionally in development
   if (process.env.NODE_ENV === 'production') {
     // Log slow requests (>1s) as warnings
     if (duration > 1000) {
-      console.warn(`[REQ] ${method} ${path} - ${status} (${duration}ms) - SLOW`);
+      console.warn(`${logMessage} - SLOW`);
     } else {
-      console.log(`[REQ] ${method} ${path} - ${status} (${duration}ms)`);
+      console.log(logMessage);
     }
   } else if (process.env.NODE_ENV === 'development' && duration > 500) {
     // Only log slow requests in development
-    console.warn(`[REQ] ${method} ${path} - ${status} (${duration}ms)`);
+    console.warn(logMessage);
   }
 }
 
