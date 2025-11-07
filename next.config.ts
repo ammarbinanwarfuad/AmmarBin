@@ -187,6 +187,20 @@ const nextConfig: NextConfig = {
             key: "CDN-Cache-Control",
             value: isProduction ? "public, s-maxage=60" : undefined,
           },
+          {
+            key: "Access-Control-Allow-Origin",
+            value: isProduction
+              ? "https://ammarbin.vercel.app"
+              : "*",
+          },
+          {
+            key: "Access-Control-Allow-Methods",
+            value: "GET, POST, PUT, DELETE, OPTIONS",
+          },
+          {
+            key: "Access-Control-Allow-Headers",
+            value: "Content-Type, Authorization",
+          },
         ].filter((h): h is { key: string; value: string } => h.value !== undefined),
       },
       {
