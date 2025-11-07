@@ -9,8 +9,6 @@ const MAX_LOGIN_ATTEMPTS = 5;
 const LOCK_TIME = 30 * 60 * 1000; // 30 minutes
 
 export const authOptions: NextAuthOptions = {
-  // Explicitly set URL for NextAuth
-  url: process.env.NEXTAUTH_URL,
   providers: [
     CredentialsProvider({
       name: "Credentials",
