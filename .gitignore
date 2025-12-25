@@ -51,3 +51,14 @@ next-env.d.ts
 # generated sitemaps
 /public/sitemap*.xml
 /public/robots.txt
+# Build artifacts
+dist/
+# Environment files
+.env.production
+# Platform-specific
+.vscode/settings.json
+*.iml
+# Vercel
+# Testing
+coverage/
+.nyc_output/
