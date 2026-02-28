@@ -15,21 +15,13 @@ export function AutoLogout() {
 
   const handleLogout = useCallback(async () => {
     try {
-      if (typeof window !== 'undefined') {
-        if ('caches' in window) {
-          const cacheNames = await caches.keys();
-          await Promise.all(cacheNames.map(name => caches.delete(name)));
-        }
-        const savedTheme = localStorage.getItem('theme');
-        localStorage.clear();
-        if (savedTheme) localStorage.setItem('theme', savedTheme);
-        sessionStorage.clear();
-      }
-      
-      await signOut({ callbackUrl: '/admin/login?logout=1&reason=timeout' });
-    } catch (error) {
-      console.error('Auto-logout error:', error);
-      window.location.href = '/admin/login?logout=1&reason=timeout';
+      const savedTheme = localStorage.getItem('theme');
+      localStorage.clear();
+      if (savedTheme) localStorage.setItem('theme', savedTheme);
+
+      await signOut({ callbackUrl: '/admin/login' });
+    } catch {
+      window.location.href = '/admin/login';
     }
   }, []);
 

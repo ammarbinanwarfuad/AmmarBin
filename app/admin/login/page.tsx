@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { signIn } from "next-auth/react";
+import { useSearchParams } from "next/navigation";
 import { motion } from "framer-motion";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -10,48 +11,47 @@ import { Label } from "@/components/ui/label";
 import toast from "react-hot-toast";
 import { LogIn } from "lucide-react";
 
-export default function AdminLoginPage() {
-  const [isSubmitting, setIsSubmitting] = useState(false);
+// Error codes NextAuth may append to /admin/login?error=...
+const AUTH_ERRORS: Record<string, string> = {
+  CredentialsSignin: "Invalid email or password.",
+  SessionRequired: "Please sign in to continue.",
+  Default: "Sign in failed. Please try again.",
+};
 
-  // NOTE: We do NOT redirect authenticated users here.
-  // proxy.ts (middleware) already redirects authenticated users away from /admin/login
-  // at the edge before this page ever renders. Adding a client-side redirect here
-  // created an infinite loop: dashboard → login → dashboard → login.
+function LoginForm() {
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const searchParams = useSearchParams();
+
+  // Show error toast when NextAuth redirects back with ?error=
+  useEffect(() => {
+    const error = searchParams?.get("error");
+    if (error) {
+      toast.error(AUTH_ERRORS[error] ?? AUTH_ERRORS.Default);
+    }
+  }, [searchParams]);
 
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
-    
     if (isSubmitting) return;
-    
     setIsSubmitting(true);
-    
-    try {
-      const form = e.currentTarget as HTMLFormElement;
-      const formData = new FormData(form);
-      const email = formData.get("email") as string;
-      const password = formData.get("password") as string;
 
-      const result = await signIn("credentials", {
-        email,
-        password,
-        redirect: false,
-      });
+    const form = e.currentTarget as HTMLFormElement;
+    const formData = new FormData(form);
+    const email = formData.get("email") as string;
+    const password = formData.get("password") as string;
 
-      if (result?.error) {
-        toast.error(result.error || "Invalid credentials");
-        setIsSubmitting(false);
-      } else if (result?.ok) {
-        toast.success("Login successful! Redirecting...");
-        
-        // Immediate redirect - no waiting
-        // The dashboard will handle loading states client-side
-        window.location.href = `/admin/dashboard`;
-      }
-    } catch (error) {
-      console.error("Login error:", error);
-      toast.error("An error occurred. Please try again.");
-      setIsSubmitting(false);
-    }
+    // Use NextAuth's built-in redirect (not redirect:false).
+    // This sets the session cookie + redirect atomically on the server,
+    // eliminating the race condition that caused the post-logout login loop.
+    await signIn("credentials", {
+      email,
+      password,
+      callbackUrl: "/admin/dashboard",
+    });
+
+    // Only reached if an error caused NextAuth to redirect back to this page;
+    // reset the loading state so the form is usable again.
+    setIsSubmitting(false);
   };
 
   return (
@@ -110,6 +110,20 @@ export default function AdminLoginPage() {
         </Card>
       </motion.div>
     </div>
+  );
+}
+
+export default function AdminLoginPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen flex items-center justify-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary" />
+        </div>
+      }
+    >
+      <LoginForm />
+    </Suspense>
   );
 }
 

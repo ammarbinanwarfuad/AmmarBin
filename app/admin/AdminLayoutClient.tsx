@@ -50,27 +50,18 @@ export function AdminLayoutClient({
 
   const handleLogout = async () => {
     if (isLoggingOut) return; // Prevent multiple clicks
-    
     setIsLoggingOut(true);
     try {
-      // Clear all client-side storage except theme preference
-      if (typeof window !== 'undefined') {
-        if ('caches' in window) {
-          const cacheNames = await caches.keys();
-          await Promise.all(cacheNames.map(name => caches.delete(name)));
-        }
-        const savedTheme = localStorage.getItem('theme');
-        localStorage.clear();
-        if (savedTheme) localStorage.setItem('theme', savedTheme);
-        sessionStorage.clear();
-      }
-      
-      // Let NextAuth handle the redirect — this clears the cookie server-side
-      // then navigates to login, preventing the stale-session redirect-loop.
-      await signOut({ callbackUrl: '/admin/login?logout=1' });
-    } catch (error) {
-      console.error("Logout error:", error);
-      window.location.href = '/admin/login?logout=1';
+      // Preserve theme so the login page doesn't flash the wrong theme
+      const savedTheme = localStorage.getItem('theme');
+      localStorage.clear();
+      if (savedTheme) localStorage.setItem('theme', savedTheme);
+
+      // signOut clears the NextAuth session cookie server-side,
+      // then navigates the browser to the login page.
+      await signOut({ callbackUrl: '/admin/login' });
+    } catch {
+      window.location.href = '/admin/login';
     }
   };
 
