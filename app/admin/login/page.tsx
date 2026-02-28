@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { signIn, useSession } from "next-auth/react";
+import { useState } from "react";
+import { signIn } from "next-auth/react";
 import { motion } from "framer-motion";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -12,29 +12,11 @@ import { LogIn } from "lucide-react";
 
 export default function AdminLoginPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
-  // Track whether this page load came from a logout action.
-  // We must not auto-redirect to dashboard in that case because the
-  // SessionProvider client cache might still hold the old session for
-  // a brief moment even though the cookie has already been cleared.
-  const [isPostLogout, setIsPostLogout] = useState(false);
-  const { data: session, status } = useSession();
 
-  // Detect logout flag and clean the URL
-  useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    if (params.get('logout') === '1') {
-      setIsPostLogout(true);
-      window.history.replaceState({}, '', '/admin/login');
-    }
-  }, []);
-
-  // Redirect if already authenticated — but only when session status is
-  // definitively resolved (not 'loading') to avoid acting on stale cache.
-  useEffect(() => {
-    if (status === "authenticated" && session && !isSubmitting && !isPostLogout) {
-      window.location.replace("/admin/dashboard");
-    }
-  }, [status, session, isSubmitting, isPostLogout]);
+  // NOTE: We do NOT redirect authenticated users here.
+  // proxy.ts (middleware) already redirects authenticated users away from /admin/login
+  // at the edge before this page ever renders. Adding a client-side redirect here
+  // created an infinite loop: dashboard → login → dashboard → login.
 
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();

@@ -1,17 +1,25 @@
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
-import { redirect } from "next/navigation";
 import { DashboardClient } from "./DashboardClient";
 import { connectDB } from "@/lib/db";
 import { getCached, CACHE_TTL } from "@/lib/redis-cache";
 
 export default async function AdminDashboard() {
-  const session = await getServerSession(authOptions);
-  if (!session) redirect("/admin/login");
+  // NOTE: We do NOT redirect here if session is null.
+  // proxy.ts middleware handles unauthenticated access at the edge.
+  // A server-side redirect here caused an infinite loop:
+  //   getServerSession null → redirect to /admin/login
+  //   → login page redirected back → getServerSession null again.
+  // AdminLayoutClient handles the client-side auth check as fallback.
+  const session = await getServerSession(authOptions).catch(() => null);
   
   // ✅ OPTIMIZED: Prefetch critical data server-side for instant render
   // ⚠️ IMPORTANT: Wrapped in try-catch to prevent login blocking
   let initialData = null;
+  if (!session) {
+    // Not authenticated — skip data fetching, client will redirect
+    return <DashboardClient initialData={null} />;
+  }
   
   try {
     await connectDB();

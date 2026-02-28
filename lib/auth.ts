@@ -152,24 +152,10 @@ export const authOptions: NextAuthOptions = {
     maxAge: 2 * 60 * 60, // 2 hours
     updateAge: 30 * 60, // Update session every 30 minutes
   },
-  cookies: {
-    sessionToken: {
-      // Use __Secure- prefix in production to be consistent with useSecureCookies
-      // and to ensure getToken() looks for the same cookie it sets.
-      name: process.env.NODE_ENV === 'production'
-        ? `__Secure-next-auth.session-token`
-        : `next-auth.session-token`,
-      options: {
-        httpOnly: true,
-        sameSite: 'lax',
-        path: '/',
-        secure: process.env.NODE_ENV === 'production',
-      },
-    },
-  },
-  // useSecureCookies is now handled consistently via the explicit cookie name above.
-  // Setting it separately caused a mismatch: cookie was SET as next-auth.session-token
-  // but getToken() looked for __Secure-next-auth.session-token in production.
+  // Do NOT override cookie names — let NextAuth use its own defaults.
+  // Custom names caused getServerSession() and the client SessionProvider
+  // to look for different cookie names, resulting in session = null
+  // on the server even though the user was logged in.
   secret: process.env.NEXTAUTH_SECRET,
 } as NextAuthOptions;
 
