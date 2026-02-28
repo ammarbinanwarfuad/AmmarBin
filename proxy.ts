@@ -20,38 +20,24 @@ export async function proxy(req: NextRequest) {
     || req.cookies.get('next-auth.session-token');
   const hasSession = !!sessionCookie;
   
-  // Login page handling
+  // Login page: always allow access.
+  // We intentionally do NOT redirect authenticated users away from the login page here.
+  // Checking only whether the session cookie *exists* (not whether the JWT inside it is
+  // still valid) caused a post-logout loop:
+  //   signOut clears cookie server-side → redirects to /admin/login
+  //   → proxy sees the (now-expired) cookie still in the jar → bounces to /admin/dashboard
+  //   → useSession() fetches /api/auth/session → JWT invalid → "unauthenticated"
+  //   → AdminLayoutClient hard-navs back to /admin/login → repeat forever.
+  // The login form itself uses NextAuth's native callbackUrl redirect, so a legitimately
+  // authenticated user who somehow lands here will be redirected to /admin/dashboard by
+  // NextAuth after a no-op credentials check — no extra proxy logic needed.
   if (url.pathname === "/admin/login") {
-    // If already authenticated, redirect to dashboard
-    if (hasSession) {
-      const dashboardUrl = new URL("/admin/dashboard", req.url);
-      const response = NextResponse.redirect(dashboardUrl);
-      const duration = Date.now() - start;
-      
-      // Prevent caching of redirects
-      response.headers.set('Cache-Control', 'private, no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0');
-      response.headers.set('Pragma', 'no-cache');
-      response.headers.set('Expires', '0');
-      response.headers.set('CDN-Cache-Control', 'no-store');
-      response.headers.set('Vercel-CDN-Cache-Control', 'no-store');
-      response.headers.set('X-Middleware-Duration', duration.toString());
-      response.headers.set('X-Country', country);
-      if (city) response.headers.set('X-City', city);
-      if (region) response.headers.set('X-Region', region);
-      
-      if (duration > 50) {
-        console.warn(`[Middleware] Slow: ${url.pathname} (${duration}ms)`);
-      }
-      
-      return response;
-    }
-    
-    // Not authenticated - allow access to login page with no-cache headers
     const response = NextResponse.next();
     response.headers.set('Cache-Control', 'private, no-store, no-cache, must-revalidate, max-age=0');
     response.headers.set('Pragma', 'no-cache');
     response.headers.set('Expires', '0');
     response.headers.set('CDN-Cache-Control', 'no-store');
+    response.headers.set('Vercel-CDN-Cache-Control', 'no-store');
     response.headers.set('X-Country', country);
     if (city) response.headers.set('X-City', city);
     if (region) response.headers.set('X-Region', region);
