@@ -28,8 +28,8 @@ export default function AdminLoginPage() {
     }
   }, []);
 
-  // Redirect if already authenticated — but never right after a logout
-  // to avoid the stale-cache redirect loop back to dashboard.
+  // Redirect if already authenticated — but only when session status is
+  // definitively resolved (not 'loading') to avoid acting on stale cache.
   useEffect(() => {
     if (status === "authenticated" && session && !isSubmitting && !isPostLogout) {
       window.location.replace("/admin/dashboard");

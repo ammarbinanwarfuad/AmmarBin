@@ -26,11 +26,11 @@ export const metadata: Metadata = {
   keywords: ["portfolio", "developer", "projects", "blog"],
   icons: {
     icon: [
-      { url: '/light.png', media: '(prefers-color-scheme: light)' },
+      { url: '/dark.png', media: '(prefers-color-scheme: light)' },
       { url: '/dark.png', media: '(prefers-color-scheme: dark)' },
     ],
     apple: [
-      { url: '/light.png', media: '(prefers-color-scheme: light)' },
+      { url: '/dark.png', media: '(prefers-color-scheme: light)' },
       { url: '/dark.png', media: '(prefers-color-scheme: dark)' },
     ],
   },

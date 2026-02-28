@@ -9,7 +9,7 @@ export function DynamicFavicon() {
   useEffect(() => {
     if (!resolvedTheme) return;
 
-    const faviconPath = resolvedTheme === "dark" ? "/dark.png" : "/light.png";
+    const faviconPath = resolvedTheme === "dark" ? "/dark.png" : "/dark.png";
 
     // Remove all existing favicon-related links
     const oldLinks = document.querySelectorAll('link[rel*="icon"]');
