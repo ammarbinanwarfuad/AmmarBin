@@ -52,7 +52,7 @@ export default function AdminBackupPage() {
         a.download = `backup-${new Date().toISOString()}.json`;
         document.body.appendChild(a);
         a.click();
-        document.body.removeChild(a);
+        a.remove();
         URL.revokeObjectURL(url);
       } else {
         toast.error("Failed to create backup");

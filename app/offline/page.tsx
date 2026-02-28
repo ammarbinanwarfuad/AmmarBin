@@ -1,11 +1,8 @@
-"use client";
-
-import Link from 'next/link';
-import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { WifiOff, RefreshCw, Home } from 'lucide-react';
+import { WifiOff } from 'lucide-react';
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
+import { OfflineActions } from './OfflineActions';
 
 export default function OfflinePage() {
   return (
@@ -31,22 +28,7 @@ export default function OfflinePage() {
                 <li>Read saved blog posts</li>
               </ul>
             </div>
-            <div className="flex flex-col sm:flex-row gap-3 justify-center">
-              <Button 
-                onClick={() => window.location.reload()} 
-                size="lg"
-                className="gap-2"
-              >
-                <RefreshCw className="h-4 w-4" />
-                Try Again
-              </Button>
-              <Button asChild size="lg" variant="outline">
-                <Link href="/">
-                  <Home className="mr-2 h-4 w-4" />
-                  Go Home
-                </Link>
-              </Button>
-            </div>
+            <OfflineActions />
             <div className="pt-6 border-t">
               <p className="text-xs text-muted-foreground">
                 This page is available offline. Once you reconnect, refresh to see the latest content.

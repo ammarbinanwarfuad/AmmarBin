@@ -5,7 +5,6 @@ import { getSkills } from "@/lib/server/data";
 import { SkillsGrid } from "@/components/SkillsGrid";
 
 export const revalidate = 86400; // 1 day - skills rarely change
-export const dynamic = 'force-static';
 
 export default async function SkillsPage() {
   // Always fetch fresh data from MongoDB (cache bypassed in getSkills)

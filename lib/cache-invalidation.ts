@@ -17,6 +17,18 @@ const CONTENT_TYPE_PATHS: Record<string, string[]> = {
   participation: ['/', '/participation', '/api/participation'],
 };
 
+// unstable_cache tags used in lib/server/data.ts — must match exactly
+const CONTENT_TYPE_TAGS: Record<string, string> = {
+  projects: 'projects',
+  blog: 'blogs',       // getBlogs uses tag 'blogs' (plural)
+  skills: 'skills',
+  education: 'education',
+  experience: 'experience',
+  certifications: 'certifications',
+  profile: 'profile',
+  participation: 'participation',
+};
+
 // Pre-computed all paths for 'all' type
 const ALL_PATHS = Object.values(CONTENT_TYPE_PATHS).flat();
 
@@ -53,7 +65,7 @@ async function invalidateContentCache(
     // Note: revalidateTag may not be available in all Next.js versions
     // Using revalidatePath is sufficient for cache invalidation
     try {
-      const tag = contentType === 'all' ? 'all-content' : contentType;
+      const tag = contentType === 'all' ? 'all-content' : (CONTENT_TYPE_TAGS[contentType] ?? contentType);
       // revalidateTag is available but may have type issues in some Next.js versions
       // The revalidatePath calls above are sufficient for cache invalidation
       if (typeof revalidateTag === 'function') {

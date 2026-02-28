@@ -8,6 +8,9 @@ import { Calendar, Clock, User, Loader2 } from "lucide-react";
 import { formatDate } from "@/lib/utils";
 import { getBlogBySlug } from "@/lib/server/data";
 import { BlogBackButton } from "@/components/BlogBackButton";
+import remarkGfm from "remark-gfm";
+import rehypeHighlight from "rehype-highlight";
+import "highlight.js/styles/github-dark.css";
 
 // ⚡ Performance: Dynamic import React Markdown - Only loads on blog detail pages
 const ReactMarkdown = dynamicImport(() => import("react-markdown"), {
@@ -65,6 +68,7 @@ export default async function BlogDetailPage({ params }: BlogDetailPageProps) {
                   className="w-full h-auto"
                   priority
                   placeholder="blur"
+                  unoptimized={!['res.cloudinary.com', 'avatars.githubusercontent.com', 'raw.githubusercontent.com', 'github.com'].some(h => { try { return new URL(blog.featuredImage).hostname === h; } catch { return false; } })}
                   blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAAIAAoDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAhEAACAQMDBQAAAAAAAAAAAAABAgMABAUGIWGRkqGx0f/EABUBAQEAAAAAAAAAAAAAAAAAAAMF/8QAGhEAAgIDAAAAAAAAAAAAAAAAAAECEgMRkf/aAAwDAQACEQEDAD8AltJagyeH0AthI5xdrLcNM91BF5pX2HaH9bcfaSXWGaRmknyJckliyjqTzSlT54b6bk+h0R//2Q=="
                   sizes="(max-width: 768px) 100vw, (max-width: 1200px) 90vw, 1280px"
                   style={{ maxWidth: "100%", height: "auto" }}
@@ -126,7 +130,10 @@ export default async function BlogDetailPage({ params }: BlogDetailPageProps) {
 
               {/* Content */}
               <article className="prose prose-lg dark:prose-invert max-w-none">
-                <ReactMarkdown>{blog.content}</ReactMarkdown>
+                <ReactMarkdown
+                  remarkPlugins={[remarkGfm]}
+                  rehypePlugins={[rehypeHighlight]}
+                >{blog.content}</ReactMarkdown>
               </article>
 
               {/* Back Button (Bottom) */}

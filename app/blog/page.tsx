@@ -3,8 +3,7 @@ import { Footer } from "@/components/Footer";
 import { getBlogs } from "@/lib/server/data";
 import { BlogGrid } from "@/components/BlogGrid";
 
-export const revalidate = 1800; // 30 minutes - faster revalidation for blogs
-export const dynamic = 'force-static';
+export const revalidate = 1800; // 30 minutes
 
 export default async function BlogPage() {
   const blogs = await getBlogs();

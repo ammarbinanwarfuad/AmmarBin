@@ -1,8 +1,7 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
-import { logger } from "./lib/logger";
 
-export async function middleware(req: NextRequest) {
+export async function proxy(req: NextRequest) {
   const start = Date.now();
   
   // Get user's country from Vercel Edge Network (or Cloudflare)
@@ -40,7 +39,7 @@ export async function middleware(req: NextRequest) {
       if (region) response.headers.set('X-Region', region);
       
       if (duration > 50) {
-        logger.warn('Slow middleware execution', { pathname: url.pathname, duration });
+        console.warn(`[Middleware] Slow: ${url.pathname} (${duration}ms)`);
       }
       
       return response;
@@ -73,31 +72,16 @@ export async function middleware(req: NextRequest) {
   if (city) response.headers.set('X-City', city);
   if (region) response.headers.set('X-Region', region);
   
-  // Static assets - long-term caching
-  if (url.pathname.startsWith('/_next/static/') || 
-      url.pathname.startsWith('/_next/image') ||
-      /\.(jpg|jpeg|png|gif|webp|avif|svg|ico|woff|woff2|ttf|eot)$/i.test(url.pathname)) {
-    if (isProduction) {
-      response.headers.set('Cache-Control', 'public, max-age=31536000, immutable');
-      response.headers.set('CDN-Cache-Control', 'public, max-age=31536000, immutable');
-    }
-  }
-  
-  // API routes - edge caching with stale-while-revalidate
-  if (url.pathname.startsWith('/api/')) {
-    // Skip caching for authenticated/admin and auth routes
-    if (!url.pathname.startsWith('/api/admin/') && !url.pathname.startsWith('/api/auth/') && isProduction) {
-      response.headers.set('Cache-Control', 'public, s-maxage=60, stale-while-revalidate=300');
-      response.headers.set('CDN-Cache-Control', 'public, s-maxage=60');
-    }
-  }
-  
+  // Note: static asset and API cache headers are set in vercel.json.
+  // This proxy only matches /admin/* (see config.matcher below), so those
+  // paths never reach here — handling them here was dead code.
+
   const duration = Date.now() - start;
   response.headers.set('X-Middleware-Duration', duration.toString());
   
   // Log slow middleware (>50ms is concerning)
   if (duration > 50) {
-    logger.warn('Slow middleware execution', { pathname: url.pathname, duration });
+    console.warn(`[Middleware] Slow: ${url.pathname} (${duration}ms)`);
   }
   
   return response;

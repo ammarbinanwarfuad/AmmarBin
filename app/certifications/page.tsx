@@ -4,7 +4,6 @@ import { getCertifications } from "@/lib/server/data";
 import { CertificationsGridWithFilter } from "@/components/CertificationsGridWithFilter";
 
 export const revalidate = 3600; // 1 hour
-export const dynamic = 'force-static';
 
 export default async function CertificationsPage() {
   const { certificates, stats } = await getCertifications();

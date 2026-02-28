@@ -7,7 +7,6 @@ import { AboutContent } from "@/components/AboutContent";
 import { Card } from "@/components/ui/card";
 
 export const revalidate = 86400; // 1 day - profile info rarely changes
-export const dynamic = 'force-static';
 
 // ⚡ Performance: Separate async component for Suspense
 async function AboutProfileContent() {

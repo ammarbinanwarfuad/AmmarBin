@@ -71,14 +71,19 @@ export async function POST(request: Request) {
       }
 
       // Check if project already exists to preserve manually assigned fields
-      const existingProject = await Project.findOne({ githubUrl: repo.html_url });
+      // Search by BOTH githubUrl and slug to avoid duplicate key errors when a project
+      // was manually created with the same slug but a different (or missing) githubUrl
+      const slug = slugify(repo.name);
+      const existingProject = await Project.findOne({
+        $or: [{ githubUrl: repo.html_url }, { slug }],
+      });
       const hasManualCategory = existingProject?.category && existingProject.category.trim() !== "";
       const hasManualTechStack = existingProject?.techStack && existingProject.techStack.length > 0;
 
       // Build project data from GitHub - only include fields that come from GitHub
       const projectData: Record<string, unknown> = {
         title: repo.name,
-        slug: slugify(repo.name),
+        slug,
         description: repo.description || "No description available",
         githubUrl: repo.html_url,
         liveUrl: repo.homepage || "",
@@ -117,8 +122,14 @@ export async function POST(request: Request) {
       // - featured
       // - image
       // These fields are NOT included in projectData for existing projects, so they won't be overwritten
+      // Upsert: if existing doc found, update by _id to avoid slug unique-index conflicts.
+      // If not found, insert new with the slug as the filter anchor.
+      const upsertFilter = existingProject
+        ? { _id: existingProject._id }
+        : { slug };
+
       await Project.findOneAndUpdate(
-        { githubUrl: repo.html_url },
+        upsertFilter,
         { $set: projectData },
         { upsert: true, new: true }
       );

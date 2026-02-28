@@ -9,8 +9,8 @@ import { DynamicFavicon } from "@/components/DynamicFavicon";
 export function Providers({ children }: { children: React.ReactNode }) {
   return (
     <SessionProvider 
-      refetchInterval={60}
-      refetchOnWindowFocus={true}
+      refetchInterval={0}
+      refetchOnWindowFocus={false}
       refetchWhenOffline={false}
     >
       <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>

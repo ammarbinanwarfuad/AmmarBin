@@ -84,41 +84,27 @@ export default function RootLayout({
         <link rel="dns-prefetch" href="https://res.cloudinary.com" />
         <link rel="dns-prefetch" href="https://vercel.live" />
         <link rel="preconnect" href="https://vercel.live" crossOrigin="anonymous" />
-        {/* Preload LCP image - Critical for Largest Contentful Paint - Reduced quality to 65 for faster load */}
-        <link
-          rel="preload"
-          as="image"
-          href="https://res.cloudinary.com/ammarbin/image/upload/c_fill,w_384,h_384,f_avif,q_65,dpr_2/v1762075570/profile/fshoacntppx9mgjwvlca.jpg"
-          fetchPriority="high"
-          imageSrcSet="https://res.cloudinary.com/ammarbin/image/upload/c_fill,w_192,h_192,f_avif,q_65,dpr_1/v1762075570/profile/fshoacntppx9mgjwvlca.jpg 192w, https://res.cloudinary.com/ammarbin/image/upload/c_fill,w_384,h_384,f_avif,q_65,dpr_2/v1762075570/profile/fshoacntppx9mgjwvlca.jpg 384w"
-          imageSizes="192px"
-        />
+        {/* LCP image preload is handled inside HeroContent with fetchPriority="high" on the <Image> component
+            so we don't hardcode a URL here that could fall out of sync when the profile image is updated */}
         {/* Preload critical CSS */}
         <link
           rel="preload"
           href="/_next/static/css/app.css"
           as="style"
         />
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="dns-prefetch" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        {/* Font preloading handled by Next.js font optimization */}
-        {/* Static favicon fallback for first paint and no-JS users */}
-        <link rel="icon" type="image/png" href="/light.png" />
-        <link rel="icon" type="image/png" href="/light.png" media="(prefers-color-scheme: light)" />
-        <link rel="icon" type="image/png" href="/dark.png" media="(prefers-color-scheme: dark)" />
-        <link rel="apple-touch-icon" href="/light.png" media="(prefers-color-scheme: light)" />
-        <link rel="apple-touch-icon" href="/dark.png" media="(prefers-color-scheme: dark)" />
+        {/* Google Fonts preconnect removed — Inter is self-hosted via next/font, no external fetch needed */}
+        {/* Font preloading handled by Next.js font optimization (Inter is self-hosted — no Google Fonts connection needed) */}
+        {/* Icons are declared via the metadata export above — no manual link tags needed */}
       </head>
       <body className={`${inter.className} antialiased`} suppressHydrationWarning>
         {/* Defer non-critical components to improve initial load */}
         <Providers>{children}</Providers>
         {/* ⚡ Performance: Load analytics after page is interactive */}
         <DeferredAnalytics />
-        {/* Performance monitoring */}
-        <ClientPerformanceMonitor />
-        {/* Performance budget monitoring */}
-        <PerformanceBudgetMonitor />
+        {/* Performance monitoring — dev only, no overhead in production */}
+        {process.env.NODE_ENV === 'development' && <ClientPerformanceMonitor />}
+        {/* Performance budget monitoring — dev only */}
+        {process.env.NODE_ENV === 'development' && <PerformanceBudgetMonitor />}
         {/* Vercel Analytics - Auto-detects on Vercel, works without ID */}
         <Analytics />
         {/* Vercel Speed Insights - Auto-detects on Vercel, works without ID */}

@@ -39,7 +39,7 @@ export function PDFViewer({ url }: PDFViewerProps) {
     link.download = "resume.pdf";
     document.body.appendChild(link);
     link.click();
-    document.body.removeChild(link);
+    link.remove();
   };
 
   const handleLoad = () => {
@@ -121,17 +121,11 @@ export function PDFViewer({ url }: PDFViewerProps) {
             <span className="ml-2 text-muted-foreground">Loading PDF...</span>
           </div>
         )}
-        <div className="relative w-full" style={{ minHeight: "800px" }}>
+        <div className="relative w-full min-h-[800px]">
           <iframe
             src={googleDocsViewerUrl}
-            className="w-full border-0 rounded-lg shadow-lg"
-            style={{
-              height: "calc(100vh - 250px)",
-              minHeight: "800px",
-              transform: `scale(${scale / 100})`,
-              transformOrigin: "top center",
-              transition: "transform 0.3s ease",
-            }}
+            className="w-full border-0 rounded-lg shadow-lg h-[calc(100vh-250px)] min-h-[800px] origin-top transition-transform duration-300 ease-in-out"
+            style={{ transform: `scale(${scale / 100})` }}
             title="Resume PDF"
             onLoad={handleLoad}
             onError={handleError}

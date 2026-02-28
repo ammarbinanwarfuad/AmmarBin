@@ -22,7 +22,6 @@ import {
 import { format } from "date-fns";
 
 export const revalidate = 3600; // 1 hour
-export const dynamic = 'force-static';
 
 interface Certificate {
   _id: string;

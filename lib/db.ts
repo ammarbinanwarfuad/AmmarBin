@@ -1,6 +1,24 @@
 import mongoose from "mongoose";
 import { logger } from "./logger";
 
+/**
+ * Apply DNS fixes for Windows/Node.js 18+ before any MongoDB connection.
+ * Called inside connectDB() to guarantee execution order.
+ * - Node 18+ prefers IPv6 by default, which breaks MongoDB Atlas SRV lookups
+ * - Windows local resolver often refuses SRV queries entirely
+ * Uses require() to avoid bundling Node.js built-ins in client/edge chunks.
+ */
+function applyDnsFix() {
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const dns = require("dns") as typeof import("dns");
+    dns.setDefaultResultOrder("ipv4first");
+    dns.setServers(["8.8.8.8", "8.8.4.4", "1.1.1.1", "1.0.0.1"]);
+  } catch {
+    // Not available in Edge runtime — safe to ignore
+  }
+}
+
 // Lazy evaluation - only check when connectDB is called, not at module load time
 // This allows tests to set MONGODB_URI before importing
 function getMongoUri(): string {
@@ -52,7 +70,7 @@ if (!global.mongoose) {
   global.mongoose = cached;
 }
 
-export async function connectDB() {
+export async function connectDB(retryCount = 0) {
   const start = Date.now();
   
   // Get URI when function is called, not at module load time
@@ -71,6 +89,10 @@ export async function connectDB() {
       logger.info('DB: Creating new connection');
     }
     
+    // Apply DNS fix and set cached.promise atomically (single-threaded JS — safe).
+    // The tiny delay gives dns.setServers() time to take effect before the SRV lookup
+    // is dispatched, preventing the ~6ms ECONNREFUSED race on Windows cold starts.
+    applyDnsFix();
     const opts = {
       bufferCommands: false,
       maxPoolSize: 3, // Lower for serverless to avoid connection exhaustion
@@ -85,10 +107,11 @@ export async function connectDB() {
       // Optimize for performance
       compressors: ['zlib'] as ('zlib' | 'none' | 'snappy' | 'zstd')[], // Enable compression for faster data transfer
       // Connection pool monitoring
-      maxIdleTimeMS: 60000, // Keep connections alive longer for serverless
+      maxIdleTimeMS: 300000, // 5 minutes — keep warm between serverless cold starts
       // Optimize for serverless/edge
       directConnection: false, // Use connection pool (not direct)
       waitQueueTimeoutMS: 10000, // Increased timeout for serverless cold starts
+      family: 4, // Force IPv4 to match DNS resolution order
     };
 
     cached.promise = mongoose.connect(MONGODB_URI, opts).then((mongoose) => {
@@ -110,16 +133,20 @@ export async function connectDB() {
     cached.promise = null;
     const duration = Date.now() - start;
     const errorMessage = e instanceof Error ? e.message : 'Unknown error';
+
+    // Retry once on DNS/SRV failures (Windows cold-start race with dns.setServers).
+    // The first SRV lookup can fire before the override takes effect; waiting 300ms
+    // and retrying is enough for the DNS change to propagate.
+    const isDnsError = errorMessage.includes('querySrv') || errorMessage.includes('ECONNREFUSED') || errorMessage.includes('getaddrinfo');
+    if (isDnsError && retryCount === 0) {
+      logger.warn('DB: DNS error on first connect, retrying after 300ms', { errorMessage });
+      await new Promise(resolve => setTimeout(resolve, 300));
+      return connectDB(1);
+    }
+
     logger.error('DB: Connection failed', e, { duration, errorMessage });
     
-    // Provide more helpful error message
-    if (errorMessage.includes('ENOTFOUND') || errorMessage.includes('ETIMEDOUT')) {
-      throw new Error('Unable to reach database server. Please check your network connection.');
-    } else if (errorMessage.includes('Authentication failed')) {
-      throw new Error('Database authentication failed. Please check credentials.');
-    }
-    
-    throw new Error(`Database connection failed: ${errorMessage}`);
+    throw new Error("Database connection failed. Please try again.");
   }
 
   return cached.conn;

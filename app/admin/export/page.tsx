@@ -57,7 +57,7 @@ export default function AdminExportPage() {
           a.download = `portfolio-export-${Date.now()}.json`;
           document.body.appendChild(a);
           a.click();
-          document.body.removeChild(a);
+          a.remove();
           URL.revokeObjectURL(url);
         } else {
           const blob = await response.blob();
@@ -67,7 +67,7 @@ export default function AdminExportPage() {
           a.download = `portfolio-export-${Date.now()}.csv`;
           document.body.appendChild(a);
           a.click();
-          document.body.removeChild(a);
+          a.remove();
           URL.revokeObjectURL(url);
         }
         toast.success(`Export completed!`);
@@ -180,11 +180,12 @@ export default function AdminExportPage() {
                   >
                     <input
                       type="checkbox"
+                      id={`collection-${collection.id}`}
                       checked={selectedCollections.includes(collection.id)}
                       onChange={() => toggleCollection(collection.id)}
                       className="rounded flex-shrink-0"
                     />
-                    <label className="text-sm cursor-pointer truncate">
+                    <label htmlFor={`collection-${collection.id}`} className="text-sm cursor-pointer truncate">
                       {collection.label}
                     </label>
                   </div>

@@ -5,7 +5,6 @@ import { getEducation } from "@/lib/server/data";
 import { EducationList } from "@/components/EducationList";
 
 export const revalidate = 3600; // 1 hour
-export const dynamic = 'force-static';
 
 export default async function EducationPage() {
   const education = await getEducation();

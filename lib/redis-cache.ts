@@ -1,7 +1,19 @@
 // ✅ OPTIMIZED: Redis caching utilities for 50-90% faster API responses
 
-import { kv } from '@vercel/kv';
 import { logger } from './logger';
+
+// Check if Vercel KV is configured (only available in production/Vercel deployments)
+const isKvAvailable =
+  !!process.env.KV_REST_API_URL && !!process.env.KV_REST_API_TOKEN;
+
+// Lazily import kv only when available to avoid module-load-time errors in local dev
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+let kv: any = null;
+if (isKvAvailable) {
+  // Dynamic require so the module is never evaluated when env vars are missing
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  kv = require('@vercel/kv').kv;
+}
 
 /**
  * Cache configuration for different data types
@@ -54,9 +66,12 @@ export async function getCached<T>(
   fetcher: () => Promise<T>,
   ttl: number
 ): Promise<T> {
+  // No KV in local dev — skip cache entirely, call fetcher directly
+  if (!isKvAvailable) return fetcher();
+
   try {
     // Try to get from cache
-    const cached = await kv.get<T>(key);
+    const cached = (await kv.get(key)) as T | null;
     
     if (cached !== null) {
       logger.debug('Cache HIT', { key });
@@ -73,8 +88,8 @@ export async function getCached<T>(
     const data = await fetcher();
     
     // Store in cache (fire and forget - don't await)
-    kv.setex(key, ttl, data).catch((error) => {
-      logger.error('Cache: Failed to set key', error, { key });
+    kv.setex(key, ttl, data).catch((_err: unknown) => {
+      logger.error('Cache: Failed to set key', _err, { key });
     });
     
     return data;
@@ -95,6 +110,8 @@ export async function getCached<T>(
  * await invalidateCache('messages:page:1'); // Invalidate specific page
  */
 export async function invalidateCache(keyOrPattern: string): Promise<void> {
+  if (!isKvAvailable) return;
+
   try {
     if (keyOrPattern.includes('*')) {
       // Pattern-based deletion
@@ -125,6 +142,8 @@ export async function setCache<T>(
   value: T,
   ttl: number
 ): Promise<void> {
+  if (!isKvAvailable) return;
+
   try {
     await kv.setex(key, ttl, value);
     logger.debug('Cache SET', { key, ttl });
@@ -140,8 +159,10 @@ export async function setCache<T>(
  * @returns Cached data or null
  */
 export async function getCache<T>(key: string): Promise<T | null> {
+  if (!isKvAvailable) return null;
+
   try {
-    const cached = await kv.get<T>(key);
+    const cached = (await kv.get(key)) as T | null;
     if (cached !== null) {
       logger.debug('Cache HIT', { key });
     } else {
@@ -163,6 +184,8 @@ export async function getCache<T>(key: string): Promise<T | null> {
  * @returns New count
  */
 export async function incrementCache(key: string, ttl?: number): Promise<number> {
+  if (!isKvAvailable) return 0;
+
   try {
     const count = await kv.incr(key);
     if (ttl && count === 1) {
@@ -183,6 +206,8 @@ export async function getCacheStats(): Promise<{
   keys: number;
   memory: string;
 }> {
+  if (!isKvAvailable) return { keys: 0, memory: 'N/A (KV not configured)' };
+
   try {
     const keys = await kv.keys('*');
     return {

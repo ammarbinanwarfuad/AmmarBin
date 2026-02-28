@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Plus, Trash2, FileText, X, Save, Eye, CheckCircle, RefreshCw, CheckSquare, Square, Pencil } from "lucide-react";
+import { Plus, Trash2, FileText, X, Save, Eye, EyeOff, RefreshCw, CheckSquare, Square, Pencil } from "lucide-react";
 import toast from "react-hot-toast";
 import { format } from "date-fns";
 import { ImageUpload } from "@/components/ImageUpload";
@@ -234,7 +234,7 @@ export function BlogClient({ initialBlogs }: { initialBlogs: Blog[] }) {
       excerpt: blog.excerpt || "",
       content: blog.content,
       author: blog.author,
-      tags: blog.tags.join(", "),
+      tags: blog.tags?.join(", ") ?? "",
       featuredImage: blog.featuredImage || "",
       published: blog.published,
       publishedDate: blog.publishedDate ? new Date(blog.publishedDate).toISOString().slice(0, 16) : "",
@@ -290,24 +290,24 @@ export function BlogClient({ initialBlogs }: { initialBlogs: Blog[] }) {
     }
   };
 
-  const handlePublish = async (id: string) => {
+  const handleTogglePublish = async (id: string, currentlyPublished: boolean) => {
     try {
       const response = await fetch(`/api/blog/${id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ published: true }),
+        body: JSON.stringify({ published: !currentlyPublished }),
       });
 
       if (response.ok) {
-        toast.success("Blog post published successfully!");
+        toast.success(currentlyPublished ? "Blog post unpublished." : "Blog post published!");
         startTransition(() => {
           refresh(); // ⚡ SWR cache refresh
         });
       } else {
-        toast.error("Failed to publish blog post");
+        toast.error("Failed to update blog post");
       }
     } catch (error) {
-      console.error("Error publishing blog:", error);
+      console.error("Error toggling blog publish state:", error);
       toast.error("An error occurred");
     }
   };
@@ -641,17 +641,19 @@ export function BlogClient({ initialBlogs }: { initialBlogs: Blog[] }) {
                       </div>
                     </div>
                     <div className="flex gap-1.5 sm:gap-2 flex-shrink-0 w-full sm:w-auto justify-end">
-                      {!blog.published && (
-                        <Button
-                          size="sm"
-                          variant="default"
-                          onClick={() => handlePublish(blog._id)}
-                          className="gap-2 text-xs sm:text-sm h-8 sm:h-9"
-                        >
-                          <CheckCircle className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-                          Publish
-                        </Button>
-                      )}
+                      <Button
+                        size="icon"
+                        variant="ghost"
+                        onClick={() => handleTogglePublish(blog._id, blog.published)}
+                        title={blog.published ? "Unpublish (hide from public)" : "Publish (make visible)"}
+                        className="h-8 w-8 sm:h-10 sm:w-10"
+                      >
+                        {blog.published ? (
+                          <Eye className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-green-500" />
+                        ) : (
+                          <EyeOff className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-muted-foreground" />
+                        )}
+                      </Button>
                       <Button
                         size="icon"
                         variant="ghost"
@@ -660,16 +662,6 @@ export function BlogClient({ initialBlogs }: { initialBlogs: Blog[] }) {
                         className="h-8 w-8 sm:h-10 sm:w-10"
                       >
                         <Pencil className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-                      </Button>
-                      <Button
-                        size="icon"
-                        variant="ghost"
-                        asChild
-                        className="h-8 w-8 sm:h-10 sm:w-10"
-                      >
-                        <a href={`/blog/${blog.slug}`} target="_blank" rel="noopener noreferrer" aria-label="View blog post">
-                          <Eye className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-                        </a>
                       </Button>
                       <AlertDialog>
                         <AlertDialogTrigger asChild>

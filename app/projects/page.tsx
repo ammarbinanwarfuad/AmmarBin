@@ -6,7 +6,6 @@ import { ProjectsGridWithFilter } from "@/components/ProjectsGridWithFilter";
 import { ProjectsSkeleton } from "@/components/ProjectsSkeleton";
 
 export const revalidate = 7200; // 2 hours - projects don't change frequently
-export const dynamic = 'force-static';
 
 // Async component for projects with streaming
 async function ProjectsSection() {

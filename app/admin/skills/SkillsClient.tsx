@@ -101,7 +101,7 @@ function normalizeColorToHex(color: string): string | null {
       tempDiv.style.color = trimmed;
       document.body.appendChild(tempDiv);
       const computedColor = window.getComputedStyle(tempDiv).color;
-      document.body.removeChild(tempDiv);
+      tempDiv.remove();
       
       if (computedColor && computedColor !== 'rgba(0, 0, 0, 0)') {
         const rgbMatch2 = computedColor.match(/^rgba?\((\d+),\s*(\d+),\s*(\d+)/);
@@ -914,11 +914,8 @@ export function SkillsClient({ initialSkills }: { initialSkills: Skill[] }) {
                         <CardContent>
                           <div className="w-full bg-secondary rounded-full h-2.5">
                             <div
-                              className="h-2.5 rounded-full transition-all duration-500"
-                              style={{ 
-                                width: "100%",
-                                backgroundColor: getCategoryColor(skill.category, categoryColors)
-                              }}
+                              className="h-2.5 rounded-full transition-all duration-500 w-full"
+                              style={{ backgroundColor: getCategoryColor(skill.category, categoryColors) }}
                             />
                           </div>
                         </CardContent>

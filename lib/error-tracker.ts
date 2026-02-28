@@ -55,18 +55,13 @@ export async function reportError(error: Error, context?: Record<string, unknown
  */
 function safeConsoleError(...args: unknown[]) {
   try {
-    // Use setTimeout to avoid issues with console in certain contexts
-    setTimeout(() => {
-      try {
-        if (typeof console !== 'undefined' && console.error) {
-          console.error(...args);
-        }
-      } catch {
-        // Ignore any errors from console.error
-      }
-    }, 0);
+    if (typeof console !== 'undefined') {
+      // Use console.warn to avoid triggering the Next.js dev overlay
+      // which intercepts console.error and displays it as an error overlay.
+      console.warn(...args);
+    }
   } catch {
-    // Completely ignore if setTimeout fails
+    // Ignore any errors from console.warn
   }
 }
 

@@ -12,12 +12,12 @@ export async function GET(request: Request) {
     const slug = searchParams.get("slug");
     const includeUnpublished = searchParams.get("includeUnpublished") === "true";
 
-    // If slug is provided, fetch single blog post
+    // If slug is provided, fetch single blog post (public: only published)
     if (slug) {
       const getCachedBlog = unstable_cache(
         async () => {
           await connectDB();
-          return await Blog.findOne({ slug })
+          return await Blog.findOne({ slug, published: true })
         .lean()
             .maxTimeMS(500);
         },
@@ -64,7 +64,7 @@ export async function GET(request: Request) {
         .select('_id title slug published publishedDate thumbnail excerpt category readingTime createdAt')
         .sort({ publishedDate: -1, createdAt: -1 })
         .lean()
-            .maxTimeMS(500);
+            .maxTimeMS(5000);
     }
 
     // Fetch external blogs
@@ -74,7 +74,7 @@ export async function GET(request: Request) {
       externalBlogs = await ExternalBlog.find(query)
         .sort({ publishedDate: -1 })
         .lean()
-            .maxTimeMS(500);
+            .maxTimeMS(5000);
     }
 
     // Combine and add source field

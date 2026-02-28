@@ -32,6 +32,20 @@ function getSourceLabel(source: string): string {
   return labels[source] || source;
 }
 
+// Known-safe hostnames for Next.js image optimization (matches remotePatterns).
+// Placeholder domains (via.placeholder.com, placehold.co) are excluded — their DNS
+// resolution fails on the server side, so they must use unoptimized={true}.
+const OPTIMIZED_HOSTS = ['res.cloudinary.com', 'avatars.githubusercontent.com', 'raw.githubusercontent.com', 'github.com'];
+
+function isOptimizableUrl(url: string): boolean {
+  try {
+    const hostname = new URL(url).hostname;
+    return OPTIMIZED_HOSTS.some(h => hostname === h || hostname.endsWith('.' + h));
+  } catch {
+    return false;
+  }
+}
+
 // Server Component - Blog Card with CSS animations
 function BlogCard({ blog, index }: { blog: Blog; index: number }) {
   // Calculate delay for staggered animation
@@ -56,6 +70,7 @@ function BlogCard({ blog, index }: { blog: Blog; index: number }) {
               loading={index < 3 ? 'eager' : 'lazy'}
               quality={60}
               placeholder="blur"
+              unoptimized={!isOptimizableUrl(blog.featuredImage)}
               blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAAIAAoDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAhEAACAQMDBQAAAAAAAAAAAAABAgMABAUGIWGRkqGx0f/EABUBAQEAAAAAAAAAAAAAAAAAAAMF/8QAGhEAAgIDAAAAAAAAAAAAAAAAAAECEgMRkf/aAAwDAQACEQEDAD8AltJagyeH0AthI5xdrLcNM91BF5pX2HaH9bcfaSXWGaRmknyJckliyjqTzSlT54b6bk+h0R//2Q=="
             />
           </div>

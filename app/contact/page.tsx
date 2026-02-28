@@ -6,7 +6,6 @@ import { Mail, MapPin, Loader2 } from "lucide-react";
 import dynamicImport from "next/dynamic";
 
 export const revalidate = 3600; // 1 hour
-export const dynamic = 'force-static';
 
 // ⚡ Performance: Dynamic import ContactForm - Only load on contact page
 const ContactForm = dynamicImport(

@@ -9,12 +9,17 @@ const nextConfig: NextConfig = {
   // Image Optimization
   images: {
     remotePatterns: [
-      {
-        protocol: "https",
-        hostname: "**",
-      },
+      { protocol: "https", hostname: "res.cloudinary.com" },
+      { protocol: "https", hostname: "avatars.githubusercontent.com" },
+      { protocol: "https", hostname: "raw.githubusercontent.com" },
+      { protocol: "https", hostname: "github.com" },
+      { protocol: "https", hostname: "*.githubusercontent.com" },
+      // Note: via.placeholder.com and placehold.co are intentionally excluded.
+      // Their DNS is unreliable on the server side — those images use unoptimized={true}
+      // and are fetched directly by the browser.
     ],
-    formats: ["image/avif", "image/webp"], // Modern formats = 30-50% smaller
+    formats: ["image/avif", "image/webp"],
+    qualities: [65, 75, 90],
     deviceSizes: [640, 750, 828, 1080, 1200],
     imageSizes: [16, 32, 48, 64, 96],
     minimumCacheTTL: 31536000, // Cache images for 1 year

@@ -19,10 +19,10 @@ export const getProfile = unstable_cache(
     // Ultra-optimized query - minimal fields, lean(), indexed query
     // Using hint({}) to ensure index usage and limit(1) for faster query
     let profile = await Profile.findOne()
-      .select('name title bio profileImage email location socialLinks heroContent aboutContent languages hobbies resumePDF')
+      .select('name title bio profileImage email phone location socialLinks heroContent aboutContent languages hobbies resumePDF')
       .lean()
       .limit(1)
-      .maxTimeMS(200); // Ultra-fast timeout for instant response
+      .maxTimeMS(5000);
 
     if (!profile) {
       // Create default profile if none exists
@@ -76,10 +76,10 @@ export const getProfile = unstable_cache(
     return defaultProfile;
   }
   },
-  ['profile'],
+  ['v1', 'profile'],
   {
     tags: ['profile'],
-    revalidate: 3600, // 1 hour - aggressive caching for instant loads
+    revalidate: 3600,
   }
 );
 
@@ -106,7 +106,7 @@ export const getProjects = unstable_cache(
         .select('title slug description image techStack category liveUrl githubUrl videoUrl featured dateCreated published')
         .sort({ dateCreated: -1 })
         .lean()
-        .maxTimeMS(200);
+        .maxTimeMS(5000);
       const result = JSON.parse(JSON.stringify(projects));
       return result;
     } catch (error) {
@@ -114,73 +114,80 @@ export const getProjects = unstable_cache(
       return [];
     }
   },
-  ['projects'],
+  ['v1', 'projects'],
   { tags: ['projects'], revalidate: 3600 }
 );
 
 // Blog Data with caching
-export const getBlogs = unstable_cache(
-  async (source?: string, includeUnpublished?: boolean) => {
-    try {
-      await connectDB();
-      const Blog = (await import("@/models/Blog")).default;
-      const ExternalBlog = (await import("@/models/ExternalBlog")).default;
+// NOTE: unstable_cache key must vary by params — wrap inside function so each
+// unique (source, includeUnpublished) combination gets its own cache entry.
+async function fetchBlogs(source?: string, includeUnpublished?: boolean) {
+  await connectDB();
+  const Blog = (await import("@/models/Blog")).default;
+  const ExternalBlog = (await import("@/models/ExternalBlog")).default;
 
-      // Fetch internal blogs
-      let internalBlogs: Array<Record<string, unknown>> = [];
-      if (!source || source === "internal") {
-        const query = includeUnpublished ? {} : { published: true };
-        internalBlogs = await Blog.find(query)
-          .select('title slug excerpt featuredImage publishedDate readTime tags createdAt published')
-          .sort({ publishedDate: -1, createdAt: -1 })
-          .lean()
-          .maxTimeMS(200);
-      }
+  // Fetch internal blogs
+  let internalBlogs: Array<Record<string, unknown>> = [];
+  if (!source || source === "internal") {
+    const query = includeUnpublished ? {} : { published: true };
+    internalBlogs = await Blog.find(query)
+      .select('title slug excerpt featuredImage publishedDate readTime tags createdAt published')
+      .sort({ publishedDate: -1, createdAt: -1 })
+      .lean()
+      .maxTimeMS(5000);
+  }
 
-      // Fetch external blogs
-      let externalBlogs: Array<Record<string, unknown>> = [];
-      if (!source || source !== "internal") {
-        const query = source ? { source } : {};
-        externalBlogs = await ExternalBlog.find(query)
-          .select('title slug excerpt featuredImage publishedDate readTime tags source url')
-          .sort({ publishedDate: -1 })
-          .lean()
-          .maxTimeMS(200);
-      }
+  // Fetch external blogs
+  let externalBlogs: Array<Record<string, unknown>> = [];
+  if (!source || source !== "internal") {
+    const query = source ? { source } : {};
+    externalBlogs = await ExternalBlog.find(query)
+      .select('title slug excerpt featuredImage publishedDate readTime tags source url')
+      .sort({ publishedDate: -1 })
+      .lean()
+      .maxTimeMS(5000);
+  }
 
-      // Combine and add source field
-      const allBlogs = [
-        ...internalBlogs.map((blog) => ({ ...blog, source: "internal" })),
-        ...externalBlogs.map((blog) => ({
-          ...blog,
-          source: blog.source || "external",
-          published: true,
-        })),
-      ].sort((a, b) => {
-        const dateA = new Date(((a as Record<string, unknown>).publishedDate || (a as Record<string, unknown>).createdAt || 0) as string | number);
-        const dateB = new Date(((b as Record<string, unknown>).publishedDate || (b as Record<string, unknown>).createdAt || 0) as string | number);
-        return dateB.getTime() - dateA.getTime();
-      });
+  const allBlogs = [
+    ...internalBlogs.map((blog) => ({ ...blog, source: "internal" })),
+    ...externalBlogs.map((blog) => ({
+      ...blog,
+      source: blog.source || "external",
+      published: true,
+    })),
+  ].sort((a, b) => {
+    const dateA = new Date(((a as Record<string, unknown>).publishedDate || (a as Record<string, unknown>).createdAt || 0) as string | number);
+    const dateB = new Date(((b as Record<string, unknown>).publishedDate || (b as Record<string, unknown>).createdAt || 0) as string | number);
+    return dateB.getTime() - dateA.getTime();
+  });
 
-      const result = JSON.parse(JSON.stringify(allBlogs));
-      return result;
-    } catch (error) {
-      logger.error("Failed to fetch blogs", error);
-      return [];
-    }
-  },
-  ['blogs'],
-  { tags: ['blogs'], revalidate: 1800 } // 30 minutes for blogs
-);
+  return JSON.parse(JSON.stringify(allBlogs));
+}
+
+export async function getBlogs(source?: string, includeUnpublished?: boolean) {
+  // Build a unique cache key per param combination
+  const cacheKey = `v2:blogs:${source ?? 'all'}:${includeUnpublished ? '1' : '0'}`;
+  try {
+    const cached = unstable_cache(
+      () => fetchBlogs(source, includeUnpublished),
+      [cacheKey],
+      { tags: ['blogs'], revalidate: 1800 }
+    );
+    return await cached();
+  } catch (error) {
+    logger.error("Failed to fetch blogs", error);
+    return [];
+  }
+}
 
 // Single Blog Post
 export const getBlogBySlug = async (slug: string) => {
   try {
     await connectDB();
     const Blog = (await import("@/models/Blog")).default;
-    const blog = await Blog.findOne({ slug })
+    const blog = await Blog.findOne({ slug, published: true })
       .lean()
-      .maxTimeMS(500); // Timeout for faster TTFB
+      .maxTimeMS(5000);
     
     if (!blog) {
       return null;
@@ -204,7 +211,7 @@ export const getExperiences = unstable_cache(
         .select('company companyLogo role startDate endDate current location description responsibilities skills')
         .sort({ startDate: -1 })
         .lean()
-        .maxTimeMS(200);
+        .maxTimeMS(5000);
       const result = JSON.parse(JSON.stringify(experiences));
       return result;
     } catch (error) {
@@ -212,7 +219,7 @@ export const getExperiences = unstable_cache(
       return [];
     }
   },
-  ['experience'],
+  ['v1', 'experience'],
   { tags: ['experience'], revalidate: 3600 }
 );
 
@@ -226,14 +233,14 @@ export const getParticipations = unstable_cache(
         .select('title organization role startDate endDate current location description impact images')
         .sort({ startDate: -1 })
         .lean()
-        .maxTimeMS(200);
+        .maxTimeMS(5000);
       return JSON.parse(JSON.stringify(participations));
     } catch (error) {
       logger.error("Failed to fetch participations", error);
       return [];
     }
   },
-  ['participation'],
+  ['v1', 'participation'],
   { tags: ['participation'], revalidate: 3600 }
 );
 
@@ -247,7 +254,7 @@ export const getEducation = unstable_cache(
         .select('institution institutionLogo degree field startDate endDate current grade location description achievements')
         .sort({ startDate: -1 })
         .lean()
-        .maxTimeMS(200);
+        .maxTimeMS(5000);
       const result = JSON.parse(JSON.stringify(education));
       return result;
     } catch (error) {
@@ -255,7 +262,7 @@ export const getEducation = unstable_cache(
       return [];
     }
   },
-  ['education'],
+  ['v1', 'education'],
   { tags: ['education'], revalidate: 3600 }
 );
 
@@ -269,7 +276,7 @@ export const getSkills = unstable_cache(
         .select('name category proficiency icon')
         .sort({ category: 1, proficiency: -1 })
         .lean()
-        .maxTimeMS(200);
+        .maxTimeMS(5000);
       
       const result = JSON.parse(JSON.stringify(skills));
       return result;
@@ -278,7 +285,7 @@ export const getSkills = unstable_cache(
       return [];
     }
   },
-  ['skills'],
+  ['v1', 'skills'],
   { tags: ['skills'], revalidate: 3600 }
 );
 
@@ -310,14 +317,14 @@ export const getCertifications = async (filters?: { category?: string; search?: 
       .select('_id title issuer category issueDate expiryDate credentialId verificationUrl certificateImage skills description featured')
       .sort({ issueDate: -1 })
       .lean()
-      .maxTimeMS(200);
+      .maxTimeMS(5000);
     
     // Calculate stats - only count published certificates
     const publishedQuery: Record<string, unknown> = { published: true };
     const allCertificates = await Certificate.find(publishedQuery)
       .select('category expiryDate published')
       .lean()
-      .maxTimeMS(200);
+      .maxTimeMS(5000);
     const now = new Date();
     // Active: published certificates with no expiry date OR expiry date in the future
     const active = allCertificates.filter(c => !c.expiryDate || new Date(c.expiryDate as Date) > now).length;

@@ -6,7 +6,6 @@ import { ExperienceTabsClient } from "@/components/ExperienceTabsClient";
 import { Card } from "@/components/ui/card";
 
 export const revalidate = 86400; // 1 day - experience rarely changes
-export const dynamic = 'force-static';
 
 // ⚡ Performance: Separate async component for Suspense
 async function ExperienceContent() {

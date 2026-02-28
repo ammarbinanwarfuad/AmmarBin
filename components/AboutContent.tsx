@@ -8,11 +8,21 @@ interface ProfileData {
   bio: string;
   profileImage: string;
   email: string;
+  phone?: string;
   location: string;
   aboutContent: string;
   languages: string[];
   hobbies: string[];
   resumePDF?: string;
+  socialLinks?: {
+    github?: string;
+    linkedin?: string;
+    twitter?: string;
+    facebook?: string;
+    instagram?: string;
+    hashnode?: string;
+    portfolio?: string;
+  };
 }
 
 interface AboutContentProps {
