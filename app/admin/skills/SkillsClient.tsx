@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect, useTransition, useMemo } from "react";
 import useSWR from 'swr';
+import { getIconUrl } from "@/components/SkillsShowcase";
 import { fetcher } from '@/lib/fetcher';
 import { motion } from "framer-motion";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -158,6 +159,107 @@ function getCategoryColor(category: string, customColors?: Record<string, string
   
   // Default color
   return "#3B82F6";
+}
+
+// ── Admin Skill Icon Card ─────────────────────────────────────────────────────
+function AdminSkillCard({
+  skill,
+  accentColor,
+  selected,
+  onSelect,
+  onEdit,
+  onDelete,
+}: {
+  skill: Skill;
+  accentColor: string;
+  selected: boolean;
+  onSelect: () => void;
+  onEdit: () => void;
+  onDelete: () => void;
+}) {
+  const [imgError, setImgError] = useState(false);
+  const iconUrl = getIconUrl(skill.name, skill.icon);
+
+  return (
+    <div
+      className={`group relative flex flex-col items-center justify-center gap-2 p-3 rounded-2xl
+                  bg-card border transition-all duration-200 aspect-square cursor-default
+                  ${selected ? 'ring-2 ring-yellow-400 border-yellow-400/60' : 'border-border hover:border-muted-foreground/40'}`}
+    >
+      {/* Checkbox — top-left, always visible when selected; on hover otherwise */}
+      <button
+        type="button"
+        onClick={onSelect}
+        className={`absolute top-2 left-2 z-10 transition-opacity ${selected ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`}
+        aria-label={selected ? 'Deselect skill' : 'Select skill'}
+      >
+        {selected ? (
+          <CheckSquare className="h-4 w-4 text-yellow-400" />
+        ) : (
+          <Square className="h-4 w-4 text-muted-foreground" />
+        )}
+      </button>
+
+      {/* Edit / Delete — top-right, visible on hover */}
+      <div className="absolute top-1 right-1 z-10 flex gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
+        <Button size="icon" variant="ghost" className="h-6 w-6" onClick={onEdit} title="Edit">
+          <Pencil className="h-3 w-3" />
+        </Button>
+        <AlertDialog>
+          <AlertDialogTrigger asChild>
+            <Button size="icon" variant="ghost" className="h-6 w-6 hover:text-destructive" title="Delete">
+              <Trash2 className="h-3 w-3" />
+            </Button>
+          </AlertDialogTrigger>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Delete Skill</AlertDialogTitle>
+              <AlertDialogDescription>
+                Are you sure you want to delete &ldquo;{skill.name}&rdquo;? This cannot be undone.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogAction
+                onClick={onDelete}
+                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              >
+                Delete
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+      </div>
+
+      {/* Icon */}
+      <div className="flex items-center justify-center w-[52%] aspect-square shrink-0">
+        {!imgError ? (
+          <img
+            src={iconUrl}
+            alt={skill.name}
+            className="w-full h-full object-contain drop-shadow"
+            onError={() => setImgError(true)}
+            loading="lazy"
+          />
+        ) : (
+          <div
+            className="w-full h-full rounded-xl flex items-center justify-center text-white font-bold text-xl"
+            style={{ backgroundColor: accentColor }}
+          >
+            {skill.name.charAt(0).toUpperCase()}
+          </div>
+        )}
+      </div>
+
+      {/* Name */}
+      <span className="text-[10px] font-bold text-muted-foreground text-center tracking-wider uppercase leading-tight truncate w-full">
+        {skill.name}
+      </span>
+
+      {/* Accent bottom line */}
+      <div className="absolute bottom-0 left-1/4 right-1/4 h-[2px] rounded-full opacity-60" style={{ backgroundColor: accentColor }} />
+    </div>
+  );
 }
 
 export function SkillsClient({ initialSkills }: { initialSkills: Skill[] }) {
@@ -827,10 +929,8 @@ export function SkillsClient({ initialSkills }: { initialSkills: Skill[] }) {
         <div className="space-y-12">
           {sortedCategories.map((category, categoryIndex) => {
             const categorySkills = getSkillsByCategory(category);
-            
-            if (categorySkills.length === 0) {
-              return null;
-            }
+            if (categorySkills.length === 0) return null;
+            const accentColor = getCategoryColor(category, categoryColors);
 
             return (
               <motion.div
@@ -839,88 +939,27 @@ export function SkillsClient({ initialSkills }: { initialSkills: Skill[] }) {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: categoryIndex * 0.1 }}
               >
-                <h2 className="text-2xl font-bold text-foreground mb-6">
-                  {category}
-                </h2>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {/* Category heading with accent bar */}
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="w-1 h-7 rounded-full" style={{ backgroundColor: accentColor }} />
+                  <h2 className="text-2xl font-bold text-foreground">{category}</h2>
+                  <span className="text-sm text-muted-foreground ml-1">
+                    ({categorySkills.length} skill{categorySkills.length !== 1 ? 's' : ''})
+                  </span>
+                </div>
+
+                {/* 5-column icon card grid — mirrors the public skills page */}
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
                   {categorySkills.map((skill: Skill) => (
-                    <motion.div
+                    <AdminSkillCard
                       key={skill._id}
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      exit={{ opacity: 0 }}
-                    >
-                      <Card className={selectedSkills.has(skill._id) ? "ring-2 ring-primary" : ""}>
-                        <CardHeader>
-                          <div className="flex justify-between items-start">
-                            <div className="flex items-start gap-2 flex-1">
-                              <button
-                                type="button"
-                                onClick={() => handleToggleSelect(skill._id)}
-                                className="mt-1 flex-shrink-0"
-                              >
-                                {selectedSkills.has(skill._id) ? (
-                                  <CheckSquare className="h-5 w-5 text-primary" />
-                                ) : (
-                                  <Square className="h-5 w-5 text-muted-foreground hover:text-foreground" />
-                                )}
-                              </button>
-                              <div className="flex-1">
-                                <CardTitle>{skill.name}</CardTitle>
-                                <CardDescription>{skill.category}</CardDescription>
-                              </div>
-                            </div>
-                            <div className="flex gap-2">
-                              <Button
-                                size="icon"
-                                variant="ghost"
-                                onClick={() => handleEdit(skill)}
-                                title="Edit"
-                              >
-                                <Pencil className="h-4 w-4" />
-                              </Button>
-                              <AlertDialog>
-                                <AlertDialogTrigger asChild>
-                                  <Button
-                                    size="icon"
-                                    variant="ghost"
-                                    title="Delete"
-                                  >
-                                    <Trash2 className="h-4 w-4" />
-                                  </Button>
-                                </AlertDialogTrigger>
-                                <AlertDialogContent>
-                                  <AlertDialogHeader>
-                                    <AlertDialogTitle>Delete Skill</AlertDialogTitle>
-                                    <AlertDialogDescription>
-                                      Are you sure you want to delete &ldquo;{skill.name}&rdquo;?
-                                      This action cannot be undone.
-                                    </AlertDialogDescription>
-                                  </AlertDialogHeader>
-                                  <AlertDialogFooter>
-                                    <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                    <AlertDialogAction
-                                      onClick={() => handleDelete(skill._id)}
-                                      className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                                    >
-                                      Delete
-                                    </AlertDialogAction>
-                                  </AlertDialogFooter>
-                                </AlertDialogContent>
-                              </AlertDialog>
-                            </div>
-                          </div>
-                        </CardHeader>
-                        <CardContent>
-                          <div className="w-full bg-secondary rounded-full h-2.5">
-                            <div
-                              className="h-2.5 rounded-full transition-all duration-500 w-full"
-                              style={{ backgroundColor: getCategoryColor(skill.category, categoryColors) }}
-                            />
-                          </div>
-                        </CardContent>
-                      </Card>
-                    </motion.div>
+                      skill={skill}
+                      accentColor={accentColor}
+                      selected={selectedSkills.has(skill._id)}
+                      onSelect={() => handleToggleSelect(skill._id)}
+                      onEdit={() => handleEdit(skill)}
+                      onDelete={() => handleDelete(skill._id)}
+                    />
                   ))}
                 </div>
               </motion.div>
