@@ -12,25 +12,29 @@ import { LogIn } from "lucide-react";
 
 export default function AdminLoginPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const { data: session, status, update } = useSession();
+  // Track whether this page load came from a logout action.
+  // We must not auto-redirect to dashboard in that case because the
+  // SessionProvider client cache might still hold the old session for
+  // a brief moment even though the cookie has already been cleared.
+  const [isPostLogout, setIsPostLogout] = useState(false);
+  const { data: session, status } = useSession();
 
-  // Check for logout flag and clear session
+  // Detect logout flag and clean the URL
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
-    if (params.get('logout') === 'true') {
-      // Force session refetch after logout
-      update();
-      // Clean URL
+    if (params.get('logout') === '1') {
+      setIsPostLogout(true);
       window.history.replaceState({}, '', '/admin/login');
     }
-  }, [update]);
+  }, []);
 
-  // Redirect if already authenticated
+  // Redirect if already authenticated — but never right after a logout
+  // to avoid the stale-cache redirect loop back to dashboard.
   useEffect(() => {
-    if (status === "authenticated" && session && !isSubmitting) {
+    if (status === "authenticated" && session && !isSubmitting && !isPostLogout) {
       window.location.replace("/admin/dashboard");
     }
-  }, [status, session, isSubmitting]);
+  }, [status, session, isSubmitting, isPostLogout]);
 
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();

@@ -54,33 +54,22 @@ export function AdminLayoutClient({
     try {
       // Clear all client-side storage except theme preference
       if (typeof window !== 'undefined') {
-        // Clear cache storage
         if ('caches' in window) {
           const cacheNames = await caches.keys();
           await Promise.all(cacheNames.map(name => caches.delete(name)));
         }
-        
-        // Preserve theme so the anti-flash script still works on next load
         const savedTheme = localStorage.getItem('theme');
         localStorage.clear();
         if (savedTheme) localStorage.setItem('theme', savedTheme);
-        
-        // Clear session storage
         sessionStorage.clear();
       }
       
-      // Sign out with redirect disabled
-      await signOut({ redirect: false });
-      
-      // Wait longer for session destruction to complete (300ms for production)
-      await new Promise(resolve => setTimeout(resolve, 300));
-      
-      // Force hard navigation to login page with cache bust and logout flag
-      window.location.href = `/admin/login?logout=true&t=${Date.now()}`;
+      // Let NextAuth handle the redirect — this clears the cookie server-side
+      // then navigates to login, preventing the stale-session redirect-loop.
+      await signOut({ callbackUrl: '/admin/login?logout=1' });
     } catch (error) {
       console.error("Logout error:", error);
-      // Fallback: manual navigation with cache bust
-      window.location.href = `/admin/login?logout=true&t=${Date.now()}`;
+      window.location.href = '/admin/login?logout=1';
     }
   };
 

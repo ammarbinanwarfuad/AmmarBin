@@ -15,29 +15,21 @@ export function AutoLogout() {
 
   const handleLogout = useCallback(async () => {
     try {
-      // Clear all client-side storage
       if (typeof window !== 'undefined') {
         if ('caches' in window) {
           const cacheNames = await caches.keys();
           await Promise.all(cacheNames.map(name => caches.delete(name)));
         }
-        // Preserve theme so the anti-flash script still works on next load
         const savedTheme = localStorage.getItem('theme');
         localStorage.clear();
         if (savedTheme) localStorage.setItem('theme', savedTheme);
         sessionStorage.clear();
       }
       
-      await signOut({ redirect: false });
-      
-      // Wait for session cleanup
-      await new Promise(resolve => setTimeout(resolve, 300));
-      
-      // Hard navigate with cache bust
-      window.location.href = `/admin/login?logout=true&t=${Date.now()}&reason=timeout`;
+      await signOut({ callbackUrl: '/admin/login?logout=1&reason=timeout' });
     } catch (error) {
       console.error('Auto-logout error:', error);
-      window.location.href = `/admin/login?logout=true&t=${Date.now()}&reason=timeout`;
+      window.location.href = '/admin/login?logout=1&reason=timeout';
     }
   }, []);
 
