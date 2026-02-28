@@ -52,7 +52,7 @@ export function AdminLayoutClient({
     
     setIsLoggingOut(true);
     try {
-      // Clear all client-side storage
+      // Clear all client-side storage except theme preference
       if (typeof window !== 'undefined') {
         // Clear cache storage
         if ('caches' in window) {
@@ -60,8 +60,10 @@ export function AdminLayoutClient({
           await Promise.all(cacheNames.map(name => caches.delete(name)));
         }
         
-        // Clear local storage
+        // Preserve theme so the anti-flash script still works on next load
+        const savedTheme = localStorage.getItem('theme');
         localStorage.clear();
+        if (savedTheme) localStorage.setItem('theme', savedTheme);
         
         // Clear session storage
         sessionStorage.clear();

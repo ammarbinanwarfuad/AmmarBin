@@ -21,7 +21,10 @@ export function AutoLogout() {
           const cacheNames = await caches.keys();
           await Promise.all(cacheNames.map(name => caches.delete(name)));
         }
+        // Preserve theme so the anti-flash script still works on next load
+        const savedTheme = localStorage.getItem('theme');
         localStorage.clear();
+        if (savedTheme) localStorage.setItem('theme', savedTheme);
         sessionStorage.clear();
       }
       

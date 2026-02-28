@@ -154,7 +154,11 @@ export const authOptions: NextAuthOptions = {
   },
   cookies: {
     sessionToken: {
-      name: `next-auth.session-token`,
+      // Use __Secure- prefix in production to be consistent with useSecureCookies
+      // and to ensure getToken() looks for the same cookie it sets.
+      name: process.env.NODE_ENV === 'production'
+        ? `__Secure-next-auth.session-token`
+        : `next-auth.session-token`,
       options: {
         httpOnly: true,
         sameSite: 'lax',
@@ -163,8 +167,9 @@ export const authOptions: NextAuthOptions = {
       },
     },
   },
+  // useSecureCookies is now handled consistently via the explicit cookie name above.
+  // Setting it separately caused a mismatch: cookie was SET as next-auth.session-token
+  // but getToken() looked for __Secure-next-auth.session-token in production.
   secret: process.env.NEXTAUTH_SECRET,
-  // Prevent caching of auth responses
-  useSecureCookies: process.env.NODE_ENV === 'production',
 } as NextAuthOptions;
 

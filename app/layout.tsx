@@ -68,10 +68,11 @@ export default function RootLayout({
                 try {
                   var theme = localStorage.getItem('theme');
                   var systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-                  var effectiveTheme = theme === 'system' ? systemTheme : theme;
+                  // Fall back to system theme when no preference is saved (e.g. after logout clears localStorage)
+                  var effectiveTheme = (theme === 'system' || !theme) ? systemTheme : theme;
                   if (effectiveTheme === 'dark') {
                     document.documentElement.classList.add('dark');
-                  } else if (effectiveTheme === 'light') {
+                  } else {
                     document.documentElement.classList.remove('dark');
                   }
                 } catch (e) {}

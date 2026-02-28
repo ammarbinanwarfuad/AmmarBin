@@ -15,8 +15,9 @@ export async function proxy(req: NextRequest) {
   const isProduction = process.env.NODE_ENV === 'production';
   
   // Check for session cookie (edge-compatible way)
-  const sessionCookie = req.cookies.get('next-auth.session-token') 
-    || req.cookies.get('__Secure-next-auth.session-token');
+  // Must match both the dev name and production __Secure- prefixed name
+  const sessionCookie = req.cookies.get('__Secure-next-auth.session-token')
+    || req.cookies.get('next-auth.session-token');
   const hasSession = !!sessionCookie;
   
   // Login page handling
