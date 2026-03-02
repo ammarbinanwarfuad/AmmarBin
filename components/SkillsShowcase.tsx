@@ -231,9 +231,10 @@ function useItemsPerPage() {
 }
 
 export function SkillsShowcase({ skills, categories }: SkillsShowcaseProps) {
-  const containerRef  = useRef<HTMLDivElement>(null);
-  const lastWheelRef  = useRef(0);
-  const isAnimating   = useRef(false);
+  const containerRef   = useRef<HTMLDivElement>(null);
+  const lastWheelRef   = useRef(0);
+  const isAnimating    = useRef(false);
+  const touchStartRef  = useRef<{ x: number; y: number } | null>(null);
 
   const [catIdx,    setCatIdx]    = useState(0);
   const [subPage,   setSubPage]   = useState(0);
@@ -298,8 +299,46 @@ export function SkillsShowcase({ skills, categories }: SkillsShowcaseProps) {
       }
     };
 
+    const onTouchStart = (e: TouchEvent) => {
+      touchStartRef.current = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+    };
+
+    const onTouchEnd = (e: TouchEvent) => {
+      if (!touchStartRef.current) return;
+      const dx = e.changedTouches[0].clientX - touchStartRef.current.x;
+      const dy = e.changedTouches[0].clientY - touchStartRef.current.y;
+      touchStartRef.current = null;
+
+      // Only handle predominantly vertical swipes
+      if (Math.abs(dy) < 40 || Math.abs(dy) < Math.abs(dx)) return;
+
+      const swipeDown = dy < 0; // finger moved up = scroll down
+      if (swipeDown) {
+        if (subPage < totalSubPages - 1) {
+          animate(catIdx, subPage + 1, 'down');
+        } else if (catIdx < totalCats - 1) {
+          animate(catIdx + 1, 0, 'down');
+        }
+      } else {
+        if (subPage > 0) {
+          animate(catIdx, subPage - 1, 'up');
+        } else if (catIdx > 0) {
+          const prevCat    = catIdx - 1;
+          const prevSkills = skills.filter((s) => s.category === categories[prevCat]);
+          const prevSub    = Math.max(0, Math.ceil(prevSkills.length / ITEMS_PER_PAGE) - 1);
+          animate(prevCat, prevSub, 'up');
+        }
+      }
+    };
+
     el.addEventListener('wheel', onWheel, { passive: false });
-    return () => el.removeEventListener('wheel', onWheel);
+    el.addEventListener('touchstart', onTouchStart, { passive: true });
+    el.addEventListener('touchend', onTouchEnd, { passive: true });
+    return () => {
+      el.removeEventListener('wheel', onWheel);
+      el.removeEventListener('touchstart', onTouchStart);
+      el.removeEventListener('touchend', onTouchEnd);
+    };
   }, [catIdx, subPage, totalSubPages, totalCats, skills, categories, animate]);
 
   // ── Overall progress for right bar ────────────────────────────────────────
@@ -382,10 +421,10 @@ export function SkillsShowcase({ skills, categories }: SkillsShowcaseProps) {
                   key={i}
                   aria-label={`Sub-page ${i + 1}`}
                   onClick={() => animate(catIdx, i, i > subPage ? 'down' : 'up')}
-                  className={`rounded-full transition-all duration-300 focus:outline-none ${
+                  className={`rounded-full transition-all duration-300 focus:outline-none touch-manipulation ${
                     i === subPage
-                      ? 'w-6 h-[5px] bg-yellow-400'
-                      : 'w-[5px] h-[5px] bg-border hover:bg-muted-foreground'
+                      ? 'w-6 h-1.5 sm:h-[5px] bg-yellow-400'
+                      : 'w-1.5 h-1.5 sm:w-[5px] sm:h-[5px] bg-border hover:bg-muted-foreground'
                   }`}
                 />
               ))}
@@ -399,11 +438,11 @@ export function SkillsShowcase({ skills, categories }: SkillsShowcaseProps) {
                 key={cat}
                 aria-label={`Go to ${cat}`}
                 onClick={() => animate(i, 0, i > catIdx ? 'down' : 'up')}
-                className="rounded-full transition-all duration-300 focus:outline-none"
+                className="rounded-full transition-all duration-300 focus:outline-none touch-manipulation"
                 style={
                   i === catIdx
-                    ? { width: 24, height: 5, backgroundColor: categoryColor }
-                    : { width: 5, height: 5, backgroundColor: 'hsl(var(--border))' }
+                    ? { width: 24, height: 6, backgroundColor: categoryColor }
+                    : { width: 6, height: 6, backgroundColor: 'hsl(var(--border))' }
                 }
               />
             ))}
