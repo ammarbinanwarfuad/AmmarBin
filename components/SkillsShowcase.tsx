@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback, useRef } from 'react';
+import type { CSSProperties } from 'react';
 
 interface Skill {
   _id: string;
@@ -192,8 +193,8 @@ function SkillCard({ skill }: { skill: Skill | null }) {
         ) : (
           <div
             className="w-full h-full rounded-xl flex items-center justify-center
-                       text-white font-bold text-2xl"
-            style={{ backgroundColor: accent }}
+                       text-white font-bold text-2xl [background-color:var(--accent-color)]"
+            style={{ '--accent-color': accent } as CSSProperties}
           >
             {skill.name.charAt(0).toUpperCase()}
           </div>
@@ -381,9 +382,9 @@ export function SkillsShowcase({ skills, categories }: SkillsShowcaseProps) {
       <div className="hidden sm:flex flex-col items-center justify-center gap-5 w-10 md:w-14 shrink-0 self-stretch">
         <div className="w-[3px] h-12 md:h-16 bg-yellow-400 rounded-full" />
         <span
+          style={{ '--cat-color': categoryColor } as CSSProperties}
           className="text-[9px] md:text-[11px] font-extrabold tracking-[0.2em] uppercase whitespace-nowrap
-                     [writing-mode:vertical-rl] rotate-180 select-none leading-none"
-          style={{ color: categoryColor }}
+                     [writing-mode:vertical-rl] rotate-180 select-none leading-none [color:var(--cat-color)]"
         >
           {currentCategory}
         </span>
@@ -394,16 +395,15 @@ export function SkillsShowcase({ skills, categories }: SkillsShowcaseProps) {
 
         {/* Category label — mobile only */}
         <p
-          className="sm:hidden text-[11px] font-extrabold tracking-[0.2em] uppercase select-none"
-          style={{ color: categoryColor }}
+          style={{ '--cat-color': categoryColor } as CSSProperties}
+          className="sm:hidden text-[11px] font-extrabold tracking-[0.2em] uppercase select-none [color:var(--cat-color)]"
         >
           {currentCategory}
         </p>
 
         {/* Responsive grid: 2 cols mobile → 3 cols tablet → 5 cols desktop */}
         <div
-          className={`grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2 sm:gap-3 md:gap-4 w-full flex-1 min-h-0 transition-all duration-300 ease-in-out ${gridClass}`}
-          style={{ gridTemplateRows: 'repeat(2, 1fr)' }}
+          className={`grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2 sm:gap-3 md:gap-4 w-full flex-1 min-h-0 transition-all duration-300 ease-in-out [grid-template-rows:repeat(2,1fr)] ${gridClass}`}
         >
           {paddedSkills.map((skill, idx) => (
             <SkillCard
@@ -440,12 +440,10 @@ export function SkillsShowcase({ skills, categories }: SkillsShowcaseProps) {
                 key={cat}
                 aria-label={`Go to ${cat}`}
                 onClick={() => animate(i, 0, i > catIdx ? 'down' : 'up')}
-                className="rounded-full transition-all duration-300 focus:outline-none touch-manipulation"
-                style={
-                  i === catIdx
-                    ? { width: 24, height: 6, backgroundColor: categoryColor }
-                    : { width: 6, height: 6, backgroundColor: 'hsl(var(--border))' }
-                }
+                className={`rounded-full transition-all duration-300 focus:outline-none touch-manipulation [background-color:var(--dot-color)] ${
+                  i === catIdx ? 'w-6 h-1.5' : 'w-1.5 h-1.5'
+                }`}
+                style={{ '--dot-color': i === catIdx ? categoryColor : 'hsl(var(--border))' } as CSSProperties}
               />
             ))}
           </div>
@@ -461,8 +459,8 @@ export function SkillsShowcase({ skills, categories }: SkillsShowcaseProps) {
       <div className="hidden sm:flex flex-col items-center justify-center w-8 md:w-10 shrink-0 self-stretch gap-3">
         <div className="relative w-[3px] h-36 md:h-48 bg-border rounded-full overflow-hidden">
           <div
-            className="absolute top-0 left-0 right-0 bg-yellow-400 rounded-full transition-all duration-500 ease-out"
-            style={{ height: `${progressPct}%` }}
+            className="absolute top-0 left-0 right-0 bg-yellow-400 rounded-full transition-all duration-500 ease-out [height:var(--prog-height)]"
+            style={{ '--prog-height': `${progressPct}%` } as CSSProperties}
           />
         </div>
         <div className="flex flex-col items-center gap-[5px]">
@@ -471,12 +469,10 @@ export function SkillsShowcase({ skills, categories }: SkillsShowcaseProps) {
               key={cat}
               onClick={() => animate(i, 0, i > catIdx ? 'down' : 'up')}
               title={cat}
-              className="rounded-full cursor-pointer transition-all duration-300"
-              style={
-                i === catIdx
-                  ? { width: 8, height: 8, backgroundColor: categoryColor }
-                  : { width: 5, height: 5, backgroundColor: 'hsl(var(--border))' }
-              }
+              className={`rounded-full cursor-pointer transition-all duration-300 [background-color:var(--dot-color)] ${
+                i === catIdx ? 'w-2 h-2' : 'w-[5px] h-[5px]'
+              }`}
+              style={{ '--dot-color': i === catIdx ? categoryColor : 'hsl(var(--border))' } as CSSProperties}
             />
           ))}
         </div>

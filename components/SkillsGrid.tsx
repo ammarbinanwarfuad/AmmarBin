@@ -1,3 +1,4 @@
+import type { CSSProperties } from "react";
 import { Card } from "@/components/ui/card";
 
 interface Skill {
@@ -81,11 +82,8 @@ export function SkillsGrid({ skills, categories }: SkillsGridProps) {
                   </div>
                   <div className="w-full bg-secondary rounded-full h-2.5">
                     <div
-                      className="h-2.5 rounded-full transition-all duration-500"
-                      style={{ 
-                        width: "100%",
-                        backgroundColor: getCategoryColor(category)
-                      }}
+                      className="h-2.5 rounded-full transition-all duration-500 w-full [background-color:var(--cat-color)]"
+                      style={{ '--cat-color': getCategoryColor(category) } as CSSProperties}
                     />
                   </div>
                 </Card>

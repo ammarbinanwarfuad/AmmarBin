@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect, useTransition, useMemo } from "react";
+import type { CSSProperties } from "react";
 import useSWR from 'swr';
 import { getIconUrl } from "@/components/SkillsShowcase";
 import { fetcher } from '@/lib/fetcher';
@@ -243,8 +244,8 @@ function AdminSkillCard({
           />
         ) : (
           <div
-            className="w-full h-full rounded-xl flex items-center justify-center text-white font-bold text-xl"
-            style={{ backgroundColor: accentColor }}
+            className="w-full h-full rounded-xl flex items-center justify-center text-white font-bold text-xl [background-color:var(--accent-color)]"
+            style={{ '--accent-color': accentColor } as CSSProperties}
           >
             {skill.name.charAt(0).toUpperCase()}
           </div>
@@ -257,7 +258,7 @@ function AdminSkillCard({
       </span>
 
       {/* Accent bottom line */}
-      <div className="absolute bottom-0 left-1/4 right-1/4 h-[2px] rounded-full opacity-60" style={{ backgroundColor: accentColor }} />
+      <div className="absolute bottom-0 left-1/4 right-1/4 h-[2px] rounded-full opacity-60 [background-color:var(--accent-color)]" style={{ '--accent-color': accentColor } as CSSProperties} />
     </div>
   );
 }
@@ -802,10 +803,8 @@ export function SkillsClient({ initialSkills }: { initialSkills: Skill[] }) {
                                   className="pr-10"
                                 />
                                 <div
-                                  className="absolute right-2 top-1/2 -translate-y-1/2 w-6 h-6 rounded border border-border"
-                                  style={{
-                                    backgroundColor: normalizeColorToHex(newCategoryColor) || newCategoryColor || "#3B82F6"
-                                  }}
+                                  className="absolute right-2 top-1/2 -translate-y-1/2 w-6 h-6 rounded border border-border [background-color:var(--preview-color)]"
+                                  style={{ '--preview-color': normalizeColorToHex(newCategoryColor) || newCategoryColor || '#3B82F6' } as CSSProperties}
                                 />
                               </div>
                             </div>
@@ -941,7 +940,7 @@ export function SkillsClient({ initialSkills }: { initialSkills: Skill[] }) {
               >
                 {/* Category heading with accent bar */}
                 <div className="flex items-center gap-3 mb-6">
-                  <div className="w-1 h-7 rounded-full" style={{ backgroundColor: accentColor }} />
+                  <div className="w-1 h-7 rounded-full [background-color:var(--accent-color)]" style={{ '--accent-color': accentColor } as CSSProperties} />
                   <h2 className="text-2xl font-bold text-foreground">{category}</h2>
                   <span className="text-sm text-muted-foreground ml-1">
                     ({categorySkills.length} skill{categorySkills.length !== 1 ? 's' : ''})

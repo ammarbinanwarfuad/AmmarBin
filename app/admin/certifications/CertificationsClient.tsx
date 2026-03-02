@@ -543,6 +543,8 @@ export function CertificationsClient({ initialCertifications }: { initialCertifi
                       {skill}
                       <button
                         type="button"
+                        aria-label={`Remove ${skill}`}
+                        title={`Remove ${skill}`}
                         onClick={() => setFormData({ ...formData, skills: formData.skills.filter(s => s !== skill) })}
                         className="hover:text-destructive"
                       >

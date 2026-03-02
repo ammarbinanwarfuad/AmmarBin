@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef, useTransition } from "react";
+import type { CSSProperties } from "react";
 import { motion } from "framer-motion";
 import useSWR from 'swr';
 import { fetcher } from '@/lib/fetcher';
@@ -962,8 +963,8 @@ export function ProjectsClient({ initialProjects }: { initialProjects: Project[]
                         className="flex-1 font-mono text-sm"
                       />
                       <div
-                        className="h-10 w-10 rounded border border-input flex-shrink-0"
-                        style={{ backgroundColor: color }}
+                        className="h-10 w-10 rounded border border-input flex-shrink-0 [background-color:var(--swatch-color)]"
+                        style={{ '--swatch-color': color } as CSSProperties}
                       />
                     </div>
                   </div>
