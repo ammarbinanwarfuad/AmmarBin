@@ -318,7 +318,7 @@ export function SkillsShowcase({ skills, categories }: SkillsShowcaseProps) {
   return (
     <div
       ref={containerRef}
-      className="flex items-center h-full w-full overflow-hidden"
+      className="flex items-center justify-center h-full w-full overflow-hidden px-4"
     >
       {/* ── LEFT SIDEBAR ──────────────────────────────────────────────── */}
       <div className="flex flex-col items-center justify-center gap-5 w-14 shrink-0 self-stretch">
@@ -333,11 +333,11 @@ export function SkillsShowcase({ skills, categories }: SkillsShowcaseProps) {
       </div>
 
       {/* ── MAIN CONTENT ──────────────────────────────────────────────── */}
-      <div className="flex-1 flex flex-col items-center justify-between px-4 pt-5 pb-4 overflow-hidden min-h-0 gap-3">
-        {/* 5 × 2 grid — row height clamps to viewport so size is always comfortable */}
+      <div className="flex-1 flex flex-col items-center justify-between gap-4 overflow-hidden min-h-0 max-w-6xl py-6">
+        {/* 5 × 2 grid */}
         <div
-          className={`grid grid-cols-5 gap-3 w-full max-w-3xl transition-all duration-300 ease-in-out ${gridClass}`}
-          style={{ gridTemplateRows: 'repeat(2, clamp(90px, 17vh, 150px))' }}
+          className={`grid grid-cols-5 gap-4 w-full flex-1 min-h-0 transition-all duration-300 ease-in-out ${gridClass}`}
+          style={{ gridTemplateRows: 'repeat(2, 1fr)' }}
         >
           {paddedSkills.map((skill, idx) => (
             <SkillCard
@@ -347,8 +347,8 @@ export function SkillsShowcase({ skills, categories }: SkillsShowcaseProps) {
           ))}
         </div>
 
-        {/* ── Controls — pinned at bottom by justify-between ─────────── */}
-        <div className="flex flex-col items-center gap-1 shrink-0 pt-2">
+        {/* ── Controls ────────────────────────────────────────────────── */}
+        <div className="flex flex-col items-center gap-1 shrink-0">
           {/* Sub-page dots — only if category has >10 skills */}
           {totalSubPages > 1 && (
             <div className="flex items-center gap-2">
@@ -392,7 +392,7 @@ export function SkillsShowcase({ skills, categories }: SkillsShowcaseProps) {
       </div>
 
       {/* ── RIGHT SIDEBAR — progress bar ──────────────────────────────── */}
-      <div className="flex flex-col items-center justify-center w-8 shrink-0 self-stretch gap-3">
+      <div className="flex flex-col items-center justify-center w-10 shrink-0 self-stretch gap-3">
         <div className="relative w-[3px] h-48 bg-border rounded-full overflow-hidden">
           <div
             className="absolute top-0 left-0 right-0 bg-yellow-400 rounded-full transition-all duration-500 ease-out"
