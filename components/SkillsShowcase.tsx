@@ -48,9 +48,9 @@ export function getIconUrl(skillName: string, iconField?: string): string {
     sass:           'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/sass/sass-original.svg',
     scss:           'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/sass/sass-original.svg',
     bootstrap:      'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/bootstrap/bootstrap-original.svg',
-    tailwind:       '/tailwindcss.svg',
-    tailwindcss:    '/tailwindcss.svg',
-    'tailwind css': '/tailwindcss.svg',
+    tailwind:       'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/tailwindcss/tailwindcss-original.svg',
+    tailwindcss:    'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/tailwindcss/tailwindcss-original.svg',
+    'tailwind css': 'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/tailwindcss/tailwindcss-original.svg',
     materialui:     'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/materialui/materialui-original.svg',
     'material ui':  'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/materialui/materialui-original.svg',
     'node.js':      'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/nodejs/nodejs-original.svg',
@@ -87,7 +87,7 @@ export function getIconUrl(skillName: string, iconField?: string): string {
     sqlite:         'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/sqlite/sqlite-original.svg',
     firebase:       'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/firebase/firebase-plain.svg',
     git:            'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/git/git-original.svg',
-    github:         'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/github/github-original.svg',
+    github:         'https://cdn.simpleicons.org/github/000000',  // dark icon — inverted in dark mode via CSS
     gitlab:         'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/gitlab/gitlab-original.svg',
     docker:         'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/docker/docker-original.svg',
     dockers:        'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/docker/docker-original.svg',
@@ -103,7 +103,29 @@ export function getIconUrl(skillName: string, iconField?: string): string {
     webpack:        'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/webpack/webpack-original.svg',
     vite:           'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/vite/vite-original.svg',
     figma:          'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/figma/figma-original.svg',
-    wordpress:      'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/wordpress/wordpress-plain.svg',
+    wordpress:      'https://cdn.simpleicons.org/wordpress',
+    'wordpress.com': 'https://cdn.simpleicons.org/wordpress',
+    // VS Code
+    vscode:         'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/vscode/vscode-original.svg',
+    'vs code':      'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/vscode/vscode-original.svg',
+    'visual studio code': 'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/vscode/vscode-original.svg',
+    // JSON
+    json:           'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/json/json-original.svg',
+    // npm
+    npm:            'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/npm/npm-original-wordmark.svg',
+    // Design tools
+    canva:          'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/canva/canva-original.svg',
+    photoshop:      'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/photoshop/photoshop-original.svg',
+    'adobe photoshop': 'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/photoshop/photoshop-original.svg',
+    xd:             'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/xd/xd-original.svg',
+    'adobe xd':     'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/xd/xd-original.svg',
+    illustrator:    'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/illustrator/illustrator-original.svg',
+    'adobe illustrator': 'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/illustrator/illustrator-original.svg',
+    'adobe premiere pro': '/premiere-pro.svg',
+    'premiere pro':  '/premiere-pro.svg',
+    premierepro:    '/premiere-pro.svg',
+    premiere:       '/premiere-pro.svg',
+    blogger:        '/Blogger_icon.svg',
     vercel:         'https://cdn.simpleicons.org/vercel/ffffff',
     netlify:        'https://cdn.simpleicons.org/netlify',
     shopify:        'https://cdn.simpleicons.org/shopify',
@@ -116,6 +138,13 @@ export function getIconUrl(skillName: string, iconField?: string): string {
 
   const slug = n.replace(/[^a-z0-9]/g, '');
   return `https://cdn.jsdelivr.net/gh/devicons/devicon/icons/${slug}/${slug}-original.svg`;
+}
+
+// ── Icons that are monochrome-dark and need CSS inversion in dark mode ──────────
+const DARK_INVERT_ICONS = new Set(['github', 'express', 'express.js', 'expressjs']);
+
+export function needsDarkInvert(skillName: string): boolean {
+  return DARK_INVERT_ICONS.has((skillName || '').toLowerCase().trim());
 }
 
 // ── Category accent colour ─────────────────────────────────────────────────────
@@ -139,8 +168,9 @@ function SkillCard({ skill }: { skill: Skill | null }) {
     return <div className="h-full rounded-2xl border border-border/30 bg-card/20" />;
   }
 
-  const iconUrl = getIconUrl(skill.name, skill.icon);
-  const accent  = getCategoryColor(skill.category);
+  const iconUrl    = getIconUrl(skill.name, skill.icon);
+  const accent      = getCategoryColor(skill.category);
+  const invertClass = needsDarkInvert(skill.name) ? 'dark:invert' : '';
 
   return (
     <div
@@ -155,7 +185,7 @@ function SkillCard({ skill }: { skill: Skill | null }) {
           <img
             src={iconUrl}
             alt={skill.name}
-            className="w-full h-full object-contain drop-shadow-lg"
+            className={`w-full h-full object-contain drop-shadow-lg ${invertClass}`}
             onError={() => setImgError(true)}
             loading="lazy"
           />
