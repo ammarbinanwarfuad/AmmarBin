@@ -213,7 +213,22 @@ function SkillCard({ skill }: { skill: Skill | null }) {
 }
 
 // ── Main Showcase ──────────────────────────────────────────────────────────────
-const ITEMS_PER_PAGE = 10;
+// Items per page adapts to breakpoint so we always get exactly 2 rows:
+// mobile → 2 cols × 2 rows = 4 | sm → 3 cols × 2 rows = 6 | lg → 5 cols × 2 rows = 10
+function useItemsPerPage() {
+  const [items, setItems] = useState(10);
+  useEffect(() => {
+    const update = () => {
+      if (window.innerWidth < 640)       setItems(4);
+      else if (window.innerWidth < 1024) setItems(6);
+      else                               setItems(10);
+    };
+    update();
+    window.addEventListener('resize', update);
+    return () => window.removeEventListener('resize', update);
+  }, []);
+  return items;
+}
 
 export function SkillsShowcase({ skills, categories }: SkillsShowcaseProps) {
   const containerRef  = useRef<HTMLDivElement>(null);
@@ -225,6 +240,7 @@ export function SkillsShowcase({ skills, categories }: SkillsShowcaseProps) {
   const [visible,   setVisible]   = useState(true);
   const [direction, setDirection] = useState<'down' | 'up'>('down');
 
+  const ITEMS_PER_PAGE = useItemsPerPage();
   const totalCats = categories.length;
 
   const catSkills     = skills.filter((s) => s.category === (categories[catIdx] ?? ''));
@@ -318,13 +334,13 @@ export function SkillsShowcase({ skills, categories }: SkillsShowcaseProps) {
   return (
     <div
       ref={containerRef}
-      className="flex items-center justify-center h-full w-full overflow-hidden px-4"
+      className="flex items-center justify-center h-full w-full overflow-hidden px-2 sm:px-4"
     >
-      {/* ── LEFT SIDEBAR ──────────────────────────────────────────────── */}
-      <div className="flex flex-col items-center justify-center gap-5 w-14 shrink-0 self-stretch">
-        <div className="w-[3px] h-16 bg-yellow-400 rounded-full" />
+      {/* ── LEFT SIDEBAR — hidden on mobile ───────────────────────────── */}
+      <div className="hidden sm:flex flex-col items-center justify-center gap-5 w-10 md:w-14 shrink-0 self-stretch">
+        <div className="w-[3px] h-12 md:h-16 bg-yellow-400 rounded-full" />
         <span
-          className="text-[11px] font-extrabold tracking-[0.2em] uppercase whitespace-nowrap
+          className="text-[9px] md:text-[11px] font-extrabold tracking-[0.2em] uppercase whitespace-nowrap
                      [writing-mode:vertical-rl] rotate-180 select-none leading-none"
           style={{ color: categoryColor }}
         >
@@ -333,10 +349,19 @@ export function SkillsShowcase({ skills, categories }: SkillsShowcaseProps) {
       </div>
 
       {/* ── MAIN CONTENT ──────────────────────────────────────────────── */}
-      <div className="flex-1 flex flex-col items-center justify-between gap-4 overflow-hidden min-h-0 max-w-6xl py-6">
-        {/* 5 × 2 grid */}
+      <div className="flex-1 flex flex-col items-center justify-between gap-3 overflow-hidden min-h-0 max-w-6xl py-3 sm:py-5 md:py-6">
+
+        {/* Category label — mobile only */}
+        <p
+          className="sm:hidden text-[11px] font-extrabold tracking-[0.2em] uppercase select-none"
+          style={{ color: categoryColor }}
+        >
+          {currentCategory}
+        </p>
+
+        {/* Responsive grid: 2 cols mobile → 3 cols tablet → 5 cols desktop */}
         <div
-          className={`grid grid-cols-5 gap-4 w-full flex-1 min-h-0 transition-all duration-300 ease-in-out ${gridClass}`}
+          className={`grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2 sm:gap-3 md:gap-4 w-full flex-1 min-h-0 transition-all duration-300 ease-in-out ${gridClass}`}
           style={{ gridTemplateRows: 'repeat(2, 1fr)' }}
         >
           {paddedSkills.map((skill, idx) => (
@@ -391,9 +416,9 @@ export function SkillsShowcase({ skills, categories }: SkillsShowcaseProps) {
         </div>
       </div>
 
-      {/* ── RIGHT SIDEBAR — progress bar ──────────────────────────────── */}
-      <div className="flex flex-col items-center justify-center w-10 shrink-0 self-stretch gap-3">
-        <div className="relative w-[3px] h-48 bg-border rounded-full overflow-hidden">
+      {/* ── RIGHT SIDEBAR — hidden on mobile ──────────────────────────── */}
+      <div className="hidden sm:flex flex-col items-center justify-center w-8 md:w-10 shrink-0 self-stretch gap-3">
+        <div className="relative w-[3px] h-36 md:h-48 bg-border rounded-full overflow-hidden">
           <div
             className="absolute top-0 left-0 right-0 bg-yellow-400 rounded-full transition-all duration-500 ease-out"
             style={{ height: `${progressPct}%` }}
