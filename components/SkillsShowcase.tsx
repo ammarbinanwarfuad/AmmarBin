@@ -244,7 +244,9 @@ export function SkillsShowcase({ skills, categories }: SkillsShowcaseProps) {
   const ITEMS_PER_PAGE = useItemsPerPage();
   const totalCats = categories.length;
 
-  const catSkills     = skills.filter((s) => s.category === (categories[catIdx] ?? ''));
+  const catSkills     = skills
+    .filter((s) => s.category === (categories[catIdx] ?? ''))
+    .sort((a, b) => a.name.localeCompare(b.name));
   const totalSubPages = Math.max(1, Math.ceil(catSkills.length / ITEMS_PER_PAGE));
   const pageSkills    = catSkills.slice(subPage * ITEMS_PER_PAGE, (subPage + 1) * ITEMS_PER_PAGE);
 
@@ -292,7 +294,7 @@ export function SkillsShowcase({ skills, categories }: SkillsShowcaseProps) {
           animate(catIdx, subPage - 1, 'up');
         } else if (catIdx > 0) {
           const prevCat    = catIdx - 1;
-          const prevSkills = skills.filter((s) => s.category === categories[prevCat]);
+          const prevSkills = skills.filter((s) => s.category === categories[prevCat]).sort((a, b) => a.name.localeCompare(b.name));
           const prevSub    = Math.max(0, Math.ceil(prevSkills.length / ITEMS_PER_PAGE) - 1);
           animate(prevCat, prevSub, 'up');
         }
@@ -324,7 +326,7 @@ export function SkillsShowcase({ skills, categories }: SkillsShowcaseProps) {
           animate(catIdx, subPage - 1, 'up');
         } else if (catIdx > 0) {
           const prevCat    = catIdx - 1;
-          const prevSkills = skills.filter((s) => s.category === categories[prevCat]);
+          const prevSkills = skills.filter((s) => s.category === categories[prevCat]).sort((a, b) => a.name.localeCompare(b.name));
           const prevSub    = Math.max(0, Math.ceil(prevSkills.length / ITEMS_PER_PAGE) - 1);
           animate(prevCat, prevSub, 'up');
         }
@@ -346,7 +348,7 @@ export function SkillsShowcase({ skills, categories }: SkillsShowcaseProps) {
     (acc, cat) => acc + Math.max(1, Math.ceil(skills.filter((s) => s.category === cat).length / ITEMS_PER_PAGE)),
     0
   );
-  const viewsBefore  = categories.slice(0, catIdx).reduce(
+  const viewsBefore = categories.slice(0, catIdx).reduce(
     (acc, cat) => acc + Math.max(1, Math.ceil(skills.filter((s) => s.category === cat).length / ITEMS_PER_PAGE)),
     0
   );

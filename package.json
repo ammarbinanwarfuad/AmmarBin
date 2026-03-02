@@ -11,19 +11,9 @@
     "lint": "eslint",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "seed": "tsx scripts/seed.ts",
     "seed:skills": "tsx scripts/seed-skills.ts",
     "postbuild": "next-sitemap",
-    "verify:deployment": "tsx scripts/verify-deployment.ts",
-    "test": "jest",
-    "test:watch": "jest --watch",
-    "test:coverage": "jest --coverage",
-    "test:ci": "jest --ci --coverage --maxWorkers=2",
-    "test:e2e": "playwright test",
-    "test:e2e:ui": "playwright test --ui",
-    "test:e2e:headed": "playwright test --headed",
-    "test:e2e:debug": "playwright test --debug",
-    "playwright:install": "playwright install"
+    "verify:deployment": "tsx scripts/verify-deployment.ts"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",
@@ -71,7 +61,6 @@
     "@types/nodemailer": "^7.0.3",
     "@types/react": "^19",
     "@types/react-dom": "^19",
-    "@types/supertest": "^6.0.3",
     "autoprefixer": "^10.4.17",
     "critters": "^0.0.23",
     "dotenv": "^17.3.1",
