@@ -42,9 +42,9 @@ interface Skill {
 // Helper function to convert various color formats to HEX
 function normalizeColorToHex(color: string): string | null {
   if (!color || typeof color !== 'string') return null;
-  
+
   const trimmed = color.trim();
-  
+
   // Already HEX format
   if (/^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3}|[A-Fa-f0-9]{8})$/.test(trimmed)) {
     // Convert 3-digit HEX to 6-digit
@@ -53,7 +53,7 @@ function normalizeColorToHex(color: string): string | null {
     }
     return trimmed;
   }
-  
+
   // RGB/RGBA format: rgb(255, 0, 0) or rgba(255, 0, 0, 0.5)
   const rgbMatch = trimmed.match(/^rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*[\d.]+)?\)$/);
   if (rgbMatch) {
@@ -65,37 +65,37 @@ function normalizeColorToHex(color: string): string | null {
       return hex.length === 1 ? '0' + hex : hex;
     }).join('')}`;
   }
-  
+
   // HSL/HSLA format: hsl(0, 100%, 50%) or hsla(0, 100%, 50%, 0.5)
   const hslMatch = trimmed.match(/^hsla?\((\d+),\s*(\d+)%,\s*(\d+)%(?:,\s*[\d.]+)?\)$/);
   if (hslMatch) {
     const h = parseInt(hslMatch[1]) / 360;
     const s = parseInt(hslMatch[2]) / 100;
     const l = parseInt(hslMatch[3]) / 100;
-    
+
     const c = (1 - Math.abs(2 * l - 1)) * s;
     const x = c * (1 - Math.abs((h * 6) % 2 - 1));
     const m = l - c / 2;
-    
+
     let r = 0, g = 0, b = 0;
-    
-    if (h < 1/6) { r = c; g = x; b = 0; }
-    else if (h < 2/6) { r = x; g = c; b = 0; }
-    else if (h < 3/6) { r = 0; g = c; b = x; }
-    else if (h < 4/6) { r = 0; g = x; b = c; }
-    else if (h < 5/6) { r = x; g = 0; b = c; }
+
+    if (h < 1 / 6) { r = c; g = x; b = 0; }
+    else if (h < 2 / 6) { r = x; g = c; b = 0; }
+    else if (h < 3 / 6) { r = 0; g = c; b = x; }
+    else if (h < 4 / 6) { r = 0; g = x; b = c; }
+    else if (h < 5 / 6) { r = x; g = 0; b = c; }
     else { r = c; g = 0; b = x; }
-    
+
     r = Math.round((r + m) * 255);
     g = Math.round((g + m) * 255);
     b = Math.round((b + m) * 255);
-    
+
     return `#${[r, g, b].map(x => {
       const hex = x.toString(16);
       return hex.length === 1 ? '0' + hex : hex;
     }).join('')}`;
   }
-  
+
   // Try CSS named colors by creating a temporary element (only in browser)
   if (typeof window !== 'undefined' && typeof document !== 'undefined') {
     try {
@@ -104,7 +104,7 @@ function normalizeColorToHex(color: string): string | null {
       document.body.appendChild(tempDiv);
       const computedColor = window.getComputedStyle(tempDiv).color;
       tempDiv.remove();
-      
+
       if (computedColor && computedColor !== 'rgba(0, 0, 0, 0)') {
         const rgbMatch2 = computedColor.match(/^rgba?\((\d+),\s*(\d+),\s*(\d+)/);
         if (rgbMatch2) {
@@ -121,7 +121,7 @@ function normalizeColorToHex(color: string): string | null {
       // Fall through to return null
     }
   }
-  
+
   return null;
 }
 
@@ -132,9 +132,9 @@ function getCategoryColor(category: string, customColors?: Record<string, string
     const normalized = normalizeColorToHex(customColors[category]);
     if (normalized) return normalized;
   }
-  
+
   const lowerCategory = category.toLowerCase();
-  
+
   // Define color mapping
   if (lowerCategory.includes("tools") && lowerCategory.includes("technologies")) {
     return "#F59E0B"; // Amber - Tools & Technologies
@@ -157,7 +157,7 @@ function getCategoryColor(category: string, customColors?: Record<string, string
   if (lowerCategory.includes("other")) {
     return "#6366F1"; // Indigo - Other Skills
   }
-  
+
   // Default color
   return "#3B82F6";
 }
@@ -235,6 +235,7 @@ function AdminSkillCard({
       {/* Icon */}
       <div className="flex items-center justify-center w-[52%] aspect-square shrink-0">
         {!imgError ? (
+          // eslint-disable-next-line @next/next/no-img-element
           <img
             src={iconUrl}
             alt={skill.name}
@@ -281,13 +282,13 @@ export function SkillsClient({ initialSkills }: { initialSkills: Skill[] }) {
   const formRef = useRef<HTMLDivElement>(null);
   const [selectedSkills, setSelectedSkills] = useState<Set<string>>(new Set());
   const [editingSkill, setEditingSkill] = useState<Skill | null>(null);
-  
+
   // Initialize formData first before useMemo hooks that depend on it
   const [formData, setFormData] = useState<Partial<Skill> & { _id?: string; name: string; category: string }>({
     name: "",
     category: "",
   });
-  
+
 
   // Define the desired order of categories (same as public panel)
   const categoryOrder = useMemo(() => [
@@ -305,8 +306,8 @@ export function SkillsClient({ initialSkills }: { initialSkills: Skill[] }) {
     const allCategories = Array.from(
       new Set(skills.map((skill: Skill) => skill.category).filter(Boolean))
     ) as string[];
-    
-    const sorted = categoryOrder.filter(category => 
+
+    const sorted = categoryOrder.filter(category =>
       allCategories.some(cat => cat.toLowerCase() === category.toLowerCase())
     ).concat(
       // Add any categories not in the predefined list at the end
@@ -329,8 +330,8 @@ export function SkillsClient({ initialSkills }: { initialSkills: Skill[] }) {
     const allCategories = Array.from(
       new Set(skills.map((skill: Skill) => skill.category).filter(Boolean))
     ) as string[];
-    
-    return categoryOrder.filter(category => 
+
+    return categoryOrder.filter(category =>
       allCategories.some(cat => cat.toLowerCase() === category.toLowerCase())
     ).concat(
       // Add any categories not in the predefined list at the end
@@ -411,7 +412,7 @@ export function SkillsClient({ initialSkills }: { initialSkills: Skill[] }) {
     if (newCategoryName.trim()) {
       const categoryName = newCategoryName.trim();
       setFormData({ ...formData, category: categoryName });
-      
+
       // Save the color for this category
       const normalizedColor = normalizeColorToHex(newCategoryColor);
       if (normalizedColor) {
@@ -420,7 +421,7 @@ export function SkillsClient({ initialSkills }: { initialSkills: Skill[] }) {
           [categoryName]: normalizedColor
         }));
       }
-      
+
       setIsCreatingNewCategory(false);
       setNewCategoryName("");
       setNewCategoryColor("#3B82F6");
@@ -452,10 +453,10 @@ export function SkillsClient({ initialSkills }: { initialSkills: Skill[] }) {
       const isEdit = !!formData._id;
       const url = "/api/skills";
       const method = isEdit ? "PUT" : "POST";
-      
+
       // Send proficiency as 0 (default) since it's no longer shown in UI
       const submitData = { ...formData, proficiency: 0 };
-      
+
       const response = await fetch(url, {
         method,
         headers: { "Content-Type": "application/json" },
@@ -628,13 +629,13 @@ export function SkillsClient({ initialSkills }: { initialSkills: Skill[] }) {
                 </>
               )}
             </Button>
-            <Button 
+            <Button
               onClick={() => {
                 if (showAddForm) {
                   resetForm();
                 }
                 setShowAddForm(!showAddForm);
-              }} 
+              }}
               className="gap-2 text-sm"
             >
               {showAddForm ? <X className="h-4 w-4" /> : <Plus className="h-4 w-4" />}
@@ -851,14 +852,13 @@ export function SkillsClient({ initialSkills }: { initialSkills: Skill[] }) {
                             tabIndex={-1}
                           >
                             <ChevronDown
-                              className={`h-4 w-4 transition-transform ${
-                                categoryDropdownOpen ? "transform rotate-180" : ""
-                              }`}
+                              className={`h-4 w-4 transition-transform ${categoryDropdownOpen ? "transform rotate-180" : ""
+                                }`}
                             />
                           </Button>
                         </div>
                       )}
-                      
+
                       {/* Dropdown menu */}
                       {categoryDropdownOpen && !isCreatingNewCategory && (
                         <div className="absolute z-50 w-full mt-1 bg-popover border rounded-md shadow-lg max-h-60 overflow-auto">

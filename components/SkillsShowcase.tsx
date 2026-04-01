@@ -183,6 +183,7 @@ function SkillCard({ skill }: { skill: Skill | null }) {
       {/* Icon — large, takes up ~55% of card */}
       <div className="flex items-center justify-center w-[55%] aspect-square shrink-0">
         {!imgError ? (
+          // eslint-disable-next-line @next/next/no-img-element
           <img
             src={iconUrl}
             alt={skill.name}
@@ -342,7 +343,7 @@ export function SkillsShowcase({ skills, categories }: SkillsShowcaseProps) {
       el.removeEventListener('touchstart', onTouchStart);
       el.removeEventListener('touchend', onTouchEnd);
     };
-  }, [catIdx, subPage, totalSubPages, totalCats, skills, categories, animate]);
+  }, [catIdx, subPage, totalSubPages, totalCats, skills, categories, animate, ITEMS_PER_PAGE]);
 
   // ── Overall progress for right bar ────────────────────────────────────────
   const totalViews = categories.reduce(
