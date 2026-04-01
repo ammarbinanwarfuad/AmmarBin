@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useEffect, useState, useTransition } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { LazyMotionDiv } from "@/components/LazyMotion";
 import { Card } from "@/components/ui/card";
@@ -47,7 +47,12 @@ export function ExperienceTabsClient({ experiences, participations }: Experience
   const router = useRouter();
   const tabParam = searchParams.get("tab");
   const [, startTransition] = useTransition();
-  
+  const [hasMounted, setHasMounted] = useState(false);
+
+  useEffect(() => {
+    setHasMounted(true);
+  }, []);
+
   const [activeTab, setActiveTab] = useState<"experience" | "participation">(
     tabParam === "participation" ? "participation" : "experience"
   );
@@ -68,11 +73,10 @@ export function ExperienceTabsClient({ experiences, participations }: Experience
       <div className="flex flex-col sm:flex-row gap-2 sm:gap-4 mb-8 border-b border-border">
         <Button
           variant="ghost"
-          className={`rounded-none border-b-2 justify-start sm:justify-center ${
-            activeTab === "experience"
+          className={`rounded-none border-b-2 justify-start sm:justify-center ${activeTab === "experience"
               ? "border-primary text-primary"
               : "border-transparent"
-          }`}
+            }`}
           onClick={() => handleTabChange("experience")}
         >
           <Briefcase className="h-4 w-4 mr-2" />
@@ -80,11 +84,10 @@ export function ExperienceTabsClient({ experiences, participations }: Experience
         </Button>
         <Button
           variant="ghost"
-          className={`rounded-none border-b-2 justify-start sm:justify-center ${
-            activeTab === "participation"
+          className={`rounded-none border-b-2 justify-start sm:justify-center ${activeTab === "participation"
               ? "border-primary text-primary"
               : "border-transparent"
-          }`}
+            }`}
           onClick={() => handleTabChange("participation")}
         >
           <Users className="h-4 w-4 mr-2" />
@@ -99,7 +102,7 @@ export function ExperienceTabsClient({ experiences, participations }: Experience
             experiences.map((exp, index) => (
               <LazyMotionDiv
                 key={exp._id}
-                initial={{ opacity: 0, x: -20 }}
+                initial={hasMounted ? { opacity: 0, x: -20 } : false}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ duration: 0.5, delay: index * 0.1 }}
               >
@@ -184,7 +187,7 @@ export function ExperienceTabsClient({ experiences, participations }: Experience
             participations.map((participation, index) => (
               <LazyMotionDiv
                 key={participation._id}
-                initial={{ opacity: 0, y: 20 }}
+                initial={hasMounted ? { opacity: 0, y: 20 } : false}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: index * 0.1 }}
               >
@@ -216,8 +219,8 @@ export function ExperienceTabsClient({ experiences, participations }: Experience
                           {participation.current
                             ? "Present"
                             : participation.endDate
-                            ? formatDate(participation.endDate)
-                            : "N/A"}
+                              ? formatDate(participation.endDate)
+                              : "N/A"}
                         </span>
                       </div>
                       {participation.location && (

@@ -1,4 +1,3 @@
-import { Suspense } from "react";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { getExperiences, getParticipations } from "@/lib/server/data";
@@ -6,22 +5,12 @@ import { ExperienceTabsClient } from "@/components/ExperienceTabsClient";
 
 export const revalidate = 86400; // 1 day - experience rarely changes
 
-// ⚡ Performance: Separate async component for Suspense
-async function ExperienceContent() {
+export default async function ExperiencePage() {
   const [experiences, participations] = await Promise.all([
     getExperiences(),
     getParticipations(),
   ]);
 
-  return (
-    <ExperienceTabsClient
-      experiences={experiences}
-      participations={participations}
-    />
-  );
-}
-
-export default function ExperiencePage() {
   return (
     <div className="min-h-screen flex flex-col">
       <Header />
@@ -36,9 +25,10 @@ export default function ExperiencePage() {
             </p>
           </div>
 
-          <Suspense fallback={<p className="text-muted-foreground">Loading experience...</p>}>
-            <ExperienceContent />
-          </Suspense>
+          <ExperienceTabsClient
+            experiences={experiences}
+            participations={participations}
+          />
         </div>
       </main>
       <Footer />
