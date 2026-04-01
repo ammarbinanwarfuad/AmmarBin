@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
+import { getToken } from "next-auth/jwt";
 
 export async function proxy(req: NextRequest) {
   const start = Date.now();
@@ -13,11 +14,12 @@ export async function proxy(req: NextRequest) {
   // CDN Optimization Headers
   const url = req.nextUrl;
 
-  // Check for session cookie (edge-compatible way)
-  // Must match both the dev name and production __Secure- prefixed name
-  const sessionCookie = req.cookies.get('__Secure-next-auth.session-token')
-    || req.cookies.get('next-auth.session-token');
-  const hasSession = !!sessionCookie;
+  // Validate session token at edge to avoid stale-cookie false positives.
+  const token = await getToken({
+    req,
+    secret: process.env.NEXTAUTH_SECRET,
+  });
+  const hasValidSession = !!token;
 
   // Login page: always allow access.
   // We intentionally do NOT redirect authenticated users away from the login page here.
@@ -44,9 +46,9 @@ export async function proxy(req: NextRequest) {
   }
 
   // Protect all other admin routes
-  if (url.pathname.startsWith("/admin") && !hasSession) {
+  if (url.pathname.startsWith("/admin") && !hasValidSession) {
     const loginUrl = new URL("/admin/login", req.url);
-    loginUrl.searchParams.set("callbackUrl", url.pathname);
+    loginUrl.searchParams.set("callbackUrl", `${url.pathname}${url.search}`);
     return NextResponse.redirect(loginUrl);
   }
 

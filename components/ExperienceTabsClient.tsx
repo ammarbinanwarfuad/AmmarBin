@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useTransition } from "react";
+import { useState, useTransition } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { LazyMotionDiv } from "@/components/LazyMotion";
 import { Card } from "@/components/ui/card";
@@ -47,11 +47,6 @@ export function ExperienceTabsClient({ experiences, participations }: Experience
   const router = useRouter();
   const tabParam = searchParams.get("tab");
   const [, startTransition] = useTransition();
-  const [hasMounted, setHasMounted] = useState(false);
-
-  useEffect(() => {
-    setHasMounted(true);
-  }, []);
 
   const [activeTab, setActiveTab] = useState<"experience" | "participation">(
     tabParam === "participation" ? "participation" : "experience"
@@ -74,8 +69,8 @@ export function ExperienceTabsClient({ experiences, participations }: Experience
         <Button
           variant="ghost"
           className={`rounded-none border-b-2 justify-start sm:justify-center ${activeTab === "experience"
-              ? "border-primary text-primary"
-              : "border-transparent"
+            ? "border-primary text-primary"
+            : "border-transparent"
             }`}
           onClick={() => handleTabChange("experience")}
         >
@@ -85,8 +80,8 @@ export function ExperienceTabsClient({ experiences, participations }: Experience
         <Button
           variant="ghost"
           className={`rounded-none border-b-2 justify-start sm:justify-center ${activeTab === "participation"
-              ? "border-primary text-primary"
-              : "border-transparent"
+            ? "border-primary text-primary"
+            : "border-transparent"
             }`}
           onClick={() => handleTabChange("participation")}
         >
@@ -102,7 +97,7 @@ export function ExperienceTabsClient({ experiences, participations }: Experience
             experiences.map((exp, index) => (
               <LazyMotionDiv
                 key={exp._id}
-                initial={hasMounted ? { opacity: 0, x: -20 } : false}
+                initial={false}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ duration: 0.5, delay: index * 0.1 }}
               >
@@ -187,7 +182,7 @@ export function ExperienceTabsClient({ experiences, participations }: Experience
             participations.map((participation, index) => (
               <LazyMotionDiv
                 key={participation._id}
-                initial={hasMounted ? { opacity: 0, y: 20 } : false}
+                initial={false}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: index * 0.1 }}
               >

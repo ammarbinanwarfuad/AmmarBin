@@ -2,7 +2,7 @@
 
 import { useEffect, useCallback } from "react";
 import { signOut, useSession } from "next-auth/react";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 
 const INACTIVITY_TIMEOUT = 30 * 60 * 1000; // 30 minutes
@@ -11,19 +11,20 @@ const WARNING_TIME = 5 * 60 * 1000; // Show warning 5 minutes before logout
 export function AutoLogout() {
   const { status } = useSession();
   const pathname = usePathname();
+  const router = useRouter();
   const isAdminRoute = pathname?.startsWith("/admin");
 
   const handleLogout = useCallback(async () => {
     try {
-      const savedTheme = localStorage.getItem('theme');
-      localStorage.clear();
-      if (savedTheme) localStorage.setItem('theme', savedTheme);
+      // Remove only app-managed cache/preferences keys; preserve theme.
+      const keysToClear = ["app-cache", "skillCategoryColors", "projectCategoryColors"];
+      keysToClear.forEach((key) => localStorage.removeItem(key));
 
       await signOut({ callbackUrl: '/admin/login' });
     } catch {
-      window.location.href = '/admin/login';
+      router.replace('/admin/login');
     }
-  }, []);
+  }, [router]);
 
   useEffect(() => {
     // Only apply auto-logout to admin routes

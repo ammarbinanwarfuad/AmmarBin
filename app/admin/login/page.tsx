@@ -1,8 +1,7 @@
 "use client";
 
-import { useState, useEffect, Suspense } from "react";
+import { useState, useEffect } from "react";
 import { signIn } from "next-auth/react";
-import { useSearchParams } from "next/navigation";
 import { motion } from "framer-motion";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -20,15 +19,23 @@ const AUTH_ERRORS: Record<string, string> = {
 
 function LoginForm() {
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const searchParams = useSearchParams();
+  const [callbackUrl, setCallbackUrl] = useState("/admin/dashboard");
 
-  // Show error toast when NextAuth redirects back with ?error=
+  // Read URL params on mount to avoid useSearchParams Suspense dependency.
   useEffect(() => {
-    const error = searchParams?.get("error");
+    const params = new URLSearchParams(window.location.search);
+    const rawCallback = params.get("callbackUrl") || "";
+
+    // Allow only internal relative callback paths to prevent open redirects.
+    if (rawCallback.startsWith("/") && !rawCallback.startsWith("//") && !rawCallback.includes("://")) {
+      setCallbackUrl(rawCallback);
+    }
+
+    const error = params.get("error");
     if (error) {
       toast.error(AUTH_ERRORS[error] ?? AUTH_ERRORS.Default);
     }
-  }, [searchParams]);
+  }, []);
 
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -40,24 +47,26 @@ function LoginForm() {
     const email = formData.get("email") as string;
     const password = formData.get("password") as string;
 
-    // Use NextAuth's built-in redirect (not redirect:false).
-    // This sets the session cookie + redirect atomically on the server,
-    // eliminating the race condition that caused the post-logout login loop.
-    await signIn("credentials", {
-      email,
-      password,
-      callbackUrl: "/admin/dashboard",
-    });
-
-    // Only reached if an error caused NextAuth to redirect back to this page;
-    // reset the loading state so the form is usable again.
-    setIsSubmitting(false);
+    try {
+      // Use NextAuth's built-in redirect (not redirect:false).
+      // This sets session cookie + redirect atomically on the server.
+      await signIn("credentials", {
+        email,
+        password,
+        callbackUrl,
+      });
+    } catch {
+      toast.error("An unexpected error occurred. Please try again.");
+    } finally {
+      // If redirect does not happen (error path), keep form usable.
+      setIsSubmitting(false);
+    }
   };
 
   return (
     <div className="min-h-screen flex items-center justify-center px-6 py-24 bg-background">
       <motion.div
-        initial={{ opacity: 0, y: 20 }}
+        initial={false}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
         className="w-full max-w-md"
@@ -114,16 +123,6 @@ function LoginForm() {
 }
 
 export default function AdminLoginPage() {
-  return (
-    <Suspense
-      fallback={
-        <div className="min-h-screen flex items-center justify-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary" />
-        </div>
-      }
-    >
-      <LoginForm />
-    </Suspense>
-  );
+  return <LoginForm />;
 }
 

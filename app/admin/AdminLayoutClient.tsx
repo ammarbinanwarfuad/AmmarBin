@@ -1,7 +1,7 @@
 "use client";
 
 import { useSession, signOut } from "next-auth/react";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -36,31 +36,31 @@ export function AdminLayoutClient({
 }) {
   const { data: session, status } = useSession();
   const pathname = usePathname();
+  const router = useRouter();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
 
   useEffect(() => {
-    // Use hard navigation so SessionProvider cache is fully reset.
-    // router.push() is a soft nav — it keeps the stale session cache alive,
-    // causing the login page to immediately redirect back here (infinite loop).
+    // Prefer soft navigation for smooth UX in normal flow.
+    // Keep hard navigation only as a fallback in error paths.
     if (status === "unauthenticated" && pathname !== "/admin/login") {
-      window.location.href = "/admin/login";
+      router.replace("/admin/login");
     }
-  }, [status, pathname]);
+  }, [status, pathname, router]);
 
   const handleLogout = async () => {
     if (isLoggingOut) return; // Prevent multiple clicks
     setIsLoggingOut(true);
     try {
-      // Preserve theme so the login page doesn't flash the wrong theme
-      const savedTheme = localStorage.getItem('theme');
-      localStorage.clear();
-      if (savedTheme) localStorage.setItem('theme', savedTheme);
+      // Remove only app-managed cache/preferences keys; preserve theme.
+      const keysToClear = ["app-cache", "skillCategoryColors", "projectCategoryColors"];
+      keysToClear.forEach((key) => localStorage.removeItem(key));
 
       // signOut clears the NextAuth session cookie server-side,
       // then navigates the browser to the login page.
       await signOut({ callbackUrl: '/admin/login' });
     } catch {
+      // Fallback hard navigation when router/signOut flow fails.
       window.location.href = '/admin/login';
     }
   };
@@ -70,24 +70,12 @@ export function AdminLayoutClient({
     return <>{children}</>;
   }
 
-  if (status === "loading") {
+  if (status !== "authenticated" || !session) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
-          <p className="mt-4 text-muted-foreground">Loading...</p>
-        </div>
-      </div>
-    );
-  }
-
-  // If not authenticated, show redirecting message while hard-nav fires
-  if (!session) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
-          <p className="mt-4 text-muted-foreground">Redirecting...</p>
+          <p className="mt-4 text-muted-foreground">Checking session...</p>
         </div>
       </div>
     );
@@ -172,10 +160,9 @@ export function AdminLayoutClient({
                       className={`
                         flex items-center gap-3 px-4 py-3 rounded-lg
                         transition-colors duration-200
-                        ${
-                          isActive
-                            ? "bg-primary text-primary-foreground"
-                            : "hover:bg-accent text-foreground"
+                        ${isActive
+                          ? "bg-primary text-primary-foreground"
+                          : "hover:bg-accent text-foreground"
                         }
                       `}
                     >
