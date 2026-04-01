@@ -3,7 +3,6 @@ import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { getProjects } from "@/lib/server/data";
 import { ProjectsGridWithFilter } from "@/components/ProjectsGridWithFilter";
-import { ProjectsSkeleton } from "@/components/ProjectsSkeleton";
 
 export const revalidate = 7200; // 2 hours - projects don't change frequently
 
@@ -29,7 +28,7 @@ export default function ProjectsPage() {
           </div>
 
           {/* Stream projects content for faster perceived performance */}
-          <Suspense fallback={<ProjectsSkeleton />}>
+          <Suspense fallback={<p className="text-muted-foreground">Loading projects...</p>}>
             <ProjectsSection />
           </Suspense>
         </div>

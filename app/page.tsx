@@ -1,31 +1,22 @@
 import Link from "next/link";
-import { Suspense } from "react";
 import { Download, ArrowRight } from "lucide-react";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { getProfile } from "@/lib/server/data";
 import { HeroContent } from "@/components/HeroContent";
-import { HeroSkeleton } from "@/components/HeroSkeleton";
 
 export const revalidate = 7200; // 2 hours - content rarely changes, longer cache for better performance
 
-// Async component for hero content with streaming
-async function HeroSection() {
+export default async function Home() {
   const profile = await getProfile();
-  return <HeroContent profile={profile} />;
-}
 
-export default function Home() {
   return (
     <div className="min-h-screen flex flex-col">
-        <Header />
-        <main className="flex-1 flex items-center justify-center px-6 py-24 sm:py-32">
-          <div className="text-center max-w-4xl mx-auto">
-            {/* Stream hero content for faster perceived performance */}
-            <Suspense fallback={<HeroSkeleton />}>
-              <HeroSection />
-            </Suspense>
+      <Header />
+      <main className="flex-1 flex items-center justify-center px-6 py-24 sm:py-32">
+        <div className="text-center max-w-4xl mx-auto">
+          <HeroContent profile={profile} />
 
           {/* CTA Buttons */}
           <div className="flex flex-wrap justify-center gap-4 mb-12">
@@ -45,9 +36,9 @@ export default function Home() {
               </Button>
             </Link>
           </div>
-          </div>
-        </main>
-        <Footer />
-      </div>
+        </div>
+      </main>
+      <Footer />
+    </div>
   );
 }

@@ -25,113 +25,113 @@ export function getIconUrl(skillName: string, iconField?: string): string {
   const n = (skillName || '').toLowerCase().trim();
 
   const iconMap: Record<string, string> = {
-    html:           'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/html5/html5-original.svg',
-    html5:          'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/html5/html5-original.svg',
-    css:            'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/css3/css3-original.svg',
-    css3:           'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/css3/css3-original.svg',
-    javascript:     'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/javascript/javascript-original.svg',
-    js:             'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/javascript/javascript-original.svg',
-    typescript:     'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/typescript/typescript-original.svg',
-    ts:             'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/typescript/typescript-original.svg',
-    react:          'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/react/react-original.svg',
-    'react js':     'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/react/react-original.svg',
-    reactjs:        'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/react/react-original.svg',
-    'react.js':     'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/react/react-original.svg',
-    'next.js':      'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/nextjs/nextjs-original.svg',
-    nextjs:         'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/nextjs/nextjs-original.svg',
-    'next js':      'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/nextjs/nextjs-original.svg',
-    vue:            'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/vuejs/vuejs-original.svg',
-    'vue.js':       'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/vuejs/vuejs-original.svg',
-    vuejs:          'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/vuejs/vuejs-original.svg',
-    angular:        'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/angularjs/angularjs-original.svg',
-    svelte:         'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/svelte/svelte-original.svg',
-    redux:          'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/redux/redux-original.svg',
-    sass:           'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/sass/sass-original.svg',
-    scss:           'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/sass/sass-original.svg',
-    bootstrap:      'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/bootstrap/bootstrap-original.svg',
-    tailwind:       'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/tailwindcss/tailwindcss-original.svg',
-    tailwindcss:    'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/tailwindcss/tailwindcss-original.svg',
+    html: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/html5/html5-original.svg',
+    html5: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/html5/html5-original.svg',
+    css: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/css3/css3-original.svg',
+    css3: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/css3/css3-original.svg',
+    javascript: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/javascript/javascript-original.svg',
+    js: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/javascript/javascript-original.svg',
+    typescript: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/typescript/typescript-original.svg',
+    ts: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/typescript/typescript-original.svg',
+    react: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/react/react-original.svg',
+    'react js': 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/react/react-original.svg',
+    reactjs: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/react/react-original.svg',
+    'react.js': 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/react/react-original.svg',
+    'next.js': 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/nextjs/nextjs-original.svg',
+    nextjs: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/nextjs/nextjs-original.svg',
+    'next js': 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/nextjs/nextjs-original.svg',
+    vue: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/vuejs/vuejs-original.svg',
+    'vue.js': 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/vuejs/vuejs-original.svg',
+    vuejs: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/vuejs/vuejs-original.svg',
+    angular: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/angularjs/angularjs-original.svg',
+    svelte: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/svelte/svelte-original.svg',
+    redux: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/redux/redux-original.svg',
+    sass: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/sass/sass-original.svg',
+    scss: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/sass/sass-original.svg',
+    bootstrap: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/bootstrap/bootstrap-original.svg',
+    tailwind: 'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/tailwindcss/tailwindcss-original.svg',
+    tailwindcss: 'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/tailwindcss/tailwindcss-original.svg',
     'tailwind css': 'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/tailwindcss/tailwindcss-original.svg',
-    materialui:     'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/materialui/materialui-original.svg',
-    'material ui':  'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/materialui/materialui-original.svg',
-    'node.js':      'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/nodejs/nodejs-original.svg',
-    nodejs:         'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/nodejs/nodejs-original.svg',
-    'node js':      'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/nodejs/nodejs-original.svg',
-    node:           'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/nodejs/nodejs-original.svg',
-    express:        'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/express/express-original.svg',
-    'express.js':   'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/express/express-original.svg',
-    expressjs:      'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/express/express-original.svg',
-    python:         'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/python/python-original.svg',
-    django:         'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/django/django-plain.svg',
-    flask:          'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/flask/flask-original.svg',
-    php:            'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/php/php-original.svg',
-    laravel:        'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/laravel/laravel-plain.svg',
-    java:           'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/java/java-original.svg',
-    spring:         'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/spring/spring-original.svg',
-    go:             'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/go/go-original.svg',
-    golang:         'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/go/go-original.svg',
-    rust:           'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/rust/rust-plain.svg',
-    ruby:           'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/ruby/ruby-original.svg',
-    rails:          'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/rails/rails-original-wordmark.svg',
-    swift:          'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/swift/swift-original.svg',
-    kotlin:         'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/kotlin/kotlin-original.svg',
-    c:              'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/c/c-original.svg',
-    'c++':          'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/cplusplus/cplusplus-original.svg',
-    cpp:            'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/cplusplus/cplusplus-original.svg',
-    'c#':           'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/csharp/csharp-original.svg',
-    csharp:         'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/csharp/csharp-original.svg',
-    mongodb:        'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/mongodb/mongodb-original.svg',
-    postgresql:     'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/postgresql/postgresql-original.svg',
-    postgres:       'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/postgresql/postgresql-original.svg',
-    mysql:          'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/mysql/mysql-original.svg',
-    redis:          'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/redis/redis-original.svg',
-    sqlite:         'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/sqlite/sqlite-original.svg',
-    firebase:       'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/firebase/firebase-plain.svg',
-    git:            'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/git/git-original.svg',
-    github:         'https://cdn.simpleicons.org/github/000000',  // dark icon — inverted in dark mode via CSS
-    gitlab:         'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/gitlab/gitlab-original.svg',
-    docker:         'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/docker/docker-original.svg',
-    dockers:        'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/docker/docker-original.svg',
-    kubernetes:     'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/kubernetes/kubernetes-plain.svg',
-    aws:            'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/amazonwebservices/amazonwebservices-original.svg',
-    azure:          'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/azure/azure-original.svg',
-    gcp:            'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/googlecloud/googlecloud-original.svg',
-    nginx:          'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/nginx/nginx-original.svg',
-    linux:          'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/linux/linux-original.svg',
-    ubuntu:         'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/ubuntu/ubuntu-plain.svg',
-    graphql:        'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/graphql/graphql-plain.svg',
-    jest:           'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/jest/jest-plain.svg',
-    webpack:        'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/webpack/webpack-original.svg',
-    vite:           'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/vite/vite-original.svg',
-    figma:          'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/figma/figma-original.svg',
-    wordpress:      'https://cdn.simpleicons.org/wordpress',
+    materialui: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/materialui/materialui-original.svg',
+    'material ui': 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/materialui/materialui-original.svg',
+    'node.js': 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/nodejs/nodejs-original.svg',
+    nodejs: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/nodejs/nodejs-original.svg',
+    'node js': 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/nodejs/nodejs-original.svg',
+    node: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/nodejs/nodejs-original.svg',
+    express: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/express/express-original.svg',
+    'express.js': 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/express/express-original.svg',
+    expressjs: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/express/express-original.svg',
+    python: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/python/python-original.svg',
+    django: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/django/django-plain.svg',
+    flask: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/flask/flask-original.svg',
+    php: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/php/php-original.svg',
+    laravel: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/laravel/laravel-plain.svg',
+    java: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/java/java-original.svg',
+    spring: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/spring/spring-original.svg',
+    go: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/go/go-original.svg',
+    golang: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/go/go-original.svg',
+    rust: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/rust/rust-plain.svg',
+    ruby: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/ruby/ruby-original.svg',
+    rails: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/rails/rails-original-wordmark.svg',
+    swift: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/swift/swift-original.svg',
+    kotlin: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/kotlin/kotlin-original.svg',
+    c: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/c/c-original.svg',
+    'c++': 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/cplusplus/cplusplus-original.svg',
+    cpp: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/cplusplus/cplusplus-original.svg',
+    'c#': 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/csharp/csharp-original.svg',
+    csharp: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/csharp/csharp-original.svg',
+    mongodb: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/mongodb/mongodb-original.svg',
+    postgresql: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/postgresql/postgresql-original.svg',
+    postgres: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/postgresql/postgresql-original.svg',
+    mysql: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/mysql/mysql-original.svg',
+    redis: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/redis/redis-original.svg',
+    sqlite: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/sqlite/sqlite-original.svg',
+    firebase: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/firebase/firebase-plain.svg',
+    git: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/git/git-original.svg',
+    github: 'https://cdn.simpleicons.org/github/000000',  // dark icon — inverted in dark mode via CSS
+    gitlab: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/gitlab/gitlab-original.svg',
+    docker: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/docker/docker-original.svg',
+    dockers: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/docker/docker-original.svg',
+    kubernetes: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/kubernetes/kubernetes-plain.svg',
+    aws: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/amazonwebservices/amazonwebservices-original.svg',
+    azure: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/azure/azure-original.svg',
+    gcp: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/googlecloud/googlecloud-original.svg',
+    nginx: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/nginx/nginx-original.svg',
+    linux: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/linux/linux-original.svg',
+    ubuntu: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/ubuntu/ubuntu-plain.svg',
+    graphql: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/graphql/graphql-plain.svg',
+    jest: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/jest/jest-plain.svg',
+    webpack: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/webpack/webpack-original.svg',
+    vite: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/vite/vite-original.svg',
+    figma: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/figma/figma-original.svg',
+    wordpress: 'https://cdn.simpleicons.org/wordpress',
     'wordpress.com': 'https://cdn.simpleicons.org/wordpress',
     // VS Code
-    vscode:         'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/vscode/vscode-original.svg',
-    'vs code':      'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/vscode/vscode-original.svg',
+    vscode: 'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/vscode/vscode-original.svg',
+    'vs code': 'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/vscode/vscode-original.svg',
     'visual studio code': 'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/vscode/vscode-original.svg',
     // JSON
-    json:           'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/json/json-original.svg',
+    json: 'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/json/json-original.svg',
     // npm
-    npm:            'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/npm/npm-original-wordmark.svg',
+    npm: 'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/npm/npm-original-wordmark.svg',
     // Design tools
-    canva:          'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/canva/canva-original.svg',
-    photoshop:      'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/photoshop/photoshop-original.svg',
+    canva: 'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/canva/canva-original.svg',
+    photoshop: 'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/photoshop/photoshop-original.svg',
     'adobe photoshop': 'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/photoshop/photoshop-original.svg',
-    xd:             'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/xd/xd-original.svg',
-    'adobe xd':     'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/xd/xd-original.svg',
-    illustrator:    'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/illustrator/illustrator-original.svg',
+    xd: 'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/xd/xd-original.svg',
+    'adobe xd': 'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/xd/xd-original.svg',
+    illustrator: 'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/illustrator/illustrator-original.svg',
     'adobe illustrator': 'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/illustrator/illustrator-original.svg',
     'adobe premiere pro': '/premiere-pro.svg',
-    'premiere pro':  '/premiere-pro.svg',
-    premierepro:    '/premiere-pro.svg',
-    premiere:       '/premiere-pro.svg',
-    blogger:        '/Blogger_icon.svg',
-    vercel:         'https://cdn.simpleicons.org/vercel/ffffff',
-    netlify:        'https://cdn.simpleicons.org/netlify',
-    shopify:        'https://cdn.simpleicons.org/shopify',
-    prisma:         'https://cdn.simpleicons.org/prisma/ffffff',
-    postman:        'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/postman/postman-original.svg',
+    'premiere pro': '/premiere-pro.svg',
+    premierepro: '/premiere-pro.svg',
+    premiere: '/premiere-pro.svg',
+    blogger: '/Blogger_icon.svg',
+    vercel: 'https://cdn.simpleicons.org/vercel/ffffff',
+    netlify: 'https://cdn.simpleicons.org/netlify',
+    shopify: 'https://cdn.simpleicons.org/shopify',
+    prisma: 'https://cdn.simpleicons.org/prisma/ffffff',
+    postman: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/postman/postman-original.svg',
   };
 
   const url = iconMap[n];
@@ -169,8 +169,8 @@ function SkillCard({ skill }: { skill: Skill | null }) {
     return <div className="h-full rounded-2xl border border-border/30 bg-card/20" />;
   }
 
-  const iconUrl    = getIconUrl(skill.name, skill.icon);
-  const accent      = getCategoryColor(skill.category);
+  const iconUrl = getIconUrl(skill.name, skill.icon);
+  const accent = getCategoryColor(skill.category);
   const invertClass = needsDarkInvert(skill.name) ? 'dark:invert' : '';
 
   return (
@@ -220,9 +220,9 @@ function useItemsPerPage() {
   const [items, setItems] = useState(10);
   useEffect(() => {
     const update = () => {
-      if (window.innerWidth < 640)       setItems(4);
+      if (window.innerWidth < 640) setItems(4);
       else if (window.innerWidth < 1024) setItems(6);
-      else                               setItems(10);
+      else setItems(10);
     };
     update();
     window.addEventListener('resize', update);
@@ -232,24 +232,24 @@ function useItemsPerPage() {
 }
 
 export function SkillsShowcase({ skills, categories }: SkillsShowcaseProps) {
-  const containerRef   = useRef<HTMLDivElement>(null);
-  const lastWheelRef   = useRef(0);
-  const isAnimating    = useRef(false);
-  const touchStartRef  = useRef<{ x: number; y: number } | null>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const lastWheelRef = useRef(0);
+  const isAnimating = useRef(false);
+  const touchStartRef = useRef<{ x: number; y: number } | null>(null);
 
-  const [catIdx,    setCatIdx]    = useState(0);
-  const [subPage,   setSubPage]   = useState(0);
-  const [visible,   setVisible]   = useState(true);
+  const [catIdx, setCatIdx] = useState(0);
+  const [subPage, setSubPage] = useState(0);
+  const [visible, setVisible] = useState(true);
   const [direction, setDirection] = useState<'down' | 'up'>('down');
 
   const ITEMS_PER_PAGE = useItemsPerPage();
   const totalCats = categories.length;
 
-  const catSkills     = skills
+  const catSkills = skills
     .filter((s) => s.category === (categories[catIdx] ?? ''))
     .sort((a, b) => a.name.localeCompare(b.name));
   const totalSubPages = Math.max(1, Math.ceil(catSkills.length / ITEMS_PER_PAGE));
-  const pageSkills    = catSkills.slice(subPage * ITEMS_PER_PAGE, (subPage + 1) * ITEMS_PER_PAGE);
+  const pageSkills = catSkills.slice(subPage * ITEMS_PER_PAGE, (subPage + 1) * ITEMS_PER_PAGE);
 
   const paddedSkills: (Skill | null)[] = [
     ...pageSkills,
@@ -294,9 +294,9 @@ export function SkillsShowcase({ skills, categories }: SkillsShowcaseProps) {
         if (subPage > 0) {
           animate(catIdx, subPage - 1, 'up');
         } else if (catIdx > 0) {
-          const prevCat    = catIdx - 1;
+          const prevCat = catIdx - 1;
           const prevSkills = skills.filter((s) => s.category === categories[prevCat]).sort((a, b) => a.name.localeCompare(b.name));
-          const prevSub    = Math.max(0, Math.ceil(prevSkills.length / ITEMS_PER_PAGE) - 1);
+          const prevSub = Math.max(0, Math.ceil(prevSkills.length / ITEMS_PER_PAGE) - 1);
           animate(prevCat, prevSub, 'up');
         }
       }
@@ -326,9 +326,9 @@ export function SkillsShowcase({ skills, categories }: SkillsShowcaseProps) {
         if (subPage > 0) {
           animate(catIdx, subPage - 1, 'up');
         } else if (catIdx > 0) {
-          const prevCat    = catIdx - 1;
+          const prevCat = catIdx - 1;
           const prevSkills = skills.filter((s) => s.category === categories[prevCat]).sort((a, b) => a.name.localeCompare(b.name));
-          const prevSub    = Math.max(0, Math.ceil(prevSkills.length / ITEMS_PER_PAGE) - 1);
+          const prevSub = Math.max(0, Math.ceil(prevSkills.length / ITEMS_PER_PAGE) - 1);
           animate(prevCat, prevSub, 'up');
         }
       }
@@ -359,11 +359,11 @@ export function SkillsShowcase({ skills, categories }: SkillsShowcaseProps) {
   const gridClass = visible
     ? 'opacity-100 translate-y-0'
     : direction === 'down'
-    ? 'opacity-0 translate-y-8'
-    : 'opacity-0 -translate-y-8';
+      ? 'opacity-0 translate-y-8'
+      : 'opacity-0 -translate-y-8';
 
   const currentCategory = categories[catIdx] ?? '';
-  const categoryColor   = getCategoryColor(currentCategory);
+  const categoryColor = getCategoryColor(currentCategory);
 
   if (!totalCats || skills.length === 0) {
     return (
@@ -374,109 +374,140 @@ export function SkillsShowcase({ skills, categories }: SkillsShowcaseProps) {
   }
 
   return (
-    <div
-      ref={containerRef}
-      className="flex items-center justify-center h-full w-full overflow-hidden px-2 sm:px-4"
-    >
-      {/* ── LEFT SIDEBAR — hidden on mobile ───────────────────────────── */}
-      <div className="hidden sm:flex flex-col items-center justify-center gap-5 w-10 md:w-14 shrink-0 self-stretch">
-        <div className="w-[3px] h-12 md:h-16 bg-yellow-400 rounded-full" />
-        <span
-          style={{ '--cat-color': categoryColor } as CSSProperties}
-          className="text-[9px] md:text-[11px] font-extrabold tracking-[0.2em] uppercase whitespace-nowrap
-                     [writing-mode:vertical-rl] rotate-180 select-none leading-none [color:var(--cat-color)]"
-        >
-          {currentCategory}
-        </span>
+    <>
+      <div className="sm:hidden px-4 py-6">
+        <div className="space-y-8">
+          {categories.map((category) => {
+            const categorySkills = skills
+              .filter((s) => s.category === category)
+              .sort((a, b) => a.name.localeCompare(b.name));
+
+            if (categorySkills.length === 0) return null;
+
+            const categoryColor = getCategoryColor(category);
+
+            return (
+              <section key={category} className="space-y-3">
+                <p
+                  style={{ '--cat-color': categoryColor } as CSSProperties}
+                  className="text-xs font-extrabold tracking-[0.14em] uppercase [color:var(--cat-color)]"
+                >
+                  {category}
+                </p>
+                <div className="grid grid-cols-2 gap-3">
+                  {categorySkills.map((skill) => (
+                    <div key={skill._id} className="min-h-[112px]">
+                      <SkillCard skill={skill} />
+                    </div>
+                  ))}
+                </div>
+              </section>
+            );
+          })}
+        </div>
       </div>
 
-      {/* ── MAIN CONTENT ──────────────────────────────────────────────── */}
-      <div className="flex-1 flex flex-col items-center justify-between gap-3 overflow-hidden min-h-0 max-w-6xl py-3 sm:py-5 md:py-6">
-
-        {/* Category label — mobile only */}
-        <p
-          style={{ '--cat-color': categoryColor } as CSSProperties}
-          className="sm:hidden text-[11px] font-extrabold tracking-[0.2em] uppercase select-none [color:var(--cat-color)]"
-        >
-          {currentCategory}
-        </p>
-
-        {/* Responsive grid: 2 cols mobile → 3 cols tablet → 5 cols desktop */}
-        <div
-          className={`grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2 sm:gap-3 md:gap-4 w-full flex-1 min-h-0 transition-all duration-300 ease-in-out [grid-template-rows:repeat(2,1fr)] ${gridClass}`}
-        >
-          {paddedSkills.map((skill, idx) => (
-            <SkillCard
-              key={skill ? skill._id : `empty-${idx}`}
-              skill={skill}
-            />
-          ))}
+      <div
+        ref={containerRef}
+        className="hidden sm:flex items-center justify-center w-full overflow-hidden px-2 sm:px-4 sm:min-h-[420px] lg:h-[52vh] lg:max-h-[560px]"
+      >
+        {/* ── LEFT SIDEBAR — hidden on mobile ───────────────────────────── */}
+        <div className="hidden sm:flex flex-col items-center justify-center gap-5 w-10 md:w-14 shrink-0 self-stretch">
+          <div className="w-[3px] h-12 md:h-16 bg-yellow-400 rounded-full" />
+          <span
+            style={{ '--cat-color': categoryColor } as CSSProperties}
+            className="text-[9px] md:text-[11px] font-extrabold tracking-[0.2em] uppercase whitespace-nowrap
+                     [writing-mode:vertical-rl] rotate-180 select-none leading-none [color:var(--cat-color)]"
+          >
+            {currentCategory}
+          </span>
         </div>
 
-        {/* ── Controls ────────────────────────────────────────────────── */}
-        <div className="flex flex-col items-center gap-1 shrink-0">
-          {/* Sub-page dots — only if category has >10 skills */}
-          {totalSubPages > 1 && (
-            <div className="flex items-center gap-2">
-              {Array.from({ length: totalSubPages }).map((_, i) => (
-                <button
-                  key={i}
-                  aria-label={`Sub-page ${i + 1}`}
-                  onClick={() => animate(catIdx, i, i > subPage ? 'down' : 'up')}
-                  className={`rounded-full transition-all duration-300 focus:outline-none touch-manipulation ${
-                    i === subPage
-                      ? 'w-6 h-1.5 sm:h-[5px] bg-yellow-400'
-                      : 'w-1.5 h-1.5 sm:w-[5px] sm:h-[5px] bg-border hover:bg-muted-foreground'
-                  }`}
-                />
-              ))}
-            </div>
-          )}
+        {/* ── MAIN CONTENT ──────────────────────────────────────────────── */}
+        <div className="flex-1 flex flex-col items-center justify-between gap-3 overflow-hidden min-h-0 max-w-6xl py-3 sm:py-5 md:py-6">
 
-          {/* Category navigation dots */}
-          <div className="flex items-center gap-2">
-            {categories.map((cat, i) => (
-              <button
-                key={cat}
-                aria-label={`Go to ${cat}`}
-                onClick={() => animate(i, 0, i > catIdx ? 'down' : 'up')}
-                className={`rounded-full transition-all duration-300 focus:outline-none touch-manipulation [background-color:var(--dot-color)] ${
-                  i === catIdx ? 'w-6 h-1.5' : 'w-1.5 h-1.5'
-                }`}
-                style={{ '--dot-color': i === catIdx ? categoryColor : 'hsl(var(--border))' } as CSSProperties}
+          {/* Category label — mobile only */}
+          <p
+            style={{ '--cat-color': categoryColor } as CSSProperties}
+            className="sm:hidden text-[11px] font-extrabold tracking-[0.2em] uppercase select-none [color:var(--cat-color)]"
+          >
+            {currentCategory}
+          </p>
+
+          {/* Responsive grid: 2 cols mobile → 3 cols tablet → 5 cols desktop */}
+          <div
+            className={`grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2 sm:gap-3 md:gap-4 w-full flex-1 min-h-0 transition-all duration-300 ease-in-out [grid-template-rows:repeat(2,1fr)] ${gridClass}`}
+          >
+            {paddedSkills.map((skill, idx) => (
+              <SkillCard
+                key={skill ? skill._id : `empty-${idx}`}
+                skill={skill}
               />
             ))}
           </div>
 
-          {/* x / n counter */}
-          <p className="text-[11px] text-muted-foreground tracking-widest font-medium select-none">
-            {String(catIdx + 1).padStart(2, '0')} / {String(totalCats).padStart(2, '0')}
-          </p>
-        </div>
-      </div>
+          {/* ── Controls ────────────────────────────────────────────────── */}
+          <div className="flex flex-col items-center gap-1 shrink-0">
+            {/* Sub-page dots — only if category has >10 skills */}
+            {totalSubPages > 1 && (
+              <div className="flex items-center gap-2">
+                {Array.from({ length: totalSubPages }).map((_, i) => (
+                  <button
+                    key={i}
+                    aria-label={`Sub-page ${i + 1}`}
+                    onClick={() => animate(catIdx, i, i > subPage ? 'down' : 'up')}
+                    className={`rounded-full transition-all duration-300 focus:outline-none touch-manipulation ${i === subPage
+                      ? 'w-6 h-1.5 sm:h-[5px] bg-yellow-400'
+                      : 'w-1.5 h-1.5 sm:w-[5px] sm:h-[5px] bg-border hover:bg-muted-foreground'
+                      }`}
+                  />
+                ))}
+              </div>
+            )}
 
-      {/* ── RIGHT SIDEBAR — hidden on mobile ──────────────────────────── */}
-      <div className="hidden sm:flex flex-col items-center justify-center w-8 md:w-10 shrink-0 self-stretch gap-3">
-        <div className="relative w-[3px] h-36 md:h-48 bg-border rounded-full overflow-hidden">
-          <div
-            className="absolute top-0 left-0 right-0 bg-yellow-400 rounded-full transition-all duration-500 ease-out [height:var(--prog-height)]"
-            style={{ '--prog-height': `${progressPct}%` } as CSSProperties}
-          />
+            {/* Category navigation dots */}
+            <div className="flex items-center gap-2">
+              {categories.map((cat, i) => (
+                <button
+                  key={cat}
+                  aria-label={`Go to ${cat}`}
+                  onClick={() => animate(i, 0, i > catIdx ? 'down' : 'up')}
+                  className={`rounded-full transition-all duration-300 focus:outline-none touch-manipulation [background-color:var(--dot-color)] ${i === catIdx ? 'w-6 h-1.5' : 'w-1.5 h-1.5'
+                    }`}
+                  style={{ '--dot-color': i === catIdx ? categoryColor : 'hsl(var(--border))' } as CSSProperties}
+                />
+              ))}
+            </div>
+
+            {/* x / n counter */}
+            <p className="text-[11px] text-muted-foreground tracking-widest font-medium select-none">
+              {String(catIdx + 1).padStart(2, '0')} / {String(totalCats).padStart(2, '0')}
+            </p>
+          </div>
         </div>
-        <div className="flex flex-col items-center gap-[5px]">
-          {categories.map((cat, i) => (
+
+        {/* ── RIGHT SIDEBAR — hidden on mobile ──────────────────────────── */}
+        <div className="hidden sm:flex flex-col items-center justify-center w-8 md:w-10 shrink-0 self-stretch gap-3">
+          <div className="relative w-[3px] h-36 md:h-48 bg-border rounded-full overflow-hidden">
             <div
-              key={cat}
-              onClick={() => animate(i, 0, i > catIdx ? 'down' : 'up')}
-              title={cat}
-              className={`rounded-full cursor-pointer transition-all duration-300 [background-color:var(--dot-color)] ${
-                i === catIdx ? 'w-2 h-2' : 'w-[5px] h-[5px]'
-              }`}
-              style={{ '--dot-color': i === catIdx ? categoryColor : 'hsl(var(--border))' } as CSSProperties}
+              className="absolute top-0 left-0 right-0 bg-yellow-400 rounded-full transition-all duration-500 ease-out [height:var(--prog-height)]"
+              style={{ '--prog-height': `${progressPct}%` } as CSSProperties}
             />
-          ))}
+          </div>
+          <div className="flex flex-col items-center gap-[5px]">
+            {categories.map((cat, i) => (
+              <div
+                key={cat}
+                onClick={() => animate(i, 0, i > catIdx ? 'down' : 'up')}
+                title={cat}
+                className={`rounded-full cursor-pointer transition-all duration-300 [background-color:var(--dot-color)] ${i === catIdx ? 'w-2 h-2' : 'w-[5px] h-[5px]'
+                  }`}
+                style={{ '--dot-color': i === catIdx ? categoryColor : 'hsl(var(--border))' } as CSSProperties}
+              />
+            ))}
+          </div>
         </div>
       </div>
-    </div>
+    </>
   );
 }

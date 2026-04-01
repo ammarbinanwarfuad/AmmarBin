@@ -132,20 +132,6 @@
   animation-delay: 0.5s;
 }
 
-/* Loading Skeleton */
-@keyframes skeletonPulse {
-  0%, 100% {
-    opacity: 1;
-  }
-  50% {
-    opacity: 0.5;
-  }
-}
-
-.skeleton {
-  animation: skeletonPulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-}
-
 /* Respect user's motion preferences - Accessibility */
 @media (prefers-reduced-motion: reduce) {
   .animate-fade-in,

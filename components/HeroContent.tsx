@@ -33,8 +33,8 @@ export function HeroContent({ profile }: HeroContentProps) {
         <div className="relative w-48 h-48 rounded-full overflow-hidden border-4 border-border">
           <Image
             src={
-              profile?.profileImage 
-                ? profile.profileImage.includes('/upload/') 
+              profile?.profileImage
+                ? profile.profileImage.includes('/upload/')
                   ? profile.profileImage.replace('/upload/', '/upload/c_fill,w_384,h_384,f_avif,q_65,dpr_2/')
                   : profile.profileImage
                 : "https://res.cloudinary.com/ammarbin/image/upload/c_fill,w_384,h_384,f_avif,q_65,dpr_2/v1762075570/profile/fshoacntppx9mgjwvlca.jpg"
@@ -46,8 +46,7 @@ export function HeroContent({ profile }: HeroContentProps) {
             priority
             fetchPriority="high"
             sizes="(max-width: 640px) 192px, 192px"
-            placeholder="blur"
-            blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAAIAAoDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAhEAACAQMDBQAAAAAAAAAAAAABAgMABAUGIWGRkqGx0f/EABUBAQEAAAAAAAAAAAAAAAAAAAMF/8QAGhEAAgIDAAAAAAAAAAAAAAAAAAECEgMRkf/aAAwDAQACEQEDAD8AltJagyeH0AthI5xdrLcNM91BF5pX2HaH9bcfaSXWGaRmknyJckliyjqTzSlT54b6bk+h0R//2Q=="
+            placeholder="empty"
             loading="eager"
             quality={65}
           />

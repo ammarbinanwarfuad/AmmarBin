@@ -3,7 +3,6 @@ import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { getExperiences, getParticipations } from "@/lib/server/data";
 import { ExperienceTabsClient } from "@/components/ExperienceTabsClient";
-import { Card } from "@/components/ui/card";
 
 export const revalidate = 86400; // 1 day - experience rarely changes
 
@@ -15,29 +14,10 @@ async function ExperienceContent() {
   ]);
 
   return (
-    <ExperienceTabsClient 
-      experiences={experiences} 
+    <ExperienceTabsClient
+      experiences={experiences}
       participations={participations}
     />
-  );
-}
-
-function ExperienceSkeleton() {
-  return (
-    <div className="space-y-6">
-      <div className="flex gap-2">
-        <div className="h-10 w-32 bg-muted animate-pulse rounded" />
-        <div className="h-10 w-32 bg-muted animate-pulse rounded" />
-      </div>
-      <Card className="p-6 space-y-4">
-        <div className="h-6 bg-muted animate-pulse rounded w-1/3" />
-        <div className="h-4 bg-muted animate-pulse rounded w-1/4" />
-        <div className="space-y-2">
-          <div className="h-4 bg-muted animate-pulse rounded" />
-          <div className="h-4 bg-muted animate-pulse rounded w-5/6" />
-        </div>
-      </Card>
-    </div>
   );
 }
 
@@ -56,7 +36,7 @@ export default function ExperiencePage() {
             </p>
           </div>
 
-          <Suspense fallback={<ExperienceSkeleton />}>
+          <Suspense fallback={<p className="text-muted-foreground">Loading experience...</p>}>
             <ExperienceContent />
           </Suspense>
         </div>

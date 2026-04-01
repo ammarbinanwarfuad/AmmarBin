@@ -30,10 +30,12 @@ export default async function SkillsPage() {
     );
 
   return (
-    <div className="h-[100dvh] flex flex-col overflow-hidden bg-background">
+    <div className="min-h-screen flex flex-col bg-background">
       <Header />
-      <main className="flex-1 min-h-0 overflow-hidden">
-        <SkillsShowcase skills={skills} categories={categories} />
+      <main className="flex-1 min-h-0 overflow-x-hidden pt-24 lg:pt-28 xl:pt-32">
+        <div className="h-full lg:grid lg:place-items-center">
+          <SkillsShowcase skills={skills} categories={categories} />
+        </div>
       </main>
       <Footer />
     </div>
