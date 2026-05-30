@@ -26,7 +26,7 @@ export async function GET(request: Request) {
       "analytics",
       "system",
     ];
-    
+
     // ✅ OPTIMIZED: Add timeout to prevent hanging
     const ENDPOINT_TIMEOUT = 3000; // 3 seconds max per endpoint
 
@@ -34,122 +34,138 @@ export async function GET(request: Request) {
     const results = await Promise.allSettled(
       endpoints.map(async (endpoint) => {
         // Add timeout wrapper for each endpoint
-        const timeoutPromise = new Promise((_, reject) => 
+        const timeoutPromise = new Promise((_, reject) =>
           setTimeout(() => reject(new Error('Endpoint timeout')), ENDPOINT_TIMEOUT)
         );
-        
+
         const endpointPromise = (async () => {
           switch (endpoint.trim()) {
-          case "analytics": {
-            return cachedFetch(
-              "admin:analytics",
-              async () => {
-                await connectDB();
-                const Project = (await import("@/models/Project")).default;
-                const Blog = (await import("@/models/Blog")).default;
-                const Message = (await import("@/models/Message")).default;
-                const Skill = (await import("@/models/Skill")).default;
+            case "analytics": {
+              return cachedFetch(
+                "admin:analytics",
+                async () => {
+                  await connectDB();
+                  const Project = (await import("@/models/Project")).default;
+                  const Blog = (await import("@/models/Blog")).default;
+                  const Message = (await import("@/models/Message")).default;
+                  const Skill = (await import("@/models/Skill")).default;
 
-                const now = new Date();
-                const d7 = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
-                const d30 = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+                  const now = new Date();
+                  const d7 = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+                  const d30 = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
 
-                const [
-                  projects,
-                  blogs,
-                  messages,
-                  skills,
-                  p7,
-                  b7,
-                  m7,
-                  s7,
-                  p30,
-                  b30,
-                  m30,
-                  s30,
-                ] = await Promise.all([
-                  Project.countDocuments({}).maxTimeMS(300),
-                  Blog.countDocuments({}).maxTimeMS(300),
-                  Message.countDocuments({}).maxTimeMS(300),
-                  Skill.countDocuments({}).maxTimeMS(300),
-                  Project.countDocuments({ createdAt: { $gte: d7 } }).maxTimeMS(300),
-                  Blog.countDocuments({ createdAt: { $gte: d7 } }).maxTimeMS(300),
-                  Message.countDocuments({ createdAt: { $gte: d7 } }).maxTimeMS(300),
-                  Skill.countDocuments({ createdAt: { $gte: d7 } }).maxTimeMS(300),
-                  Project.countDocuments({ createdAt: { $gte: d30 } }).maxTimeMS(300),
-                  Blog.countDocuments({ createdAt: { $gte: d30 } }).maxTimeMS(300),
-                  Message.countDocuments({ createdAt: { $gte: d30 } }).maxTimeMS(300),
-                  Skill.countDocuments({ createdAt: { $gte: d30 } }).maxTimeMS(300),
-                ]);
-
-                return {
-                  totals: { projects, blogs, messages, skills },
-                  last7d: { projects: p7, blogs: b7, messages: m7, skills: s7 },
-                  last30d: { projects: p30, blogs: b30, messages: m30, skills: s30 },
-                  generatedAt: now.toISOString(),
-                };
-              },
-              2 * 60 * 1000 // Reduced from 5min to 2min for faster updates
-            );
-          }
-          case "recent": {
-            return cachedFetch(
-              "admin:recent",
-              async () => {
-                await connectDB();
-                const Blog = (await import("@/models/Blog")).default;
-                const Message = (await import("@/models/Message")).default;
-                const { fetchGitHubRepos } = await import("@/lib/github");
-
-                const username = process.env.GITHUB_USERNAME || "";
-                let repos: Awaited<ReturnType<typeof fetchGitHubRepos>> = [];
-                if (username) {
-                  repos = await Promise.race([
-                    fetchGitHubRepos(username).then((r) => r.slice(0, 5)),
-                    new Promise<[]>(resolve => setTimeout(() => resolve([]), 10000)),
+                  const [
+                    projects,
+                    blogs,
+                    messages,
+                    skills,
+                    p7,
+                    b7,
+                    m7,
+                    s7,
+                    p30,
+                    b30,
+                    m30,
+                    s30,
+                  ] = await Promise.all([
+                    Project.countDocuments({}).maxTimeMS(300),
+                    Blog.countDocuments({}).maxTimeMS(300),
+                    Message.countDocuments({}).maxTimeMS(300),
+                    Skill.countDocuments({}).maxTimeMS(300),
+                    Project.countDocuments({ createdAt: { $gte: d7 } }).maxTimeMS(300),
+                    Blog.countDocuments({ createdAt: { $gte: d7 } }).maxTimeMS(300),
+                    Message.countDocuments({ createdAt: { $gte: d7 } }).maxTimeMS(300),
+                    Skill.countDocuments({ createdAt: { $gte: d7 } }).maxTimeMS(300),
+                    Project.countDocuments({ createdAt: { $gte: d30 } }).maxTimeMS(300),
+                    Blog.countDocuments({ createdAt: { $gte: d30 } }).maxTimeMS(300),
+                    Message.countDocuments({ createdAt: { $gte: d30 } }).maxTimeMS(300),
+                    Skill.countDocuments({ createdAt: { $gte: d30 } }).maxTimeMS(300),
                   ]);
-                }
 
-                const [blogs, messages] = await Promise.all([
-                  Blog.find({})
-                    .select("title slug updatedAt")
-                    .sort({ updatedAt: -1 })
-                    .limit(5)
-                    .lean()
-                    .maxTimeMS(500),
-                  Message.find({})
-                    .select("name email subject createdAt")
-                    .sort({ createdAt: -1 })
-                    .limit(5)
-                    .lean()
-                    .maxTimeMS(500),
-                ]);
+                  return {
+                    totals: { projects, blogs, messages, skills },
+                    last7d: { projects: p7, blogs: b7, messages: m7, skills: s7 },
+                    last30d: { projects: p30, blogs: b30, messages: m30, skills: s30 },
+                    generatedAt: now.toISOString(),
+                  };
+                },
+                2 * 60 * 1000 // Reduced from 5min to 2min for faster updates
+              );
+            }
+            case "recent": {
+              return cachedFetch(
+                "admin:recent",
+                async () => {
+                  await connectDB();
+                  const Blog = (await import("@/models/Blog")).default;
+                  const Message = (await import("@/models/Message")).default;
+                  const { fetchGitHubRepos } = await import("@/lib/github");
 
-                return { blogs, messages, repos };
-              },
-              2 * 60 * 1000
-            );
-          }
-          case "links": {
-            // Return empty for now - link check is expensive and should be separate
-            return { results: [], broken: [] };
-          }
-          case "seo": {
-            // Return basic SEO info
-            return { issues: [], warnings: [] };
-          }
-          case "system": {
-            return {
-              nodeVersion: process.version,
-              platform: process.platform,
-              uptime: process.uptime(),
-            };
-          }
+                  const username = process.env.GITHUB_USERNAME || "";
+                  let repos: Awaited<ReturnType<typeof fetchGitHubRepos>> = [];
+                  if (username) {
+                    repos = await Promise.race([
+                      fetchGitHubRepos(username).then((r) => r.slice(0, 5)),
+                      new Promise<[]>(resolve => setTimeout(() => resolve([]), 10000)),
+                    ]);
+                  }
+
+                  const [blogs, messages] = await Promise.all([
+                    Blog.find({})
+                      .select("title slug updatedAt")
+                      .sort({ updatedAt: -1 })
+                      .limit(5)
+                      .lean()
+                      .maxTimeMS(500),
+                    Message.find({})
+                      .select("name email subject createdAt")
+                      .sort({ createdAt: -1 })
+                      .limit(5)
+                      .lean()
+                      .maxTimeMS(500),
+                  ]);
+
+                  return { blogs, messages, repos };
+                },
+                2 * 60 * 1000
+              );
+            }
+            case "links": {
+              // Return empty for now - link check is expensive and should be separate
+              return { results: [], broken: [] };
+            }
+            case "seo": {
+              // Return basic SEO info
+              return { issues: [], warnings: [] };
+            }
+            case "system": {
+              const started = Date.now();
+              await connectDB();
+              const pingMs = Date.now() - started;
+
+              return {
+                dbLatencyMs: pingMs,
+                env: {
+                  NEXTAUTH_URL: !!process.env.NEXTAUTH_URL,
+                  NEXTAUTH_SECRET: !!process.env.NEXTAUTH_SECRET,
+                  CLOUDINARY: !!(
+                    process.env.CLOUDINARY_CLOUD_NAME &&
+                    process.env.CLOUDINARY_API_KEY &&
+                    process.env.CLOUDINARY_API_SECRET
+                  ),
+                  GITHUB_USERNAME: !!process.env.GITHUB_USERNAME,
+                },
+                nodeVersion: process.version,
+                platform: process.platform,
+                uptime: process.uptime(),
+                timestamp: new Date().toISOString(),
+              };
+            }
             default:
               return null;
           }
         })();
-        
+
         return Promise.race([endpointPromise, timeoutPromise]);
       })
     );
