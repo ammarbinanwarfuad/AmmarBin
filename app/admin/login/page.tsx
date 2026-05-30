@@ -3,7 +3,6 @@
 import { useEffect, useState } from "react";
 import { signIn } from "next-auth/react";
 import { motion } from "framer-motion";
-import { useRouter } from "next/navigation";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -21,7 +20,6 @@ const AUTH_ERRORS: Record<string, string> = {
 function LoginForm() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [callbackUrl, setCallbackUrl] = useState("/admin/dashboard");
-  const router = useRouter();
 
   // Read URL params on mount to avoid useSearchParams Suspense dependency.
   useEffect(() => {
@@ -62,8 +60,7 @@ function LoginForm() {
         return;
       }
 
-      router.replace(result?.url ?? callbackUrl);
-      router.refresh();
+      window.location.replace(result?.url ?? callbackUrl);
     } catch {
       toast.error("An unexpected error occurred. Please try again.");
     } finally {

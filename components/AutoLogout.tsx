@@ -21,8 +21,7 @@ export function AutoLogout() {
       keysToClear.forEach((key) => localStorage.removeItem(key));
 
       const result = await signOut({ redirect: false, callbackUrl: '/admin/login' });
-      router.replace(result?.url ?? '/admin/login');
-      router.refresh();
+      window.location.replace(result?.url ?? '/admin/login');
     } catch {
       router.replace('/admin/login');
     }

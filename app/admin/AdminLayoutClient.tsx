@@ -59,8 +59,7 @@ export function AdminLayoutClient({
       // signOut clears the NextAuth session cookie server-side,
       // then navigates the browser to the login page.
       const result = await signOut({ redirect: false, callbackUrl: '/admin/login' });
-      router.replace(result?.url ?? '/admin/login');
-      router.refresh();
+      window.location.replace(result?.url ?? '/admin/login');
     } catch {
       // Fallback hard navigation when router/signOut flow fails.
       window.location.href = '/admin/login';
