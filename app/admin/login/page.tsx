@@ -1,8 +1,9 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import { signIn } from "next-auth/react";
 import { motion } from "framer-motion";
+import { useRouter } from "next/navigation";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -20,6 +21,7 @@ const AUTH_ERRORS: Record<string, string> = {
 function LoginForm() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [callbackUrl, setCallbackUrl] = useState("/admin/dashboard");
+  const router = useRouter();
 
   // Read URL params on mount to avoid useSearchParams Suspense dependency.
   useEffect(() => {
@@ -48,13 +50,20 @@ function LoginForm() {
     const password = formData.get("password") as string;
 
     try {
-      // Use NextAuth's built-in redirect (not redirect:false).
-      // This sets session cookie + redirect atomically on the server.
-      await signIn("credentials", {
+      const result = await signIn("credentials", {
         email,
         password,
         callbackUrl,
+        redirect: false,
       });
+
+      if (result?.error) {
+        toast.error(AUTH_ERRORS[result.error] ?? AUTH_ERRORS.Default);
+        return;
+      }
+
+      router.replace(result?.url ?? callbackUrl);
+      router.refresh();
     } catch {
       toast.error("An unexpected error occurred. Please try again.");
     } finally {

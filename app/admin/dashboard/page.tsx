@@ -12,7 +12,7 @@ export default async function AdminDashboard() {
   //   → login page redirected back → getServerSession null again.
   // AdminLayoutClient handles the client-side auth check as fallback.
   const session = await getServerSession(authOptions).catch(() => null);
-  
+
   // ✅ OPTIMIZED: Prefetch critical data server-side for instant render
   // ⚠️ IMPORTANT: Wrapped in try-catch to prevent login blocking
   let initialData = null;
@@ -20,16 +20,16 @@ export default async function AdminDashboard() {
     // Not authenticated — skip data fetching, client will redirect
     return <DashboardClient initialData={null} />;
   }
-  
+
   try {
     await connectDB();
-    
+
     // Fetch analytics and system data in parallel server-side with timeout
     const fetchWithTimeout = async <T,>(promise: Promise<T>, timeoutMs: number): Promise<T | null> => {
       const timeout = new Promise<null>((resolve) => setTimeout(() => resolve(null), timeoutMs));
       return Promise.race([promise, timeout]);
     };
-    
+
     const [analytics, systemData] = await Promise.all([
       // Fetch analytics with caching and timeout
       fetchWithTimeout(
@@ -75,7 +75,7 @@ export default async function AdminDashboard() {
         ),
         2000 // 2 second timeout
       ).catch(() => null),
-      
+
       // Fetch system health with timeout
       fetchWithTimeout(
         (async () => {
@@ -86,7 +86,7 @@ export default async function AdminDashboard() {
             Message.countDocuments({ read: false }).maxTimeMS(500),
           ]);
           const dbLatencyMs = Date.now() - startTime;
-          
+
           return {
             database: 'connected',
             messageCount,
@@ -94,7 +94,11 @@ export default async function AdminDashboard() {
             dbLatencyMs,
             env: {
               NEXTAUTH_URL: !!process.env.NEXTAUTH_URL,
-              CLOUDINARY: !!(process.env.CLOUDINARY_CLOUD_NAME && process.env.CLOUDINARY_API_KEY),
+              CLOUDINARY: !!(
+                process.env.CLOUDINARY_CLOUD_NAME &&
+                process.env.CLOUDINARY_API_KEY &&
+                process.env.CLOUDINARY_API_SECRET
+              ),
               GITHUB_USERNAME: !!process.env.GITHUB_USERNAME,
             },
             nodeVersion: process.version,
@@ -105,7 +109,7 @@ export default async function AdminDashboard() {
         2000 // 2 second timeout
       ).catch(() => null),
     ]);
-    
+
     // Only set initialData if we got valid data
     if (analytics || systemData) {
       initialData = {
@@ -118,6 +122,6 @@ export default async function AdminDashboard() {
     // Continue anyway - client will fetch data
     // This ensures login always works even if DB is slow/down
   }
-  
+
   return <DashboardClient initialData={initialData} />;
 }

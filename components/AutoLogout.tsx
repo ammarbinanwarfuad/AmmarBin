@@ -20,7 +20,9 @@ export function AutoLogout() {
       const keysToClear = ["app-cache", "skillCategoryColors", "projectCategoryColors"];
       keysToClear.forEach((key) => localStorage.removeItem(key));
 
-      await signOut({ callbackUrl: '/admin/login' });
+      const result = await signOut({ redirect: false, callbackUrl: '/admin/login' });
+      router.replace(result?.url ?? '/admin/login');
+      router.refresh();
     } catch {
       router.replace('/admin/login');
     }
